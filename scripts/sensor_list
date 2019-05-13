@@ -6,7 +6,6 @@
 import argparse
 import redfish
 import redfish_utilities.sensor_list as sensor_list
-import sys
 
 # Get the input arguments
 argget = argparse.ArgumentParser( description = "A tool to walk a Redfish service and list sensor info" )
@@ -26,5 +25,3 @@ redfish_obj.logout()
 
 # Print the data received
 sensor_list.print_sensors( sensors )
-
-sys.exit( 0 )
