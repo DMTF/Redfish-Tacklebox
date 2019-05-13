@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#! /usr/bin/python
 # Copyright Notice:
 # Copyright 2019 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
@@ -273,4 +273,4 @@ def print_sensors( sensor_list ):
             print( sensor_line_format.format( reading_pr["Name"], reading_pr["Reading"], reading_pr["Health"],
                 reading_pr["LowerFatal"], reading_pr["LowerCritical"], reading_pr["LowerCaution"],
                 reading_pr["UpperCaution"], reading_pr["UpperCritical"], reading_pr["UpperFatal"] ) )
-        print()
+        print( "" )
