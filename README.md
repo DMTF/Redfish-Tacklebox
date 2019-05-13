@@ -51,6 +51,6 @@ optional arguments:
   -h, --help            show this help message and exit
 ```
 
-Example: `sensor_list.py -u <user> -p <password> -r <rhost>`
+Example: `sensor_list -u root -p root -r https://192.168.1.100`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.  It then traverses the Chassis Collection for the Service, and reads their respective Power and Thermal Resources.  Using the information from those resources, it will build a sensor table and print the information collected.
