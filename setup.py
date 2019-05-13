@@ -21,8 +21,7 @@ setup(name='redfish_utilities',
       ],
       keywords='Redfish',
       url='https://github.com/DMTF/Redfish-Tacklebox',
-      packages=find_packages('src'),
-      package_dir={'': 'src'},
+      packages=['redfish_utilities'],
       scripts=['scripts/sensor_list'],
       install_requires=[
           'redfish'
