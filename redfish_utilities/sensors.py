@@ -6,7 +6,7 @@
 """
 Sensors Module
 
-File : sensor.py
+File : sensors.py
 
 Brief : This file contains the definitions and functionalities for scanning a
         Redfish service's Power and Thermal properties for sensor readings
