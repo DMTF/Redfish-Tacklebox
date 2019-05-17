@@ -3,9 +3,17 @@
 # Copyright 2019 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
 
+"""
+Redfish Sensor List
+
+File : rf_sensor_list
+
+Brief : This script uses the redfish_utilities module to dump sensor info
+"""
+
 import argparse
 import redfish
-import redfish_utilities.sensor_list as sensor_list
+import redfish_utilities
 
 # Get the input arguments
 argget = argparse.ArgumentParser( description = "A tool to walk a Redfish service and list sensor info" )
@@ -18,10 +26,10 @@ args = argget.parse_args()
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, default_prefix = "/redfish/v1" )
 redfish_obj.login( auth = "session" )
 
-sensors = sensor_list.get_sensors( redfish_obj )
+sensors = redfish_utilities.get_sensors( redfish_obj )
 
 # Log out
 redfish_obj.logout()
 
 # Print the data received
-sensor_list.print_sensors( sensors )
+redfish_utilities.print_sensors( sensors )

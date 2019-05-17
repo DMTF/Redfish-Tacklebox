@@ -4,9 +4,9 @@
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
 
 """
-Sensor List Utility
+Sensors Module
 
-File : sensor_list.py
+File : sensor.py
 
 Brief : This file contains the definitions and functionalities for scanning a
         Redfish service's Power and Thermal properties for sensor readings
