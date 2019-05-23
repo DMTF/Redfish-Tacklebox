@@ -4,19 +4,31 @@ Copyright 2019 DMTF. All rights reserved.
 
 ## About
 
-Redfish Tacklebox contains a set of Python utilities to perform common management operations with a Redfish service.  The utilities can be used as part of larger management applications, or be used as standalone command line tools.
+Redfish Tacklebox contains a set of Python utilities to perform common management operations with a Redfish service.
+The utilities can be used as part of larger management applications, or be used as standalone command line tools.
+
+## Installation
+
+`pip install redfish_utilities`
+
+
+### Building from Source
+
+```
+python setup.py sdist --formats=zip
+cd dist
+pip install redfish_utilities-x.x.x.zip
+```
 
 
 ## Requirements
-
-Ensure that the machine has Python3 installed.
 
 External modules:
 * redfish: https://pypi.python.org/pypi/redfish
 
 You may install the external modules by running:
 
-`pip3 install -r requirements.txt`
+`pip install -r requirements.txt`
 
 
 ## Utilities
@@ -25,7 +37,7 @@ You may install the external modules by running:
 ### Sensor List
 
 ```
-usage: sensor_list.py [-h] --user USER --password PASSWORD --rhost RHOST
+usage: rf_sensor_list [-h] --user USER --password PASSWORD --rhost RHOST
 
 A tool to walk a Redfish service and list sensor info
 
@@ -40,6 +52,8 @@ optional arguments:
   -h, --help            show this help message and exit
 ```
 
-Example: `python3 sensor_list.py -u <user> -p <password> -r <rhost>`
+Example: `rf_sensor_list -u root -p root -r https://192.168.1.100`
 
-The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.  It then traverses the Chassis Collection for the Service, and reads their respective Power and Thermal Resources.  Using the information from those resources, it will build a sensor table and print the information collected.
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It then traverses the Chassis Collection for the Service, and reads their respective Power and Thermal Resources.
+Using the information from those resources, it will build a sensor table and print the information collected.
