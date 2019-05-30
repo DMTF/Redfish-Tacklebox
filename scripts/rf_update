@@ -1,0 +1,46 @@
+#! /usr/bin/python
+# Copyright Notice:
+# Copyright 2019 DMTF. All rights reserved.
+# License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
+
+"""
+Redfish Update
+
+File : rf_update
+
+Brief : This script uses the redfish_utilities module to perform updates
+"""
+
+import argparse
+import redfish
+import redfish_utilities
+
+# Get the input arguments
+argget = argparse.ArgumentParser( description = "A tool to perform an update with a Redfish service" )
+argget.add_argument( "--user", "-u", type = str, required = True, help = "The user name for authentication" )
+argget.add_argument( "--password", "-p",  type = str, required = True, help = "The password for authentication" )
+argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
+argget.add_argument( "--image", "-i", type = str, required = True, help = "The URI or filepath of the image" )
+argget.add_argument( "--target", "-t", type = str, help = "The target resource to apply the image" )
+args = argget.parse_args()
+
+# Set up the Redfish object
+redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, default_prefix = "/redfish/v1" )
+redfish_obj.login( auth = "session" )
+
+# Send the Simple Update request
+targets = None
+if args.target is not None:
+    targets = [ args.target ]
+response = redfish_utilities.simple_update( redfish_obj, args.image, targets = targets )
+
+# Monitor the response
+print( "Update initiated..." )
+response = redfish_utilities.poll_task_monitor( redfish_obj, response )
+
+# Display the results
+print( "" )
+redfish_utilities.print_error_payload( response )
+
+# Log out
+redfish_obj.logout()
