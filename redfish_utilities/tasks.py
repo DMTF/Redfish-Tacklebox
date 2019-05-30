@@ -52,7 +52,7 @@ def poll_task_monitor( context, response ):
         sys.stdout.flush()
 
         # Sleep for the requested time
-        retry_time = task_monitor.retry_after
+        retry_time = response.retry_after
         if retry_time is None:
             retry_time = 1
         time.sleep( retry_time )

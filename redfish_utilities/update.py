@@ -31,7 +31,7 @@ def get_simple_update_info( context ):
     if "Actions" not in update_service.dict:
         raise ValueError( "Service does not support SimpleUpdate" )
     if "#UpdateService.SimpleUpdate" not in update_service.dict["Actions"]:
-        raise ValueError("Service does not support SimpleUpdate")
+        raise ValueError( "Service does not support SimpleUpdate" )
 
     # Extract the info about the SimpleUpdate action
     simple_update_action = update_service.dict["Actions"]["#UpdateService.SimpleUpdate"]
