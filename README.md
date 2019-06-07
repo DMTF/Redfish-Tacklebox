@@ -87,3 +87,13 @@ The tool will log into the service specified by the *rhost* argument using the c
 It then builds a request payload to perform a Simple Update action against the Update Service using the image specified by the *image* argument.
 The optional *target* argument is used in the request if attempting to update a particular system, device, manager, or other resource.
 Once the Simple Update is requested, it monitors the progress of the update, and displays response messages reported by the service about the update once complete.
+
+
+## Release Process
+
+1. Update `CHANGELOG.md` with the list of changes since the last release
+2. Update `setup.py` to reflect the new version
+3. Push changes to Github and create a new release
+4. Push the new tool version to pypi.org
+    * `python setup.py sdist`
+    * `twine upload dist/*`
