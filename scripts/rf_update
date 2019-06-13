@@ -99,24 +99,25 @@ if os.path.isfile( args.image ):
 else:
     image_uri = args.image
 
-# Send the Simple Update request
-targets = None
-if args.target is not None:
-    targets = [ args.target ]
-response = redfish_utilities.simple_update( redfish_obj, image_uri, targets = targets )
-
-# Monitor the response
-print( "Update initiated..." )
-response = redfish_utilities.poll_task_monitor( redfish_obj, response )
-
-# Display the results
-print( "" )
-redfish_utilities.print_error_payload( response )
-
-# Log out and cleanup
-os.chdir( start_path )
 try:
-    shutil.rmtree( WEB_SERVER_FOLDER )
-except:
-    pass
-redfish_obj.logout()
+    # Send the Simple Update request
+    targets = None
+    if args.target is not None:
+        targets = [ args.target ]
+    response = redfish_utilities.simple_update( redfish_obj, image_uri, targets = targets )
+
+    # Monitor the response
+    print( "Update initiated..." )
+    response = redfish_utilities.poll_task_monitor( redfish_obj, response )
+
+    # Display the results
+    print( "" )
+    redfish_utilities.print_error_payload( response )
+finally:
+    # Log out and cleanup
+    os.chdir( start_path )
+    try:
+        shutil.rmtree( WEB_SERVER_FOLDER )
+    except:
+        pass
+    redfish_obj.logout()

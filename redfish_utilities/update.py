@@ -12,6 +12,14 @@ Brief : This file contains the definitions and functionalities for interacting
         with the UpdateService for a given Redfish service
 """
 
+from .messages import verify_response
+
+class RedfishUpdateServiceNotFoundError( Exception ):
+    """
+    Raised when the Update Service or an update action cannot be found
+    """
+    pass
+
 def get_simple_update_info( context ):
     """
     Locates the SimpleUpdate action and collects its information
@@ -29,9 +37,9 @@ def get_simple_update_info( context ):
 
     # Check that there is a SimpleUpdate action
     if "Actions" not in update_service.dict:
-        raise ValueError( "Service does not support SimpleUpdate" )
+        raise RedfishUpdateServiceNotFoundError( "Service does not support SimpleUpdate" )
     if "#UpdateService.SimpleUpdate" not in update_service.dict["Actions"]:
-        raise ValueError( "Service does not support SimpleUpdate" )
+        raise RedfishUpdateServiceNotFoundError( "Service does not support SimpleUpdate" )
 
     # Extract the info about the SimpleUpdate action
     simple_update_action = update_service.dict["Actions"]["#UpdateService.SimpleUpdate"]
@@ -113,7 +121,9 @@ def simple_update( context, image_uri, protocol = None, targets = None, username
     if password is not None:
         body["Password"] = password
 
-    return context.post( uri, body = body )
+    response = context.post( uri, body = body )
+    verify_response( response )
+    return response
 
 def get_update_service( context ):
     """
@@ -130,6 +140,6 @@ def get_update_service( context ):
     service_root = context.get( "/redfish/v1/", None )
     if "UpdateService" not in service_root.dict:
         # No Update Service
-        raise ValueError( "Service does not have an UpdateService" )
+        raise RedfishUpdateServiceNotFoundError( "Service does not have an UpdateService" )
 
     return context.get( service_root.dict["UpdateService"]["@odata.id"], None )
