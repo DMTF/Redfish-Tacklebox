@@ -68,7 +68,6 @@ usage: rf_power_reset [-h] --user USER --password PASSWORD --rhost RHOST
 A tool to perform a power/reset operation of a system
 
 required arguments:
-  -h, --help            show this help message and exit
   --user USER, -u USER  The user name for authentication
   --password PASSWORD, -p PASSWORD
                         The password for authentication
