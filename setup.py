@@ -30,6 +30,7 @@ setup(
         "scripts/rf_boot_override",
         "scripts/rf_power_reset",
         "scripts/rf_sensor_list",
+        "scripts/rf_sys_inventory",
         "scripts/rf_update"
     ],
     install_requires = [ "redfish" ]
