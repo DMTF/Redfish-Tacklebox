@@ -68,6 +68,6 @@ def verify_response( response ):
 
     if response.status >= 400:
         exception_string = get_error_messages( response )
-        raise RedfishOperationFailedError( "Operation failed\n" + exception_string )
+        raise RedfishOperationFailedError( "Operation failed: HTTP {}\n{}".format( response.status, exception_string ) )
 
     return
