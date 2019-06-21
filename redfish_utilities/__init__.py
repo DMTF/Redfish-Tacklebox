@@ -4,6 +4,7 @@
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
 
 from .inventory import get_system_inventory
+from .inventory import print_system_inventory
 from .messages import print_error_payload
 from .messages import verify_response
 from .sensors import get_sensors

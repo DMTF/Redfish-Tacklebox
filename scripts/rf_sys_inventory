@@ -30,7 +30,9 @@ redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.use
 redfish_obj.login( auth = "session" )
 
 try:
-    print( json.dumps( redfish_utilities.get_system_inventory( redfish_obj ), sort_keys = True, indent = 4, separators = ( ",", ": " ) ) )
+    # Get and print the system inventory
+    inventory = redfish_utilities.get_system_inventory( redfish_obj )
+    redfish_utilities.print_system_inventory( inventory )
 finally:
     # Log out
     redfish_obj.logout()
