@@ -59,6 +59,31 @@ It then traverses the Chassis Collection for the Service, and reads their respec
 Using the information from those resources, it will build a sensor table and print the information collected.
 
 
+### System Inventory
+
+```
+usage: rf_sys_inventory [-h] --user USER --password PASSWORD --rhost RHOST
+
+A tool to walk a Redfish service and list component information
+
+required arguments:
+  --user USER, -u USER  The user name for authentication
+  --password PASSWORD, -p PASSWORD
+                        The password for authentication
+  --rhost RHOST, -r RHOST
+                        The address of the Redfish service (with scheme)
+
+optional arguments:
+  -h, --help            show this help message and exit
+```
+
+Example: `rf_sys_inventory -u root -p root -r https://192.168.1.100`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It then traverses the Chassis Collection for the Service, and collects component information for Processors, Memory, Drives, PCIeDevices, NetworkAdapters, and StorageControllers.
+Using the information collected, it will build an inventory table and print the information.
+
+
 ### Power/Reset
 
 ```
