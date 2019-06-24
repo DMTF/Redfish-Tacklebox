@@ -7,6 +7,8 @@ Brief : This file contains the definitions and functionalities for scanning a
         Redfish service for an inventory of components
 """
 
+import re
+
 def get_system_inventory( context ):
     """
     Walks a Redfish service for system component information, such as drives,
@@ -128,7 +130,7 @@ def catalog_simple_storage( context, resource, name, inventory ):
             if "Devices" in member_res.dict:
                 for index, drive in enumerate( member_res.dict["Devices"] ):
                     drive["@odata.id"] = "{}#/Devices/{}".format( member_res.dict["@odata.id"], index )
-                    drive["@odata.type"] = "#SimpleStorage.SimpleStorage"
+                    drive["@odata.type"] = "#Drive.Drive"
                     drive["Id"] = drive["Name"]
                     catalog_resource( drive, inventory )
 
@@ -187,7 +189,46 @@ def catalog_resource( resource, inventory ):
 
     # If no label was found, build a default name
     if catalog["Label"] is None:
-        catalog["Label"] = resource["Id"]
+        catalog["Label"] = resource_type + ": " + resource["Id"]
+
+    # Build a string description of the component based on other properties
+    description_str = ""
+    if resource_type == "Chassis":
+        description_str = resource.get( "Model", "" )
+    elif resource_type == "Processor":
+        if catalog["Model"] is not None:
+            description_str = catalog["Model"]
+        else:
+            core_str = ""
+            if resource.get( "TotalCores", None ) is not None:
+                core_str = str( resource["TotalCores"] ) + " Cores"
+            speed_str = ""
+            if resource.get( "MaxSpeedMHz", None ) is not None:
+                speed_str = "@ " + str( resource["MaxSpeedMHz"] ) + "MHz"
+            description_str = "{} {} {} {} {}".format( resource.get( "Manufacturer", "" ), resource.get( "ProcessorArchitecture", "" ), resource.get( "ProcessorType", "" ), core_str, speed_str )
+    elif resource_type == "Memory":
+        size_str = ""
+        if resource.get( "CapacityMiB", None ) is not None:
+            size_str = str( resource["CapacityMiB"] ) + "MB"
+        description_str = "{} {} {} {}".format( resource.get( "Manufacturer", "" ), size_str, resource.get( "MemoryDeviceType", "" ), resource.get( "MemoryType", "" ) )
+    elif resource_type == "Drive":
+        size_str = ""
+        if resource.get( "CapacityBytes", None ) is not None:
+            size_str = str( resource["CapacityBytes"] / ( 2 ** 30 ) ) + "GB"
+        description_str = "{} {} {} {}".format( resource.get( "Manufacturer", "" ), size_str, resource.get( "Protocol", "" ), resource.get( "MediaType", "Drive" ) )
+    elif resource_type == "PCIeDevice":
+        description_str = "{} {}".format( resource.get( "Manufacturer", "" ), resource.get( "Model", "" ) )
+    elif resource_type == "StorageController":
+        speed_str = ""
+        if resource.get( "SpeedGbps", None ) is not None:
+            speed_str = str( resource["SpeedGbps"] ) + "Gbps"
+        protocol_str = "Storage Controller"
+        if resource.get( "SupportedDeviceProtocols", None ) is not None :
+            protocol_str = resource["SupportedDeviceProtocols"].join( "/" ) + " Controller"
+        description_str = "{} {} {}".format( resource.get( "Manufacturer", "" ), speed_str, protocol_str )
+    elif resource_type == "NetworkAdapter":
+        description_str = "{} {}".format( resource.get( "Manufacturer", "" ), resource.get( "Model", "" ) )
+    catalog["Description"] = re.sub( " +", " ", description_str ).strip()
 
     inventory.append( catalog )
 
@@ -199,31 +240,21 @@ def print_system_inventory( inventory_list ):
         inventory_list: The inventory list to print
     """
 
-    inventory_line_format = "  {:30s} | {:40s} | {:20} | {:20s}"
-    inventory_line_format_empty = "  {:30s} | Not Present"
+    inventory_line_format = "  {:35s} | {}"
+    inventory_line_format_empty = "  {:35s} | Not Present"
 
     # Go through each chassis instance
     for chassis in inventory_list:
         print( "'" + chassis["ChassisName"] + "' Inventory" )
-        print( inventory_line_format.format( "Name", "Model", "Part Number", "Serial Number" ) )
+        print( inventory_line_format.format( "Name", "Description" ) )
 
         # Go through each component type in the chassis
         type_list = [ "Chassis", "Processors", "Memory", "Drives", "PCIeDevices", "StorageControllers", "NetworkAdapters" ]
         for inv_type in type_list:
             # Go through each component and prints its info
             for item in chassis[inv_type]:
-                model = item["Model"]
-                if model is None:
-                    model = "N/A"
-                part_num = item["PartNumber"]
-                if part_num is None:
-                    part_num = "N/A"
-                serial_num = item["SerialNumber"]
-                if serial_num is None:
-                    serial_num = "N/A"
-
                 if item["State"] == "Absent":
-                    print( inventory_line_format_empty.format( item["Label"][:30] ) )
+                    print( inventory_line_format_empty.format( item["Label"][:35] ) )
                 else:
-                    print( inventory_line_format.format( item["Label"][:30], model[:40], part_num[:20], serial_num[:20] ) )
+                    print( inventory_line_format.format( item["Label"][:35], item["Description"] ) )
         print( "" )
