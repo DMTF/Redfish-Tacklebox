@@ -63,7 +63,7 @@ Using the information from those resources, it will build a sensor table and pri
 
 ```
 usage: rf_sys_inventory [-h] --user USER --password PASSWORD --rhost RHOST
-                        [--details]
+                        [--details] [--noabsent]
 
 A tool to walk a Redfish service and list component information
 
@@ -78,6 +78,8 @@ optional arguments:
   -h, --help            show this help message and exit
   --details, -details   Indicates if the full details of each component should
                         be shown
+  --noabsent, -noabsent
+                        Indicates if absent devices should be skipped
 ```
 
 Example: `rf_sys_inventory -u root -p root -r https://192.168.1.100 -details`

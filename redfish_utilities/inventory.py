@@ -192,53 +192,65 @@ def catalog_resource( resource, inventory ):
         catalog["Label"] = resource_type + ": " + resource["Id"]
 
     # Build a string description of the component based on other properties
-    description_str = ""
+    prop_list = []
     if resource_type == "Chassis":
-        description_str = resource.get( "Model", "" )
+        prop_list = [ "Model" ]
     elif resource_type == "Processor":
         if catalog["Model"] is not None:
-            description_str = catalog["Model"]
+            prop_list = [ "Model" ]
         else:
-            core_str = ""
-            if resource.get( "TotalCores", None ) is not None:
-                core_str = str( resource["TotalCores"] ) + " Cores"
-            speed_str = ""
-            if resource.get( "MaxSpeedMHz", None ) is not None:
-                speed_str = "@ " + str( resource["MaxSpeedMHz"] ) + "MHz"
-            description_str = "{} {} {} {} {}".format( resource.get( "Manufacturer", "" ), resource.get( "ProcessorArchitecture", "" ), resource.get( "ProcessorType", "" ), core_str, speed_str )
+            prop_list = [ "Manufacturer", "ProcessorArchitecture", "ProcessorType", "TotalCores", "MaxSpeedMHz" ]
     elif resource_type == "Memory":
-        size_str = ""
-        if resource.get( "CapacityMiB", None ) is not None:
-            size_str = str( resource["CapacityMiB"] ) + "MB"
-        description_str = "{} {} {} {}".format( resource.get( "Manufacturer", "" ), size_str, resource.get( "MemoryDeviceType", "" ), resource.get( "MemoryType", "" ) )
+        prop_list = [ "Manufacturer", "CapacityMiB", "MemoryDeviceType", "MemoryType" ]
     elif resource_type == "Drive":
-        size_str = ""
-        if resource.get( "CapacityBytes", None ) is not None:
-            size_str = str( resource["CapacityBytes"] / ( 2 ** 30 ) ) + "GB"
-        description_str = "{} {} {} {}".format( resource.get( "Manufacturer", "" ), size_str, resource.get( "Protocol", "" ), resource.get( "MediaType", "Drive" ) )
+        prop_list = [ "Manufacturer", "CapacityBytes", "Protocol", "MediaType" ]
     elif resource_type == "PCIeDevice":
-        description_str = "{} {}".format( resource.get( "Manufacturer", "" ), resource.get( "Model", "" ) )
+        prop_list = [ "Manufacturer", "Model" ]
     elif resource_type == "StorageController":
-        speed_str = ""
-        if resource.get( "SpeedGbps", None ) is not None:
-            speed_str = str( resource["SpeedGbps"] ) + "Gbps"
-        protocol_str = "Storage Controller"
-        if resource.get( "SupportedDeviceProtocols", None ) is not None :
-            protocol_str = resource["SupportedDeviceProtocols"].join( "/" ) + " Controller"
-        description_str = "{} {} {}".format( resource.get( "Manufacturer", "" ), speed_str, protocol_str )
+        prop_list = [ "Manufacturer", "SpeedGbps", "SupportedDeviceProtocols" ]
     elif resource_type == "NetworkAdapter":
-        description_str = "{} {}".format( resource.get( "Manufacturer", "" ), resource.get( "Model", "" ) )
-    catalog["Description"] = re.sub( " +", " ", description_str ).strip()
+        prop_list = [ "Manufacturer", "Model" ]
+
+    # Based on the listed properties for the resource type, build the description string
+    if catalog["State"] != "Absent":
+        description_str = ""
+        for prop in prop_list:
+            if resource.get( prop, None ) is not None:
+                prop_val = resource[prop]
+                # Some properties require refinement
+                if prop == "TotalCores":
+                    prop_val = str( prop_val ) + " Cores"
+                elif prop == "MaxSpeedMHz":
+                    prop_val = "@ " + str( prop_val ) + "MHz"
+                elif prop == "CapacityMiB":
+                    prop_val = str( prop_val ) + "MB"
+                elif prop == "CapacityBytes":
+                    prop_val = str( int( prop_val / ( 2 ** 30 ) ) ) + "GB"
+                elif prop == "SpeedGbps":
+                    prop_val = str( prop_val ) + "Gbps"
+                elif prop == "SupportedDeviceProtocols":
+                    prop_val = prop_val.join( "/" ) + " Controller"
+                description_str = description_str + " " + prop_val
+            else:
+                # Some properties will have a default if not found
+                if prop == "MediaType":
+                    description_str = description_str + " Drive"
+                elif prop == "SupportedDeviceProtocols":
+                    description_str = description_str + " Storage Controller"
+        catalog["Description"] = re.sub( " +", " ", description_str ).strip()
+    else:
+        catalog["Description"] = None
 
     inventory.append( catalog )
 
-def print_system_inventory( inventory_list, details = False ):
+def print_system_inventory( inventory_list, details = False, skip_absent = False ):
     """
     Prints the system inventory list into a table
 
     Args:
         inventory_list: The inventory list to print
         details: True to print all of the detailed info
+        skip_absent: True to skip printing absent components
     """
 
     inventory_line_format = "  {:35s} | {}"
@@ -256,7 +268,8 @@ def print_system_inventory( inventory_list, details = False ):
             # Go through each component and prints its info
             for item in chassis[inv_type]:
                 if item["State"] == "Absent":
-                    print( inventory_line_format_empty.format( item["Label"][:35] ) )
+                    if not skip_absent:
+                        print( inventory_line_format_empty.format( item["Label"][:35] ) )
                 else:
                     print( inventory_line_format.format( item["Label"][:35], item["Description"] ) )
 
