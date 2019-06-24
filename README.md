@@ -63,6 +63,7 @@ Using the information from those resources, it will build a sensor table and pri
 
 ```
 usage: rf_sys_inventory [-h] --user USER --password PASSWORD --rhost RHOST
+                        [--details]
 
 A tool to walk a Redfish service and list component information
 
@@ -75,9 +76,11 @@ required arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  --details, -details   Indicates if the full details of each component should
+                        be shown
 ```
 
-Example: `rf_sys_inventory -u root -p root -r https://192.168.1.100`
+Example: `rf_sys_inventory -u root -p root -r https://192.168.1.100 -details`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It then traverses the Chassis Collection for the Service, and collects component information for Processors, Memory, Drives, PCIeDevices, NetworkAdapters, and StorageControllers.

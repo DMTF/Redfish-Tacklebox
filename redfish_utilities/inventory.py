@@ -232,15 +232,17 @@ def catalog_resource( resource, inventory ):
 
     inventory.append( catalog )
 
-def print_system_inventory( inventory_list ):
+def print_system_inventory( inventory_list, details = False ):
     """
     Prints the system inventory list into a table
 
     Args:
         inventory_list: The inventory list to print
+        details: True to print all of the detailed info
     """
 
     inventory_line_format = "  {:35s} | {}"
+    inventory_line_format_detail = "  {:35s} | {}: {}"
     inventory_line_format_empty = "  {:35s} | Not Present"
 
     # Go through each chassis instance
@@ -257,4 +259,10 @@ def print_system_inventory( inventory_list ):
                     print( inventory_line_format_empty.format( item["Label"][:35] ) )
                 else:
                     print( inventory_line_format.format( item["Label"][:35], item["Description"] ) )
+
+                    if details:
+                        detail_list = [ "Manufacturer", "Model", "SKU", "PartNumber", "SerialNumber", "AssetTag" ]
+                        for detail in detail_list:
+                            if item[detail] is not None:
+                                print( inventory_line_format_detail.format( "", detail, item[detail] ) )
         print( "" )

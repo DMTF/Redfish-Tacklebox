@@ -23,6 +23,7 @@ argget = argparse.ArgumentParser( description = "A tool to walk a Redfish servic
 argget.add_argument( "--user", "-u", type = str, required = True, help = "The user name for authentication" )
 argget.add_argument( "--password", "-p",  type = str, required = True, help = "The password for authentication" )
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
+argget.add_argument( "--details", "-details", action = "store_true", help = "Indicates if the full details of each component should be shown" )
 args = argget.parse_args()
 
 # Set up the Redfish object
@@ -32,7 +33,7 @@ redfish_obj.login( auth = "session" )
 try:
     # Get and print the system inventory
     inventory = redfish_utilities.get_system_inventory( redfish_obj )
-    redfish_utilities.print_system_inventory( inventory )
+    redfish_utilities.print_system_inventory( inventory, details = args.details )
 finally:
     # Log out
     redfish_obj.logout()
