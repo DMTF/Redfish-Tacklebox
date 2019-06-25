@@ -70,7 +70,7 @@ argget.add_argument( "--target", "-t", type = str, help = "The target resource t
 args = argget.parse_args()
 
 # Set up the Redfish object
-redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, default_prefix = "/redfish/v1" )
+redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
 # If the file is local, spin up a web server to host the image

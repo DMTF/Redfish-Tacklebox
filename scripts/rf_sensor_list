@@ -23,7 +23,7 @@ argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The a
 args = argget.parse_args()
 
 # Set up the Redfish object
-redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, default_prefix = "/redfish/v1" )
+redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
 try:
