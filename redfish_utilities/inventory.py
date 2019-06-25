@@ -7,8 +7,6 @@ Brief : This file contains the definitions and functionalities for scanning a
         Redfish service for an inventory of components
 """
 
-import re
-
 def get_system_inventory( context ):
     """
     Walks a Redfish service for system component information, such as drives,
@@ -184,7 +182,8 @@ def catalog_resource( resource, inventory ):
         "SKU": resource.get( "SKU", None ),
         "AssetTag": resource.get( "AssetTag", None ),
         "Label": resource.get( location_prop, {} ).get( "PartLocation", {} ).get( "ServiceLabel", None ),
-        "State": resource.get( "Status", {} ).get( "State", None )
+        "State": resource.get( "Status", {} ).get( "State", None ),
+        "Description": None
     }
 
     # If no label was found, build a default name
@@ -237,9 +236,7 @@ def catalog_resource( resource, inventory ):
                     description_str = description_str + " Drive"
                 elif prop == "SupportedDeviceProtocols":
                     description_str = description_str + " Storage Controller"
-        catalog["Description"] = re.sub( " +", " ", description_str ).strip()
-    else:
-        catalog["Description"] = None
+        catalog["Description"] = description_str.strip()
 
     inventory.append( catalog )
 
