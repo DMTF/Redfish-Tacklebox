@@ -1,5 +1,5 @@
 """
-Sensors Module
+Inventory Module
 
 File : inventory.py
 
