@@ -1,5 +1,8 @@
 # Change Log
 
+## [0.9.0] - 2019-06-28
+- Added rf_sys_inventory utility to scan a service and catalog system components
+
 ## [0.8.0] - 2019-06-21
 - Added rf_boot_override utility to perform one time boot operations
 - Added rf_power_reset utility to perform power/reset operations
