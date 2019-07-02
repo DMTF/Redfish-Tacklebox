@@ -151,6 +151,7 @@ def catalog_storage( context, resource, name, inventory ):
             if "StorageControllers" in member_res.dict:
                 for index, controller in enumerate( member_res.dict["StorageControllers"] ):
                     controller["@odata.type"] = "#StorageController.StorageController"
+                    controller["Id"] = controller["MemberId"]
                     catalog_resource( controller, inventory["StorageControllers"] )
 
 def catalog_resource( resource, inventory ):
@@ -228,7 +229,7 @@ def catalog_resource( resource, inventory ):
                 elif prop == "SpeedGbps":
                     prop_val = str( prop_val ) + "Gbps"
                 elif prop == "SupportedDeviceProtocols":
-                    prop_val = prop_val.join( "/" ) + " Controller"
+                    prop_val = "/".join( prop_val ) + " Controller"
                 description_str = description_str + " " + prop_val
             else:
                 # Some properties will have a default if not found
