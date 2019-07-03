@@ -7,7 +7,7 @@ from .accounts import get_users
 from .accounts import print_users
 from .accounts import add_user
 from .accounts import delete_user
-from .accounts import change_user
+from .accounts import modify_user
 from .inventory import get_system_inventory
 from .inventory import print_system_inventory
 from .messages import print_error_payload

@@ -47,35 +47,35 @@ try:
         print_accounts = False
     if args.setname is not None:
         print( "Changing name of user '{}' to '{}'".format( args.setname[0], args.setname[1] ) )
-        redfish_utilities.change_user( redfish_obj, args.setname[0], new_name = args.setname[1] )
+        redfish_utilities.modify_user( redfish_obj, args.setname[0], new_name = args.setname[1] )
         print_accounts = False
     if args.setpassword is not None:
         print( "Changing password of user '{}'".format( args.setpassword[0] ) )
-        redfish_utilities.change_user( redfish_obj, args.setpassword[0], new_password = args.setpassword[1] )
+        redfish_utilities.modify_user( redfish_obj, args.setpassword[0], new_password = args.setpassword[1] )
         print_accounts = False
     if args.setrole is not None:
         print( "Changing role of user '{}' to '{}'".format( args.setrole[0], args.setrole[1] ) )
-        redfish_utilities.change_user( redfish_obj, args.setrole[0], new_role = args.setrole[1] )
+        redfish_utilities.modify_user( redfish_obj, args.setrole[0], new_role = args.setrole[1] )
         print_accounts = False
     if args.enable is not None:
         print( "Enabling user '{}'".format( args.enable ) )
-        redfish_utilities.change_user( redfish_obj, args.enable, new_enabled = True )
+        redfish_utilities.modify_user( redfish_obj, args.enable, new_enabled = True )
         print_accounts = False
     if args.disable is not None:
         print( "Disabling user '{}'".format( args.disable ) )
-        redfish_utilities.change_user( redfish_obj, args.disable, new_enabled = False )
+        redfish_utilities.modify_user( redfish_obj, args.disable, new_enabled = False )
         print_accounts = False
     if args.lock is not None:
         print( "Locking user '{}'".format( args.lock ) )
-        redfish_utilities.change_user( redfish_obj, args.lock, new_locked = True )
+        redfish_utilities.modify_user( redfish_obj, args.lock, new_locked = True )
         print_accounts = False
     if args.unlock is not None:
         print( "Unlocking user '{}'".format( args.unlock ) )
-        redfish_utilities.change_user( redfish_obj, args.unlock, new_locked = False )
+        redfish_utilities.modify_user( redfish_obj, args.unlock, new_locked = False )
         print_accounts = False
     if print_accounts:
         user_list = redfish_utilities.get_users( redfish_obj )
-        redfish_utilities.print_users( user_list )
+        redfish_utilities.modify_user( user_list )
 finally:
     # Log out
     redfish_obj.logout()

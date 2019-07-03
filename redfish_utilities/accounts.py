@@ -132,17 +132,17 @@ def delete_user( context, user_name ):
     response = context.delete( user_uri )
     if response.status == 405:
         # Some implementations keep slots around and don't allow for deleting in the proper sense
-        return change_user( context, user_name, new_name = "", new_enabled = False )
+        return modify_user(context, user_name, new_name ="", new_enabled = False)
     verify_response( response )
     return response
 
-def change_user( context, user_name, new_name = None, new_password = None, new_role = None, new_locked = None, new_enabled = None ):
+def modify_user(context, user_name, new_name = None, new_password = None, new_role = None, new_locked = None, new_enabled = None):
     """
-    Changes an existing user account
+    Modifies an existing user account
 
     Args:
         context: The Redfish client object with an open session
-        user_name: The name of the user to change
+        user_name: The name of the user to modify
         new_name: The new name of the user
         new_password: The new password of the user
         new_role: The new role of the user
