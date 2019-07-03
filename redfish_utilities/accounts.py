@@ -103,7 +103,7 @@ def add_user( context, user_name, password, role ):
             account = context.get( account_member["@odata.id"] )
             if account.dict["UserName"] == "" and not account.dict.get( "Enabled", True ):
                 # Empty slot found; PATCH it
-                response = context.patch( account_member["@odata.id"], body = payload )
+                response = context.patch( account_member["@odata.id"], body = payload, headers = { "If-Match": account.getheader( "ETag" ) } )
                 if response.status < 400:
                     # These implementations also might restrict which slots to modify...
                     account_added = True
