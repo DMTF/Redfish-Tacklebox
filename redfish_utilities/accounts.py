@@ -132,11 +132,11 @@ def delete_user( context, user_name ):
     response = context.delete( user_uri )
     if response.status == 405:
         # Some implementations keep slots around and don't allow for deleting in the proper sense
-        return modify_user(context, user_name, new_name ="", new_enabled = False)
+        return modify_user( context, user_name, new_name = "", new_enabled = False )
     verify_response( response )
     return response
 
-def modify_user(context, user_name, new_name = None, new_password = None, new_role = None, new_locked = None, new_enabled = None):
+def modify_user( context, user_name, new_name = None, new_password = None, new_role = None, new_locked = None, new_enabled = None ):
     """
     Modifies an existing user account
 
