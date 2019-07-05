@@ -67,10 +67,12 @@ def print_users( user_list ):
         user_list: The user list to print
     """
 
-    user_line_format = "{:20s} | {:20s} | {:10s} | {:10s}"
+    user_line_format = "  {:20s} | {:20s} | {:10s} | {:10s}"
+    print( "" )
     print( user_line_format.format( "Name", "Role", "Locked", "Enabled" ) )
     for user in user_list:
         print( user_line_format.format( user["UserName"], user["RoleId"], str( user["Locked"] ), str( user["Enabled"] ) ) )
+    print( "" )
 
 def add_user( context, user_name, password, role ):
     """
