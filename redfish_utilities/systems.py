@@ -161,7 +161,7 @@ def get_system_reset_info( context, system_id = None ):
                 param["AllowableValues"] = reset_action[param["Name"] + "@Redfish.AllowableValues"]
     else:
         # Get the Action Info and its parameter listing
-        action_info = context.get( reset_action["@Redfish.ActionInfo"], None )
+        action_info = context.get( reset_action["@Redfish.ActionInfo"] )
         reset_parameters = action_info.dict["Parameters"]
 
     return reset_uri, reset_parameters
@@ -223,21 +223,21 @@ def get_system( context, system_id = None ):
     """
 
     # Get the Service Root to find the System Collection
-    service_root = context.get( "/redfish/v1/", None )
+    service_root = context.get( "/redfish/v1/" )
     if "Systems" not in service_root.dict:
         # No System collection
         raise RedfishSystemNotFoundError( "Service does not contain a Systems Collection" )
 
     # Get the System Collection and iterate through its collection
-    system_col = context.get( service_root.dict["Systems"]["@odata.id"], None )
+    system_col = context.get( service_root.dict["Systems"]["@odata.id"] )
     if system_id is None:
         if len( system_col.dict["Members"] ) == 1:
-            return context.get( system_col.dict["Members"][0]["@odata.id"], None )
+            return context.get( system_col.dict["Members"][0]["@odata.id"] )
         else:
             raise RedfishSystemNotFoundError( "Service does not contain exactly one system; a target system needs to be specified" )
     else:
         for system_member in system_col.dict["Members"]:
-            system = context.get( system_member["@odata.id"], None )
+            system = context.get( system_member["@odata.id"] )
             if system.dict["Id"] == system_id:
                 return system
 
