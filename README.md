@@ -167,15 +167,15 @@ The tool will then perform an operation on the Boot object within the matching s
 
 ```
 usage: rf_accounts [-h] --user USER --password PASSWORD --rhost RHOST
-                   [--add ADD ADD ADD] [--delete DELETE]
-                   [--setname SETNAME SETNAME]
-                   [--setpassword SETPASSWORD SETPASSWORD]
-                   [--setrole SETROLE SETROLE] [--enable ENABLE]
-                   [--disable DISABLE] [--lock LOCK] [--unlock UNLOCK]
+                   [--add name password role] [--delete DELETE]
+                   [--setname old_name new_name]
+                   [--setpassword name new_password] [--setrole name new_role]
+                   [--enable ENABLE] [--disable DISABLE] [--lock LOCK]
+                   [--unlock UNLOCK]
 
 A tool to manage user accounts on a Redfish service
 
-optional arguments:
+required arguments:
   --user USER, -u USER  The user name for authentication
   --password PASSWORD, -p PASSWORD
                         The password for authentication
@@ -184,18 +184,16 @@ optional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --add ADD ADD ADD, -add ADD ADD ADD
-                        Adds a new user account ([name] [password] [role])
+  --add name password role, -add name password role
+                        Adds a new user account
   --delete DELETE, -delete DELETE
                         Deletes a user account with the given name
-  --setname SETNAME SETNAME, -setname SETNAME SETNAME
-                        Sets a user account to a new name ([old name] [new
-                        name])
-  --setpassword SETPASSWORD SETPASSWORD, -setpassword SETPASSWORD SETPASSWORD
-                        Sets a user account to a new password ([name] [new
-                        password])
-  --setrole SETROLE SETROLE, -setrole SETROLE SETROLE
-                        Sets a user account to a new role ([name] [new role])
+  --setname old_name new_name, -setname old_name new_name
+                        Sets a user account to a new name
+  --setpassword name new_password, -setpassword name new_password
+                        Sets a user account to a new password
+  --setrole name new_role, -setrole name new_role
+                        Sets a user account to a new role
   --enable ENABLE, -enable ENABLE
                         Enables a user account with the given name
   --disable DISABLE, -disable DISABLE

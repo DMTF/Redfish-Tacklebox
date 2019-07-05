@@ -1,5 +1,5 @@
 """
-Inventory Module
+Accounts Module
 
 File : accounts.py
 
