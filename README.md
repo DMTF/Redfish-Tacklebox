@@ -163,6 +163,71 @@ The tool will then perform an operation on the Boot object within the matching s
 * If *target* is not specified, it will display the current boot override settings for the system.
 
 
+### Accounts
+
+```
+usage: rf_accounts [-h] --user USER --password PASSWORD --rhost RHOST
+                   [--add name password role] [--delete DELETE]
+                   [--setname old_name new_name]
+                   [--setpassword name new_password] [--setrole name new_role]
+                   [--enable ENABLE] [--disable DISABLE] [--lock LOCK]
+                   [--unlock UNLOCK]
+
+A tool to manage user accounts on a Redfish service
+
+required arguments:
+  --user USER, -u USER  The user name for authentication
+  --password PASSWORD, -p PASSWORD
+                        The password for authentication
+  --rhost RHOST, -r RHOST
+                        The address of the Redfish service (with scheme)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --add name password role, -add name password role
+                        Adds a new user account
+  --delete DELETE, -delete DELETE
+                        Deletes a user account with the given name
+  --setname old_name new_name, -setname old_name new_name
+                        Sets a user account to a new name
+  --setpassword name new_password, -setpassword name new_password
+                        Sets a user account to a new password
+  --setrole name new_role, -setrole name new_role
+                        Sets a user account to a new role
+  --enable ENABLE, -enable ENABLE
+                        Enables a user account with the given name
+  --disable DISABLE, -disable DISABLE
+                        Disabled a user account with the given name
+  --lock LOCK, -lock LOCK
+                        Locks a user account with the given name
+  --unlock UNLOCK, -unlock UNLOCK
+                        Unlocks a user account with the given name
+```
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+Based on the parameters, it will display, add, delete, or modify user accounts.
+* The *add* argument is used to create a new user account
+    * Example: `rf_accounts -u root -p root -r https://192.168.1.100 -add new_name new_password new_role`
+* The *delete* argument is used to delete a user account based on the given user name
+    * Example: `rf_accounts -u root -p root -r https://192.168.1.100 -delete user_to_delete`
+* The *setname* argument is used to change the name of a user account
+    * Example: `rf_accounts -u root -p root -r https://192.168.1.100 -setname user_to_change new_name`
+* The *setpassword* argument is used to change the password of a user account
+    * Example: `rf_accounts -u root -p root -r https://192.168.1.100 -setpassword user_to_change new_password`
+* The *setrole* argument is used to change the role of a user account
+    * Example: `rf_accounts -u root -p root -r https://192.168.1.100 -setrole user_to_change new_role`
+* The *enable* argument is used to enable a user account
+    * Example: `rf_accounts -u root -p root -r https://192.168.1.100 -enable user_to_change`
+* The *disable* argument is used to disable a user account
+    * Example: `rf_accounts -u root -p root -r https://192.168.1.100 -disable user_to_change`
+* The *lock* argument is used to lock a user account
+    * Example: `rf_accounts -u root -p root -r https://192.168.1.100 -lock user_to_change`
+* The *unlock* argument is used to unlock a user account
+    * Example: `rf_accounts -u root -p root -r https://192.168.1.100 -unlock user_to_change`
+* If none of the above arguments are given, a table of the user accounts is provided
+    * Example: `rf_accounts -u root -p root -r https://192.168.1.100`
+
+
 ### Update
 
 ```

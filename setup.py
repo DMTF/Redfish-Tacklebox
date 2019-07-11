@@ -27,6 +27,7 @@ setup(
     url = "https://github.com/DMTF/Redfish-Tacklebox",
     packages = [ "redfish_utilities" ],
     scripts = [
+        "scripts/rf_accounts",
         "scripts/rf_boot_override",
         "scripts/rf_power_reset",
         "scripts/rf_sensor_list",
