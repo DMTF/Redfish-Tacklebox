@@ -26,15 +26,15 @@ def get_sensors( context ):
     sensor_list = []
 
     # Get the Service Root to find the Chassis Collection
-    service_root = context.get( "/redfish/v1/", None )
+    service_root = context.get( "/redfish/v1/" )
     if "Chassis" not in service_root.dict:
         # No Chassis Collection
         return sensor_list
 
     # Get the Chassis Collection and iterate through its collection
-    chassis_col = context.get( service_root.dict["Chassis"]["@odata.id"], None )
+    chassis_col = context.get( service_root.dict["Chassis"]["@odata.id"] )
     for chassis_member in chassis_col.dict["Members"]:
-        chassis = context.get( chassis_member["@odata.id"], None )
+        chassis = context.get( chassis_member["@odata.id"] )
 
         # Get the Chassis status
         chassis_instance = {
@@ -46,7 +46,7 @@ def get_sensors( context ):
 
         # If there's a Power resource, read it
         if "Power" in chassis.dict:
-            power = context.get( chassis.dict["Power"]["@odata.id"], None )
+            power = context.get( chassis.dict["Power"]["@odata.id"] )
 
             # Add information for each power supply reported
             if "PowerSupplies" in power.dict:
@@ -75,7 +75,7 @@ def get_sensors( context ):
 
         # If there's a Thermal resource, read it
         if "Thermal" in chassis.dict:
-            thermal = context.get( chassis.dict["Thermal"]["@odata.id"], None )
+            thermal = context.get( chassis.dict["Thermal"]["@odata.id"] )
 
             # Add information for each of the temperatures reported
             if "Temperatures" in thermal.dict:

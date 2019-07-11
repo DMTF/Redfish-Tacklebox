@@ -22,15 +22,15 @@ def get_system_inventory( context ):
     inventory_list = []
 
     # Get the Service Root to find the Chassis Collection
-    service_root = context.get( "/redfish/v1/", None )
+    service_root = context.get( "/redfish/v1/" )
     if "Chassis" not in service_root.dict:
         # No Chassis Collection
         return inventory_list
 
     # Get the Chassis Collection and iterate through its collection
-    chassis_col = context.get( service_root.dict["Chassis"]["@odata.id"], None )
+    chassis_col = context.get( service_root.dict["Chassis"]["@odata.id"] )
     for chassis_member in chassis_col.dict["Members"]:
-        chassis = context.get( chassis_member["@odata.id"], None )
+        chassis = context.get( chassis_member["@odata.id"] )
 
         # Catalog Chassis itself
         chassis_instance = {
@@ -68,7 +68,7 @@ def catalog_array( context, resource, name, inventory ):
 
     if name in resource:
         for member in resource[name]:
-            member_res = context.get( member["@odata.id"], None )
+            member_res = context.get( member["@odata.id"] )
             catalog_resource( member_res.dict, inventory )
 
 def catalog_collection( context, resource, name, inventory ):
@@ -83,9 +83,9 @@ def catalog_collection( context, resource, name, inventory ):
     """
 
     if name in resource:
-        collection = context.get( resource[name]["@odata.id"], None )
+        collection = context.get( resource[name]["@odata.id"] )
         for member in collection.dict["Members"]:
-            member_res = context.get( member["@odata.id"], None )
+            member_res = context.get( member["@odata.id"] )
             catalog_resource( member_res.dict, inventory )
 
 def catalog_systems( context, resource, name, inventory ):
@@ -101,7 +101,7 @@ def catalog_systems( context, resource, name, inventory ):
 
     if name in resource:
         for system in resource[name]:
-            system_res = context.get( system["@odata.id"], None )
+            system_res = context.get( system["@odata.id"] )
 
             # Catalog all Processors, Memory, and PCIeDevices in the System
             catalog_collection( context, system_res.dict, "Processors", inventory["Processors"] )
@@ -122,9 +122,9 @@ def catalog_simple_storage( context, resource, name, inventory ):
     """
 
     if name in resource:
-        collection = context.get( resource[name]["@odata.id"], None )
+        collection = context.get( resource[name]["@odata.id"] )
         for member in collection.dict["Members"]:
-            member_res = context.get( member["@odata.id"], None )
+            member_res = context.get( member["@odata.id"] )
             if "Devices" in member_res.dict:
                 for index, drive in enumerate( member_res.dict["Devices"] ):
                     drive["@odata.id"] = "{}#/Devices/{}".format( member_res.dict["@odata.id"], index )
@@ -144,9 +144,9 @@ def catalog_storage( context, resource, name, inventory ):
     """
 
     if name in resource:
-        collection = context.get( resource[name]["@odata.id"], None )
+        collection = context.get( resource[name]["@odata.id"] )
         for member in collection.dict["Members"]:
-            member_res = context.get( member["@odata.id"], None )
+            member_res = context.get( member["@odata.id"] )
             catalog_array( context, member_res.dict, "Drives", inventory["Drives"] )
             if "StorageControllers" in member_res.dict:
                 for index, controller in enumerate( member_res.dict["StorageControllers"] ):
