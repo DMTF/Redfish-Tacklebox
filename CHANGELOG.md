@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.0.0] - 2019-07-12
+- Added rf_accounts utility to manage user accounts
+- Made fix to handling of Storage Controllers in the inventory tool
+
 ## [0.9.0] - 2019-06-28
 - Added rf_sys_inventory utility to scan a service and catalog system components
 
