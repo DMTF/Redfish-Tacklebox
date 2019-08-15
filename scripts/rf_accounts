@@ -27,7 +27,6 @@ argget.add_argument( "--setpassword", "-setpassword", type = str, nargs = 2, met
 argget.add_argument( "--setrole", "-setrole", type = str, nargs = 2, metavar = ( "name", "new_role" ), help = "Sets a user account to a new role" )
 argget.add_argument( "--enable", "-enable", type = str, help = "Enables a user account with the given name" )
 argget.add_argument( "--disable", "-disable", type = str, help = "Disabled a user account with the given name" )
-argget.add_argument( "--lock", "-lock", type = str, help = "Locks a user account with the given name" )
 argget.add_argument( "--unlock", "-unlock", type = str, help = "Unlocks a user account with the given name" )
 args = argget.parse_args()
 
@@ -64,10 +63,6 @@ try:
     if args.disable is not None:
         print( "Disabling user '{}'".format( args.disable ) )
         redfish_utilities.modify_user( redfish_obj, args.disable, new_enabled = False )
-        print_accounts = False
-    if args.lock is not None:
-        print( "Locking user '{}'".format( args.lock ) )
-        redfish_utilities.modify_user( redfish_obj, args.lock, new_locked = True )
         print_accounts = False
     if args.unlock is not None:
         print( "Unlocking user '{}'".format( args.unlock ) )
