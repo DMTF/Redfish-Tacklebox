@@ -198,8 +198,6 @@ optional arguments:
                         Enables a user account with the given name
   --disable DISABLE, -disable DISABLE
                         Disabled a user account with the given name
-  --lock LOCK, -lock LOCK
-                        Locks a user account with the given name
   --unlock UNLOCK, -unlock UNLOCK
                         Unlocks a user account with the given name
 ```
@@ -220,8 +218,6 @@ Based on the parameters, it will display, add, delete, or modify user accounts.
     * Example: `rf_accounts -u root -p root -r https://192.168.1.100 -enable user_to_change`
 * The *disable* argument is used to disable a user account
     * Example: `rf_accounts -u root -p root -r https://192.168.1.100 -disable user_to_change`
-* The *lock* argument is used to lock a user account
-    * Example: `rf_accounts -u root -p root -r https://192.168.1.100 -lock user_to_change`
 * The *unlock* argument is used to unlock a user account
     * Example: `rf_accounts -u root -p root -r https://192.168.1.100 -unlock user_to_change`
 * If none of the above arguments are given, a table of the user accounts is provided
