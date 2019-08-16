@@ -11,7 +11,7 @@ with open( "README.md", "r", "utf-8" ) as f:
 
 setup(
     name = "redfish_utilities",
-    version = "1.0.0",
+    version = "1.0.1",
     description = "Redfish Utilities",
     long_description = long_description,
     long_description_content_type = "text/markdown",
@@ -27,12 +27,12 @@ setup(
     url = "https://github.com/DMTF/Redfish-Tacklebox",
     packages = [ "redfish_utilities" ],
     scripts = [
-        "scripts/rf_accounts",
-        "scripts/rf_boot_override",
-        "scripts/rf_power_reset",
-        "scripts/rf_sensor_list",
-        "scripts/rf_sys_inventory",
-        "scripts/rf_update"
+        "scripts/rf_accounts.py",
+        "scripts/rf_boot_override.py",
+        "scripts/rf_power_reset.py",
+        "scripts/rf_sensor_list.py",
+        "scripts/rf_sys_inventory.py",
+        "scripts/rf_update.py"
     ],
     install_requires = [ "redfish" ]
 )
