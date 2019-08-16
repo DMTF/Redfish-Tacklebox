@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.0.1] - 2019-08-16
+- Removed 'Account Lock' capability from rf_accounts
+- Renamed all scripts to end in '.py' for Windows compatibility
+
 ## [1.0.0] - 2019-07-12
 - Added rf_accounts utility to manage user accounts
 - Made fix to handling of Storage Controllers in the inventory tool
