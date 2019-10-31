@@ -90,7 +90,11 @@ def set_system_boot( context, system_id = None, ov_target = None, ov_enabled = N
         payload["Boot"]["BootNext"] = ov_boot_next
 
     # Update the system
-    response = context.patch( system.dict["@odata.id"], body = payload )
+    headers = None
+    etag = system.getheader( "ETag" )
+    if etag is not None:
+        headers = { "If-Match": etag }
+    response = context.patch( system.dict["@odata.id"], body = payload, headers = headers )
     verify_response( response )
     return response
 
