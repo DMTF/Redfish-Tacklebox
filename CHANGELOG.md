@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.0.2] - 2019-11-01
+- Added support for using ETags for PATCHing ComputerSystem resources
+
 ## [1.0.1] - 2019-08-16
 - Removed 'Account Lock' capability from rf_accounts
 - Renamed all scripts to end in '.py' for Windows compatibility
