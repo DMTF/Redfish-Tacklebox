@@ -29,6 +29,7 @@ setup(
     scripts = [
         "scripts/rf_accounts.py",
         "scripts/rf_boot_override.py",
+        "scripts/rf_discover.py",
         "scripts/rf_power_reset.py",
         "scripts/rf_sensor_list.py",
         "scripts/rf_sys_inventory.py",

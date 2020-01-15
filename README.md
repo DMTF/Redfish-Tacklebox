@@ -34,6 +34,23 @@ You may install the external modules by running:
 ## Utilities
 
 
+### Discover
+
+```
+usage: rf_discover.py [-h]
+
+A tool to discover Redfish services
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+Example: `rf_discover.py`
+
+The tool will perform an SSDP request to find all available Redfish services.
+Once all of the responses are collected, it will print each service with its UUID and service root.
+
+
 ### Sensor List
 
 ```
