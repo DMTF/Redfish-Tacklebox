@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.0.3] - 2020-01-17
+- Added rf_discover.py utility to discover Redfish services via SSDP
+
 ## [1.0.2] - 2019-11-01
 - Added support for using ETags for PATCHing ComputerSystem resources
 
