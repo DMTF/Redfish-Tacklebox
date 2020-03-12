@@ -72,7 +72,7 @@ optional arguments:
 Example: `rf_sensor_list.py -u root -p root -r https://192.168.1.100`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
-It then traverses the Chassis Collection for the Service, and reads their respective Power and Thermal Resources.
+It then traverses the chassis collection for the service, and reads their respective power and thermal resources.
 Using the information from those resources, it will build a sensor table and print the information collected.
 
 
@@ -102,8 +102,52 @@ optional arguments:
 Example: `rf_sys_inventory.py -u root -p root -r https://192.168.1.100 -details`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
-It then traverses the Chassis Collection for the Service, and collects component information for Processors, Memory, Drives, PCIeDevices, NetworkAdapters, and StorageControllers.
+It then traverses the chassis collection for the service, and collects component information for processors, memory, drives, PCIe devices, network adapters, and storage controllers.
 Using the information collected, it will build an inventory table and print the information.
+
+
+### Logs
+
+```
+usage: rf_logs.py [-h] --user USER --password PASSWORD --rhost RHOST
+                  [--manager [MANAGER]] [--system [SYSTEM]]
+                  [--chassis [CHASSIS]] [--log LOG] [--details] [--clear]
+
+A tool to manage logs on a Redfish service
+
+required arguments:
+  --user USER, -u USER  The user name for authentication
+  --password PASSWORD, -p PASSWORD
+                        The password for authentication
+  --rhost RHOST, -r RHOST
+                        The address of the Redfish service (with scheme)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --manager [MANAGER], -m [MANAGER]
+                        The ID of the manager containing the log service
+  --system [SYSTEM], -s [SYSTEM]
+                        The ID of the system containing the log service
+  --chassis [CHASSIS], -c [CHASSIS]
+                        The ID of the chassis containing the log service
+  --log LOG, -l LOG     The ID of the resource containing the log service
+  --details, -details   Indicates details to be shown for each log entry
+  --clear, -clear       Indicates if the log should be cleared
+```
+
+Example: `rf_logs.py -u root -p root -r https://192.168.1.100 -m BMC`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then attempt to locate the appropriate log service via the following logic:
+* If the *manager* argument is provided, it will traverse the manager collection for the matching manager.
+* If the *system* argument is provided, it will traverse the system collection for the matching system.
+* If the *chassis* argument is provided, it will traverse the chassis collection for the matching chassis.
+* If any of the above arguments are provided without a specified Id, but the collection contains exactly one member, then that member is used.
+* If none of the above arguments are provided, then the tool will try to use a manager in the manager collection if there is only one member present.
+* Within the member, the tool will find the matching log service based on the *log* argument.
+    * If *log* is not specified, and there is exactly one log service in the member, then the tool will use that one log service.
+
+Once the desired log service is found, the tool will either perform the `ClearLog` action if *clear* is provided, or read and display the log entries.
 
 
 ### Power/Reset
@@ -131,10 +175,10 @@ optional arguments:
 Example: `rf_power_reset.py -u root -p root -r https://192.168.1.100 -t GracefulRestart`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
-It then traverses the System Collection for the Service to find the matching system specified by the *system* argument.
-It will perform the Reset action with the specified reset type from the *type* argument.
-* If *system* is not specified, and if the Service has exactly one system, it will perform the operation on the one system.
-* If *type* is not specified, it will attempt a GracefulRestart.
+It then traverses the system collection for the service to find the matching system specified by the *system* argument.
+It will perform the `Reset` action with the specified reset type from the *type* argument.
+* If *system* is not specified, and if the service has exactly one system, it will perform the operation on the one system.
+* If *type* is not specified, it will attempt a `GracefulRestart`.
 
 
 ### Boot Override
@@ -171,12 +215,12 @@ optional arguments:
 Example: `rf_boot_override.py -u root -p root -r https://192.168.1.100 -t Pxe -reset`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
-It then traverses the System Collection for the Service to find the matching system specified by the *system* argument.
-* If *system* is not specified, and if the Service has exactly one system, it will perform the operation on the one system.
+It then traverses the system collection for the service to find the matching system specified by the *system* argument.
+* If *system* is not specified, and if the service has exactly one system, it will perform the operation on the one system.
 
-The tool will then perform an operation on the Boot object within the matching system.
-* If *target* is specified, it will update the Boot object to set the boot override to be *target*.
-    * If *reset* is provided, it will reset the system after updating the Boot object.
+The tool will then perform an operation on the `Boot` object within the matching system.
+* If *target* is specified, it will update the `Boot` object to set the boot override to be *target*.
+    * If *reset* is provided, it will reset the system after updating the `Boot` object.
 * If *target* is not specified, it will display the current boot override settings for the system.
 
 
@@ -267,9 +311,9 @@ optional arguments:
 Example: `rf_update.py -u root -p root -r https://192.168.1.100 -i image.bin`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
-It then builds a request payload to perform a Simple Update action against the Update Service using the image specified by the *image* argument.
+It then builds a request payload to perform a `SimpleUpdate` action against the update service using the image specified by the *image* argument.
 The optional *target* argument is used in the request if attempting to update a particular system, device, manager, or other resource.
-Once the Simple Update is requested, it monitors the progress of the update, and displays response messages reported by the service about the update once complete.
+Once the `SimpleUpdate` is requested, it monitors the progress of the update, and displays response messages reported by the service about the update once complete.
 
 
 ## Release Process
