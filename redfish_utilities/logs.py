@@ -88,7 +88,7 @@ def print_log_entries( log_entries, details = False ):
         timestamp_property = "Created"
         if "EventTimestamp" in entry:
             timestamp_property = "EventTimestamp"
-        print( entry_line_format.format( entry["Id"], entry[timestamp_property], entry["Message"].replace( "\n", "; " )[:message_size] ) )
+        print( entry_line_format.format( entry["Id"], entry.get( timestamp_property, "Unknown" ), entry["Message"].replace( "\n", "; " )[:message_size] ) )
         if details:
             for detail in detail_list:
                 if detail in entry:
