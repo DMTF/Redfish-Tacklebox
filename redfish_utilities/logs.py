@@ -81,22 +81,18 @@ def print_log_entries( log_entries, details = False ):
     detail_line_format = "  {:33s} | {}: {}"
     detail_list = [ "Severity", "EntryType", "OemRecordFormat", "EntryCode", "OemLogEntryCode", "SensorType", "OemSensorType",
         "GeneratorId", "SensorNumber", "EventType", "EventId", "EventGroupId", "MessageId", "MessageArgs" ]
+    print( entry_line_format.format( "Id", "Timestamp", "Message" ) )
 
-    try:
-        print( entry_line_format.format( "Id", "Timestamp", "Message" ) )
-
-        # Go through each entry and print the info
-        for entry in log_entries:
-            timestamp_property = "Created"
-            if "EventTimestamp" in entry:
-                timestamp_property = "EventTimestamp"
-            print( entry_line_format.format( entry["Id"], entry[timestamp_property], entry["Message"].replace( "\n", "; " )[:message_size] ) )
-            if details:
-                for detail in detail_list:
-                    if detail in entry:
-                        print( detail_line_format.format( "", detail, entry[detail] ) )
-    except BrokenPipeError:
-        pass
+    # Go through each entry and print the info
+    for entry in log_entries:
+        timestamp_property = "Created"
+        if "EventTimestamp" in entry:
+            timestamp_property = "EventTimestamp"
+        print( entry_line_format.format( entry["Id"], entry[timestamp_property], entry["Message"].replace( "\n", "; " )[:message_size] ) )
+        if details:
+            for detail in detail_list:
+                if detail in entry:
+                    print( detail_line_format.format( "", detail, entry[detail] ) )
 
 def clear_log_entries( context, container_type = log_container.MANAGER, container_id = None, log_service_id = None ):
     """
