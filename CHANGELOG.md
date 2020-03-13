@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.0.4] - 2020-03-13
+- Added rf_logs.py utility for reading and displaying logs
+
 ## [1.0.3] - 2020-01-17
 - Added rf_discover.py utility to discover Redfish services via SSDP
 
