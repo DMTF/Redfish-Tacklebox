@@ -60,8 +60,6 @@ try:
         # Print log was requested
         log_entries = redfish_utilities.get_log_entries( redfish_obj, container_type, container_id, args.log )
         redfish_utilities.print_log_entries( log_entries, args.details )
-except BrokenPipeError:
-    pass
 finally:
     redfish_obj.logout()
     sys.stderr.close()
