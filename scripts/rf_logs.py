@@ -12,6 +12,8 @@ Brief : This script uses the redfish_utilities module to manage logs
 """
 
 import argparse
+import sys
+
 import redfish
 import redfish_utilities
 
@@ -60,3 +62,4 @@ try:
         redfish_utilities.print_log_entries( log_entries, args.details )
 finally:
     redfish_obj.logout()
+    sys.stderr.close()
