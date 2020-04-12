@@ -64,4 +64,3 @@ except BrokenPipeError:
     pass
 finally:
     redfish_obj.logout()
-    #sys.stderr.close()
