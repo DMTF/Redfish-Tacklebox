@@ -159,6 +159,12 @@ def get_analog_status_full( name, object, readings ):
     else:
         reading_val = None
 
+    # Clear the reading if the state is not correct
+    # Generally speaking, services should be doing this, but this isn't always true
+    if state != "Enabled":
+        reading_val = None
+        units = None
+
     if reading_val is None:
         reading_val = state
 
