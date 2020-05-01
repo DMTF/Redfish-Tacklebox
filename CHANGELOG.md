@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.0.5] - 2020-05-01
+- Added enhancement to one time boot script to set the boot mode to Disabled when the target is selected to be None
+- Added option in power/reset script to show available reset types
+- Added enhancement to show valid Ids of resources when an exception is generated
+- Fixed log script from hiding exceptions
+
 ## [1.0.4] - 2020-03-13
 - Added rf_logs.py utility for reading and displaying logs
 
