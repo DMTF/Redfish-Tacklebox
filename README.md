@@ -170,6 +170,7 @@ optional arguments:
   --system SYSTEM, -s SYSTEM
                         The ID of the system perform the operation
   --type TYPE, -t TYPE  The type of power/reset operation to perform
+  --info, -info         Indicates if reset information should be reported
 ```
 
 Example: `rf_power_reset.py -u root -p root -r https://192.168.1.100 -t GracefulRestart`

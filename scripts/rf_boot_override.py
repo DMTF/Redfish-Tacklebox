@@ -40,12 +40,17 @@ try:
         # Build and send the boot request based on the arguments given
         uefi_target = None
         boot_next = None
+        boot_mode = "Once"
         if args.target == "UefiTarget":
             uefi_target = args.uefi
         if args.target == "UefiBootNext":
             boot_next = args.uefi
-        print( "Setting a one time boot for {}...".format( args.target ) )
-        redfish_utilities.set_system_boot( redfish_obj, args.system, args.target, "Once", None, uefi_target, boot_next )
+        if args.target == "None":
+            print( "Disabling one time boot..." )
+            boot_mode = "Disabled"
+        else:
+            print( "Setting a one time boot for {}...".format( args.target ) )
+        redfish_utilities.set_system_boot( redfish_obj, args.system, args.target, boot_mode, None, uefi_target, boot_next )
 
         # Reset the system if requested
         if args.reset:

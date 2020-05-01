@@ -233,16 +233,21 @@ def get_system( context, system_id = None ):
         raise RedfishSystemNotFoundError( "Service does not contain a Systems Collection" )
 
     # Get the System Collection and iterate through its collection
+    avail_systems = []
     system_col = context.get( service_root.dict["Systems"]["@odata.id"] )
     if system_id is None:
         if len( system_col.dict["Members"] ) == 1:
             return context.get( system_col.dict["Members"][0]["@odata.id"] )
         else:
-            raise RedfishSystemNotFoundError( "Service does not contain exactly one system; a target system needs to be specified" )
+            for system_member in system_col.dict["Members"]:
+                system = context.get( system_member["@odata.id"] )
+                avail_systems.append( system.dict["Id"] )
+            raise RedfishSystemNotFoundError( "Service does not contain exactly one system; a target system needs to be specified: {}".format( ", ".join( avail_systems ) ) )
     else:
         for system_member in system_col.dict["Members"]:
             system = context.get( system_member["@odata.id"] )
+            avail_systems.append( system.dict["Id"] )
             if system.dict["Id"] == system_id:
                 return system
 
-    raise RedfishSystemNotFoundError( "Service does not contain a system called {}".format( system_id ) )
+    raise RedfishSystemNotFoundError( "Service does not contain a system called {}; valid systems: {}".format( system_id, ", ".join( avail_systems ) ) )

@@ -214,6 +214,7 @@ def get_user( context, user_name ):
         The contents of the user account resource
     """
 
+    avail_users = []
     account_col = context.get( get_account_collection( context ) )
     for account_member in account_col.dict["Members"]:
         account = context.get( account_member["@odata.id"] )
@@ -222,9 +223,11 @@ def get_user( context, user_name ):
         if account.dict["UserName"] == "" and not account.dict.get( "Enabled", True ):
             continue
 
+        avail_users.append( account.dict["UserName"] )
+
         # Check if the name matches
         if account.dict["UserName"] == user_name:
             return account_member["@odata.id"], account
 
     # No matches found
-    raise RedfishAccountCollectionNotFoundError( "User '{}' is not found".format( user_name ) )
+    raise RedfishAccountCollectionNotFoundError( "User '{}' is not found; valid users: {}".format( user_name, ", ".join( avail_users ) ) )
