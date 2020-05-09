@@ -134,7 +134,9 @@ def delete_user( context, user_name ):
     response = context.delete( user_uri )
     if response.status == 405:
         # Some implementations keep slots around and don't allow for deleting in the proper sense
-        return modify_user( context, user_name, new_name = "", new_enabled = False )
+        # Some also do not allow for both Enabled and UserName to be modified simultaneously
+        modify_user( context, user_name, new_enabled = False )
+        return modify_user( context, user_name, new_name = "" )
     verify_response( response )
     return response
 
