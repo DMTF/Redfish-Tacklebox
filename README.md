@@ -233,7 +233,7 @@ usage: rf_bios_settings.py [-h] --user USER --password PASSWORD --rhost RHOST
 
 A tool to manager BIOS settings for a system
 
-optional arguments:
+required arguments:
   --user USER, -u USER  The user name for authentication
   --password PASSWORD, -p PASSWORD
                         The password for authentication
