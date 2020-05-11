@@ -245,7 +245,8 @@ optional arguments:
   --system SYSTEM, -s SYSTEM
                         The ID of the system to manage
   --attribute name value, -a name value
-                        Sets a BIOS attribute to a new value
+                        Sets a BIOS attribute to a new value; can be supplied
+                        multiple times to set multiple attributes
 ```
 
 Example: `rf_bios_settings.py -u root -p root -r https://192.168.1.100 -a BiosMode Legacy`
