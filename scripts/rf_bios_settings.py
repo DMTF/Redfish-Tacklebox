@@ -38,7 +38,7 @@ try:
         if args.attribute[0] in current_settings:
             if isinstance( current_settings[args.attribute[0]], bool ):
                 # Boolean; convert from a string
-                if new_value == "true" or new_value == "True":
+                if new_value.lower() == "true":
                     new_value = True
                 else:
                     new_value = False
