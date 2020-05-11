@@ -214,6 +214,90 @@ def system_reset( context, system_id = None, reset_type = None ):
     verify_response( response )
     return response
 
+def get_system_bios( context, system_id = None ):
+    """
+    Finds a system matching the given ID and gets the BIOS settings
+
+    Args:
+        context: The Redfish client object with an open session
+        system_id: The system to locate; if None, perform on the only system
+
+    Returns:
+        A dictionary of the current BIOS attributes
+        A dictionary of the BIOS attributes on the next reset
+    """
+
+    # Locate the system
+    system = get_system( context, system_id )
+
+    # Get the Bios resource
+    bios = context.get( system.dict["Bios"]["@odata.id"] )
+    current_settings = bios.dict["Attributes"]
+    future_settings = bios.dict["Attributes"]
+
+    # Get the Settings object if present
+    if "@Redfish.Settings" in bios.dict:
+        bios_settings = context.get( bios.dict["@Redfish.Settings"]["SettingsObject"]["@odata.id"] )
+        future_settings = bios_settings.dict["Attributes"]
+
+    return current_settings, future_settings
+
+def set_system_bios( context, settings, system_id = None ):
+    """
+    Finds a system matching the given ID and sets the BIOS settings
+
+    Args:
+        context: The Redfish client object with an open session
+        settings: The settings to apply to the system
+        system_id: The system to locate; if None, perform on the only system
+
+    Returns:
+        The response of the PATCH
+    """
+
+    # Locate the system
+    system = get_system( context, system_id )
+
+    # Get the BIOS resource and determine if the settings need to be applied to the resource itself or the settings object
+    bios_uri = system.dict["Bios"]["@odata.id"]
+    bios = context.get( bios_uri )
+    etag = bios.getheader( "ETag" )
+    if "@Redfish.Settings" in bios.dict:
+        bios_uri = bios.dict["@Redfish.Settings"]["SettingsObject"]["@odata.id"]
+        bios_settings = context.get( bios_uri )
+        etag = bios_settings.getheader( "ETag" )
+
+    # Update the settings
+    payload = { "Attributes": settings }
+    headers = None
+    if etag is not None:
+        headers = { "If-Match": etag }
+    response = context.patch( bios_uri, body = payload, headers = headers )
+    verify_response( response )
+    return response
+
+def print_system_bios( current_settings, future_settings ):
+    """
+    Prints the system BIOS settings into a table
+
+    Args:
+        current_settings: A dictionary of the current BIOS attributes
+        future_settings: A dictionary of the BIOS attributes on the next reset
+    """
+
+    print( "" )
+    print( "BIOS Settings:" )
+
+    bios_line_format = "  {:30s} | {:30s} | {:30s}"
+    print( bios_line_format.format( "Attribute Name", "Current Setting", "Future Setting" ) )
+    for attribute, value in sorted( current_settings.items() ):
+        if attribute in future_settings:
+            print( bios_line_format.format( attribute, str( current_settings[attribute] ), str( future_settings[attribute] ) ) )
+        else:
+            print( bios_line_format.format( attribute, str( current_settings[attribute] ), str( current_settings[attribute] ) ) )
+
+    print( "" )
+
 def get_system( context, system_id = None ):
     """
     Finds a system matching the given ID and returns its resource
