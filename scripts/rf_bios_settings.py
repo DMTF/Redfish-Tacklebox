@@ -43,7 +43,7 @@ try:
                 else:
                     new_value = False
             elif isinstance( current_settings[args.attribute[0]], ( int, float ) ):
-                # Integer or a float; go by the user input to determine how to convert since the current value may truncate the decimal
+                # Integer or float; go by the user input to determine how to convert since the current value may be truncated
                 try:
                     new_value = int( new_value )
                 except:
