@@ -205,7 +205,7 @@ def catalog_resource( resource, inventory ):
     elif resource_type == "Drive":
         prop_list = [ "Manufacturer", "CapacityBytes", "Protocol", "MediaType" ]
     elif resource_type == "PCIeDevice":
-        prop_list = [ "Manufacturer", "Model" ]
+        prop_list = [ "Manufacturer", "Model", "DeviceType", "PCIeInterface" ]
     elif resource_type == "StorageController":
         prop_list = [ "Manufacturer", "SpeedGbps", "SupportedDeviceProtocols" ]
     elif resource_type == "NetworkAdapter":
@@ -230,6 +230,13 @@ def catalog_resource( resource, inventory ):
                     prop_val = str( prop_val ) + "Gbps"
                 elif prop == "SupportedDeviceProtocols":
                     prop_val = "/".join( prop_val ) + " Controller"
+                elif prop == "DeviceType":
+                    prop_val = prop_val + " PCIe Device"
+                elif prop == "PCIeInterface":
+                    if "MaxPCIeType" in prop_val:
+                        prop_val = "@" + " " + prop_val["MaxPCIeType"]
+                    else:
+                        continue
                 description_str = description_str + " " + prop_val
             else:
                 # Some properties will have a default if not found

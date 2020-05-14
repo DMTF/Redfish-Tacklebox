@@ -28,6 +28,7 @@ setup(
     packages = [ "redfish_utilities" ],
     scripts = [
         "scripts/rf_accounts.py",
+        "scripts/rf_bios_settings.py",
         "scripts/rf_boot_override.py",
         "scripts/rf_discover.py",
         "scripts/rf_logs.py",

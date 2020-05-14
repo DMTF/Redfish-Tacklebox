@@ -23,6 +23,9 @@ from .systems import set_system_boot
 from .systems import print_system_boot
 from .systems import get_system_reset_info
 from .systems import system_reset
+from .systems import get_system_bios
+from .systems import set_system_bios
+from .systems import print_system_bios
 from .tasks import poll_task_monitor
 from .update import get_simple_update_info
 from .update import simple_update

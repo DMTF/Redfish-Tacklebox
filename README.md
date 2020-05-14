@@ -225,6 +225,41 @@ The tool will then perform an operation on the `Boot` object within the matching
 * If *target* is not specified, it will display the current boot override settings for the system.
 
 
+### BIOS Settings
+
+```
+usage: rf_bios_settings.py [-h] --user USER --password PASSWORD --rhost RHOST
+                           [--system SYSTEM] [--attribute name value]
+
+A tool to manager BIOS settings for a system
+
+required arguments:
+  --user USER, -u USER  The user name for authentication
+  --password PASSWORD, -p PASSWORD
+                        The password for authentication
+  --rhost RHOST, -r RHOST
+                        The address of the Redfish service (with scheme)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --system SYSTEM, -s SYSTEM
+                        The ID of the system to manage
+  --attribute name value, -a name value
+                        Sets a BIOS attribute to a new value; can be supplied
+                        multiple times to set multiple attributes
+```
+
+Example: `rf_bios_settings.py -u root -p root -r https://192.168.1.100 -a BiosMode Legacy`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It then traverses the system collection for the service to find the matching system specified by the *system* argument.
+* If *system* is not specified, and if the service has exactly one system, it will perform the operation on the one system.
+
+The tool will then get the BIOS resource for the matching system.
+* If *attribute* is specified, it will update the BIOS resource with the new attribute value.
+* If *attribute* is not specified, it will display the BIOS settings.
+
+
 ### Accounts
 
 ```
