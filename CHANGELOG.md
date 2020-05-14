@@ -1,5 +1,11 @@
 # Change Log
 
+## [1.0.6] - 2020-05-14
+- Added rf_bios_settings.py utility for displaying and setting BIOS attributes
+- Added enhancement to account deletion fallback routine to send two PATCH operations when clearing an account to ensure compatibility
+- Added sensor state to the sensor objects constructed
+- Enhanced construction of the PCIe device name being built to use other properties
+
 ## [1.0.5] - 2020-05-01
 - Added enhancement to one time boot script to set the boot mode to Disabled when the target is selected to be None
 - Added option in power/reset script to show available reset types
