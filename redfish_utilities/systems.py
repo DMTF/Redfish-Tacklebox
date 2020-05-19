@@ -198,8 +198,6 @@ def system_reset( context, system_id = None, reset_type = None ):
             if param["Name"] == "ResetType":
                 if "GracefulRestart" in param["AllowableValues"]:
                     reset_type = "GracefulRestart"
-                elif "PushPowerButton" in param["AllowableValues"]:
-                    reset_type = "PushPowerButton"
                 elif "ForceRestart" in param["AllowableValues"]:
                     reset_type = "ForceRestart"
                 elif "PowerCycle" in param["AllowableValues"]:
