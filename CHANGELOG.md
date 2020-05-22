@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.0.7] - 2020-05-22
+- Removed 'PushPowerButton' from simple reset list
+
 ## [1.0.6] - 2020-05-14
 - Added rf_bios_settings.py utility for displaying and setting BIOS attributes
 - Added enhancement to account deletion fallback routine to send two PATCH operations when clearing an account to ensure compatibility
