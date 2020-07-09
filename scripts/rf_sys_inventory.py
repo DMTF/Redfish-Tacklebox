@@ -25,7 +25,7 @@ argget.add_argument( "--password", "-p",  type = str, required = True, help = "T
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
 argget.add_argument( "--details", "-details", action = "store_true", help = "Indicates if the full details of each component should be shown" )
 argget.add_argument( "--noabsent", "-noabsent", action = "store_true", help = "Indicates if absent devices should be skipped" )
-argget.add_argument( "--write", "-w", action = "store_true", help = "Indicates if the inventory should be written to a spreadsheet" )
+argget.add_argument( "--write", "-w", nargs = "?", const = "Device_Inventory", type = str, help = "Indicates if the inventory should be written to a spreadsheet and what the file name should be if given" )
 args = argget.parse_args()
 
 # Set up the Redfish object
@@ -38,7 +38,7 @@ try:
     redfish_utilities.print_system_inventory( inventory, details = args.details, skip_absent = args.noabsent )
 
     if(args.write):
-        redfish_utilities.write_system_inventory( inventory )
+        redfish_utilities.write_system_inventory( inventory, args.write )
 
 finally:
     # Log out

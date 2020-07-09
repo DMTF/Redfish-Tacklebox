@@ -288,7 +288,7 @@ def print_system_inventory( inventory_list, details = False, skip_absent = False
         print( "" )
 
 
-def write_system_inventory( inventory_list):
+def write_system_inventory( inventory_list, file_name):
     """
     Write the system inventory list into a spreadsheet
 
@@ -297,7 +297,7 @@ def write_system_inventory( inventory_list):
     """
 
     # Excel workbook to save data extracted and parsed
-    workbook = xlsxwriter.Workbook("./Device_Inventory.xlsx")
+    workbook = xlsxwriter.Workbook(f"./{file_name}.xlsx")
 
     worksheet = workbook.add_worksheet("Device Inventory")
     cell_header_format = workbook.add_format({'bold': True, 'bg_color': 'yellow'})
