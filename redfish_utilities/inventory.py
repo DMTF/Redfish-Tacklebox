@@ -7,6 +7,8 @@ Brief : This file contains the definitions and functionalities for scanning a
         Redfish service for an inventory of components
 """
 
+import xlsxwriter
+
 def get_system_inventory( context ):
     """
     Walks a Redfish service for system component information, such as drives,
@@ -284,3 +286,49 @@ def print_system_inventory( inventory_list, details = False, skip_absent = False
                             if item[detail] is not None:
                                 print( inventory_line_format_detail.format( "", detail, item[detail] ) )
         print( "" )
+
+
+def write_system_inventory( inventory_list, file_name):
+    """
+    Write the system inventory list into a spreadsheet
+
+    Args:
+        inventory_list: The inventory list to write to an Excel spreadsheet
+    """
+
+    # Excel workbook to save data extracted and parsed
+    workbook = xlsxwriter.Workbook(f"./{file_name}.xlsx")
+
+    worksheet = workbook.add_worksheet("Device Inventory")
+    cell_header_format = workbook.add_format({'bold': True, 'bg_color': 'yellow'})
+    cell_name_format = workbook.add_format({'bold': True})
+
+    column = 0
+    row = 0
+
+    # Adds header to Excel file
+    header = ["NAME", "DESCRIPTION", "MANUFACTURER", "MODEL", "SKU", "PART NUMBER", "SERIAL NUMBER", "ASSET TAG" ]
+    for column_title in header:
+        worksheet.write(row, column, column_title, cell_header_format)
+        column += 1
+    row = 1
+
+    
+
+    
+    for chassis in inventory_list:
+        # Go through each component type in the chassis
+        type_list = [ "Chassis", "Processors", "Memory", "Drives", "PCIeDevices", "StorageControllers", "NetworkAdapters" ]
+        for inv_type in type_list:
+            # Go through each component and prints its info
+            for item in chassis[inv_type]:
+                column = 0
+                worksheet.write(row, column, inv_type, cell_name_format) 
+                column += 1
+                detail_list = [ "Description", "Manufacturer", "Model", "SKU", "PartNumber", "SerialNumber", "AssetTag" ]
+                for detail in detail_list:
+                    worksheet.write(row, column, item[detail] ) 
+                    column += 1
+                row += 1
+    
+    workbook.close()
