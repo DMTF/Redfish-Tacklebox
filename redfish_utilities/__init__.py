@@ -10,6 +10,7 @@ from .accounts import delete_user
 from .accounts import modify_user
 from .inventory import get_system_inventory
 from .inventory import print_system_inventory
+from .inventory import write_system_inventory
 from .logs import log_container
 from .logs import get_log_entries
 from .logs import print_log_entries
