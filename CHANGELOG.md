@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.0.8] - 2020-07-10
+- Added option to inventory script to save information to a spreadsheet
+
 ## [1.0.7] - 2020-05-22
 - Removed 'PushPowerButton' from simple reset list
 

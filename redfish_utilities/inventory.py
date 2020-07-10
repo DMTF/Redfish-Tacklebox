@@ -288,34 +288,32 @@ def print_system_inventory( inventory_list, details = False, skip_absent = False
         print( "" )
 
 
-def write_system_inventory( inventory_list, file_name):
+def write_system_inventory( inventory_list, file_name ):
     """
     Write the system inventory list into a spreadsheet
 
     Args:
         inventory_list: The inventory list to write to an Excel spreadsheet
+        file_name: The name of the file for the spreadsheet
     """
 
     # Excel workbook to save data extracted and parsed
-    workbook = xlsxwriter.Workbook(f"./{file_name}.xlsx")
+    workbook = xlsxwriter.Workbook( "./{}.xlsx".format( file_name ) )
 
-    worksheet = workbook.add_worksheet("Device Inventory")
-    cell_header_format = workbook.add_format({'bold': True, 'bg_color': 'yellow'})
-    cell_name_format = workbook.add_format({'bold': True})
+    worksheet = workbook.add_worksheet( "Device Inventory" )
+    cell_header_format = workbook.add_format( { 'bold': True, 'bg_color': 'yellow' } )
+    cell_name_format = workbook.add_format( { 'bold': True } )
 
     column = 0
     row = 0
 
     # Adds header to Excel file
-    header = ["NAME", "DESCRIPTION", "MANUFACTURER", "MODEL", "SKU", "PART NUMBER", "SERIAL NUMBER", "ASSET TAG" ]
+    header = [ "NAME", "DESCRIPTION", "MANUFACTURER", "MODEL", "SKU", "PART NUMBER", "SERIAL NUMBER", "ASSET TAG" ]
     for column_title in header:
-        worksheet.write(row, column, column_title, cell_header_format)
+        worksheet.write( row, column, column_title, cell_header_format )
         column += 1
     row = 1
 
-    
-
-    
     for chassis in inventory_list:
         # Go through each component type in the chassis
         type_list = [ "Chassis", "Processors", "Memory", "Drives", "PCIeDevices", "StorageControllers", "NetworkAdapters" ]
@@ -323,12 +321,12 @@ def write_system_inventory( inventory_list, file_name):
             # Go through each component and prints its info
             for item in chassis[inv_type]:
                 column = 0
-                worksheet.write(row, column, inv_type, cell_name_format) 
+                worksheet.write( row, column, inv_type, cell_name_format )
                 column += 1
                 detail_list = [ "Description", "Manufacturer", "Model", "SKU", "PartNumber", "SerialNumber", "AssetTag" ]
                 for detail in detail_list:
-                    worksheet.write(row, column, item[detail] ) 
+                    worksheet.write( row, column, item[detail] )
                     column += 1
                 row += 1
-    
+
     workbook.close()

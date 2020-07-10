@@ -37,7 +37,7 @@ try:
     inventory = redfish_utilities.get_system_inventory( redfish_obj )
     redfish_utilities.print_system_inventory( inventory, details = args.details, skip_absent = args.noabsent )
 
-    if(args.write):
+    if( args.write ):
         redfish_utilities.write_system_inventory( inventory, args.write )
 
 finally:
