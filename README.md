@@ -97,6 +97,9 @@ optional arguments:
                         be shown
   --noabsent, -noabsent
                         Indicates if absent devices should be skipped
+  --write [WRITE], -w [WRITE]
+                        Indicates if the inventory should be written to a
+                        spreadsheet and what the file name should be if given
 ```
 
 Example: `rf_sys_inventory.py -u root -p root -r https://192.168.1.100 -details`
