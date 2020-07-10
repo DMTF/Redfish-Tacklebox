@@ -80,7 +80,7 @@ Using the information from those resources, it will build a sensor table and pri
 
 ```
 usage: rf_sys_inventory.py [-h] --user USER --password PASSWORD --rhost RHOST
-                           [--details] [--noabsent]
+                           [--details] [--noabsent] [--write [WRITE]]
 
 A tool to walk a Redfish service and list component information
 
