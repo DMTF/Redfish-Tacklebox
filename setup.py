@@ -1,6 +1,6 @@
 #! /usr/bin/python
 # Copyright Notice:
-# Copyright 2019 DMTF. All rights reserved.
+# Copyright 2019-2020 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
 
 from setuptools import setup
@@ -31,6 +31,7 @@ setup(
         "scripts/rf_bios_settings.py",
         "scripts/rf_boot_override.py",
         "scripts/rf_discover.py",
+        "scripts/rf_event_service.py",
         "scripts/rf_logs.py",
         "scripts/rf_power_reset.py",
         "scripts/rf_sensor_list.py",

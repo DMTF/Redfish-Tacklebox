@@ -1,12 +1,12 @@
 #! /usr/bin/python
 # Copyright Notice:
-# Copyright 2020 DMTF. All rights reserved.
+# Copyright 2019-2020 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
 
 """
 Redfish Logs
 
-File : rf_logs
+File : rf_logs.py
 
 Brief : This script uses the redfish_utilities module to manage logs
 """
