@@ -1,6 +1,6 @@
 # Redfish Tacklebox
 
-Copyright 2019 DMTF. All rights reserved.
+Copyright 2019-2020 DMTF. All rights reserved.
 
 ## About
 
@@ -353,6 +353,102 @@ The tool will log into the service specified by the *rhost* argument using the c
 It then builds a request payload to perform a `SimpleUpdate` action against the update service using the image specified by the *image* argument.
 The optional *target* argument is used in the request if attempting to update a particular system, device, manager, or other resource.
 Once the `SimpleUpdate` is requested, it monitors the progress of the update, and displays response messages reported by the service about the update once complete.
+
+
+### Event Service
+
+```
+usage: rf_event_service.py [-h] --user USER --password PASSWORD --rhost RHOST
+                           {subscribe,unsubscribe,info} ...
+
+A tool to manage the event service on a Redfish service
+
+positional arguments:
+  {info,subscribe,unsubscribe}
+    info                Displays information about the event service and
+                        subscriptions
+    subscribe           Creates an event subscription to a specified URL
+    unsubscribe         Deletes an event subscription
+
+required arguments:
+  --user USER, -u USER  The user name for authentication
+  --password PASSWORD, -p PASSWORD
+                        The password for authentication
+  --rhost RHOST, -r RHOST
+                        The address of the Redfish service (with scheme)
+
+optional arguments:
+  -h, --help            show this help message and exit
+```
+
+#### Info
+
+```
+usage: rf_event_service.py info [-h]
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+Example: `rf_event_service.py -u root -p root -r https://192.168.1.100 info`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the event service and event subscriptions and display their information.
+
+
+#### Subscribe
+
+```
+usage: rf_event_service.py subscribe [-h] --destination DESTINATION
+                                     [--context CONTEXT] [--expand]
+                                     [--format FORMAT]
+                                     [--resourcetypes RESOURCETYPES [RESOURCETYPES ...]]
+                                     [--registries REGISTRIES [REGISTRIES ...]]
+
+required arguments:
+  --destination DESTINATION, -dest DESTINATION
+                        The URL where events are sent for the subscription
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --context CONTEXT, -c CONTEXT
+                        The context string for the subscription that is
+                        supplied back in the event payload
+  --expand, -e          Indicates if the origin of condition in the event is
+                        to be expanded
+  --format FORMAT, -f FORMAT
+                        The format of the event payloads
+  --resourcetypes RESOURCETYPES [RESOURCETYPES ...], -rt RESOURCETYPES [RESOURCETYPES ...]
+                        A list of resource types for the subscription
+  --registries REGISTRIES [REGISTRIES ...], -reg REGISTRIES [REGISTRIES ...]
+                        A list of registries for the subscription
+
+``` 
+
+Example: `rf_event_service.py -u root -p root -r https://192.168.1.100 subscribe -dest http://someremotelistener/redfish_event_handler`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the event service and perform a POST operation on the event destination collection to create a new subscription.
+The subscription will specify the destination to be the *destination* argument, and other optional arguments are provided as additional settings on the subscription.
+
+
+#### Unsubscribe
+
+```
+usage: rf_event_service.py unsubscribe [-h] --id ID
+
+required arguments:
+  --id ID, -i ID  The identifier of the event subscription to be deleted
+
+optional arguments:
+  -h, --help      show this help message and exit
+```
+
+Example: `rf_event_service.py -u root -p root -r https://192.168.1.100 unsubscribe -id 1`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the event service and traverse the members of the event destination collection to find a member with the `Id` property matching the *id* argument.
+If a match is found, it will perform a DELETE on the member.
 
 
 ## Release Process

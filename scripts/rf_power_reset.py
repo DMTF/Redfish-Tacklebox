@@ -1,12 +1,12 @@
 #! /usr/bin/python
 # Copyright Notice:
-# Copyright 2019 DMTF. All rights reserved.
+# Copyright 2019-2020 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
 
 """
 Redfish Power Reset
 
-File : rf_power_reset
+File : rf_power_reset.py
 
 Brief : This script uses the redfish_utilities module to perform a reset of the system
 """

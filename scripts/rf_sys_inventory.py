@@ -1,12 +1,12 @@
 #! /usr/bin/python
 # Copyright Notice:
-# Copyright 2019 DMTF. All rights reserved.
+# Copyright 2019-2020 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
 
 """
 Redfish System Inventory
 
-File : rf_sys_inventory
+File : rf_sys_inventory.py
 
 Brief : This script uses the redfish_utilities module to dump system inventory
         information
