@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.0.9] - 2020-10-19
+- Added rf_event_service.py tool for managing event subscriptions and displaying event service information
+
 ## [1.0.8] - 2020-07-10
 - Added option to the inventory script to save information to a spreadsheet
 
