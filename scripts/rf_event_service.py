@@ -25,7 +25,7 @@ info_argget = subparsers.add_parser( "info", help = "Displays information about 
 sub_argget = subparsers.add_parser( "subscribe", help = "Creates an event subscription to a specified URL" )
 sub_argget.add_argument( "--destination", "-dest", type = str, required = True, help = "The URL where events are sent for the subscription" )
 sub_argget.add_argument( "--context", "-c", type = str, help = "The context string for the subscription that is supplied back in the event payload" )
-sub_argget.add_argument( "--expand", "-e", action = "store_true", help = "Indicates if the origin of condition in the event is to be expanded" )
+sub_argget.add_argument( "--expand", "-e", action = "store_true", help = "Indicates if the origin of condition in the event is to be expanded", default = None )
 sub_argget.add_argument( "--format", "-f", type = str, help = "The format of the event payloads" )
 sub_argget.add_argument( "--resourcetypes", "-rt", type = str, nargs = '+', help = "A list of resource types for the subscription" )
 sub_argget.add_argument( "--registries", "-reg", type = str, nargs = '+', help = "A list of registries for the subscription" )
