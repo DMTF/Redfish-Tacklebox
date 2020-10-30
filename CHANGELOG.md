@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.1.0] - 2020-10-30
+- Fixed usage of the --expand option in rf_event_service.py
+
 ## [1.0.9] - 2020-10-19
 - Added rf_event_service.py tool for managing event subscriptions and displaying event service information
 

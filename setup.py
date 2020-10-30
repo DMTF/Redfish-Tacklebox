@@ -11,7 +11,7 @@ with open( "README.md", "r", "utf-8" ) as f:
 
 setup(
     name = "redfish_utilities",
-    version = "1.0.9",
+    version = "1.1.0",
     description = "Redfish Utilities",
     long_description = long_description,
     long_description_content_type = "text/markdown",
