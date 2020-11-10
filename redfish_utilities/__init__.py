@@ -25,6 +25,7 @@ from .messages import print_error_payload
 from .messages import verify_response
 from .sensors import get_sensors
 from .sensors import print_sensors
+from .systems import system_reset_types
 from .systems import get_system_boot
 from .systems import set_system_boot
 from .systems import print_system_boot
