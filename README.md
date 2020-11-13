@@ -15,9 +15,8 @@ The utilities can be used as part of larger management applications, or be used 
 ### Building from Source
 
 ```
-python setup.py sdist --formats=zip
-cd dist
-pip install redfish_utilities-x.x.x.zip
+python setup.py sdist
+pip install dist/redfish_utilities-x.x.x.tar.gz
 ```
 
 
@@ -157,7 +156,10 @@ Once the desired log service is found, the tool will either perform the `ClearLo
 
 ```
 usage: rf_power_reset.py [-h] --user USER --password PASSWORD --rhost RHOST
-                         [--system SYSTEM] [--type TYPE]
+                         [--system SYSTEM]
+                         [--type {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle}]
+                         [--info]
+
 
 A tool to perform a power/reset operation of a system
 
@@ -172,7 +174,7 @@ optional arguments:
   -h, --help            show this help message and exit
   --system SYSTEM, -s SYSTEM
                         The ID of the system perform the operation
-  --type TYPE, -t TYPE  The type of power/reset operation to perform
+  --type {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle}, -t {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle}
   --info, -info         Indicates if reset information should be reported
 ```
 
@@ -453,9 +455,10 @@ If a match is found, it will perform a DELETE on the member.
 
 ## Release Process
 
-1. Update `CHANGELOG.md` with the list of changes since the last release
-2. Update `setup.py` to reflect the new version
-3. Push changes to Github and create a new release
-4. Push the new tool version to pypi.org
-    * `python setup.py sdist`
-    * `twine upload dist/*`
+Run the `release.sh` script to publish a new version.
+
+```bash
+sh release.sh <NewVersion>
+```
+
+Enter the release notes when prompted; an empty line signifies no more notes to add.

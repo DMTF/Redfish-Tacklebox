@@ -13,6 +13,7 @@ Brief : This file contains the definitions and functionalities for interacting
 """
 
 from .messages import verify_response
+from .resets import reset_types
 
 class RedfishSystemNotFoundError( Exception ):
     """
@@ -155,7 +156,7 @@ def get_system_reset_info( context, system_id = None ):
                 "Name": "ResetType",
                 "Required": False,
                 "DataType": "String",
-                "AllowableValues": [ "On", "ForceOff", "GracefulShutdown", "GracefulRestart", "ForceRestart", "Nmi", "ForceOn", "PushPowerButton", "PowerCycle" ]
+                "AllowableValues": reset_types
             }
         ]
 
@@ -184,7 +185,7 @@ def system_reset( context, system_id = None, reset_type = None ):
     """
 
     # Check that the values themselves are supported by the schema
-    reset_type_values = [ "On", "ForceOff", "GracefulShutdown", "GracefulRestart", "ForceRestart", "Nmi", "ForceOn", "PushPowerButton", "PowerCycle" ]
+    reset_type_values = reset_types
     if reset_type is not None:
         if reset_type not in reset_type_values:
             raise ValueError( "{} is not an allowable reset type ({})".format( reset_type, ", ".join( reset_type_values ) ) )
