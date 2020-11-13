@@ -1,8 +1,5 @@
 # Change Log
 
-## [1.1.1] - 2020-11-13
-- Added list of reset types to help text of rf_power_reset.py
-
 ## [1.1.0] - 2020-10-30
 - Fixed usage of the --expand option in rf_event_service.py
 
