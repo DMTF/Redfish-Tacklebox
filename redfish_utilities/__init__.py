@@ -1,6 +1,6 @@
 #! /usr/bin/python
 # Copyright Notice:
-# Copyright 2019-2020 DMTF. All rights reserved.
+# Copyright 2019-2021 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
 
 from .accounts import get_users
@@ -31,6 +31,10 @@ from .systems import set_system_boot
 from .systems import print_system_boot
 from .systems import get_system_reset_info
 from .systems import system_reset
+from .systems import get_virtual_media
+from .systems import print_virtual_media
+from .systems import insert_virtual_media
+from .systems import eject_virtual_media
 from .systems import get_system_bios
 from .systems import set_system_bios
 from .systems import print_system_bios
