@@ -539,7 +539,7 @@ optional arguments:
   -h, --help      show this help message and exit
 ```
 
-Example: `rf_event_service.py -u root -p root -r https://192.168.1.100 eject -id 1`
+Example: `rf_virtual_media.py -u root -p root -r https://192.168.1.100 eject -id 1`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the system specified by the *system* argument, find its virtual media collection.
