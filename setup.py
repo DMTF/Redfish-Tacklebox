@@ -1,6 +1,6 @@
 #! /usr/bin/python
 # Copyright Notice:
-# Copyright 2019-2020 DMTF. All rights reserved.
+# Copyright 2019-2021 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
 
 from setuptools import setup
@@ -18,9 +18,9 @@ setup(
     author = "DMTF, https://www.dmtf.org/standards/feedback",
     license = "BSD 3-clause \"New\" or \"Revised License\"",
     classifiers = [
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: BSD License",
-        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
         "Topic :: Communications"
     ],
     keywords = "Redfish",
@@ -36,7 +36,8 @@ setup(
         "scripts/rf_power_reset.py",
         "scripts/rf_sensor_list.py",
         "scripts/rf_sys_inventory.py",
-        "scripts/rf_update.py"
+        "scripts/rf_update.py",
+        "scripts/rf_virtual_media.py"
     ],
     install_requires = [ "redfish" ]
 )

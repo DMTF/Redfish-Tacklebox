@@ -1,6 +1,6 @@
 #! /usr/bin/python
 # Copyright Notice:
-# Copyright 2019-2020 DMTF. All rights reserved.
+# Copyright 2019-2021 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
 
 """
@@ -9,7 +9,7 @@ Systems Module
 File : systems.py
 
 Brief : This file contains the definitions and functionalities for interacting
-        with the Systems Collection for a given Redfish service
+        with the systems collection for a given Redfish service
 """
 
 from .messages import verify_response
@@ -24,6 +24,18 @@ class RedfishSystemNotFoundError( Exception ):
 class RedfishSystemResetNotFoundError( Exception ):
     """
     Raised when the Reset action cannot be found
+    """
+    pass
+
+class RedfishVirtualMediaNotFoundError( Exception ):
+    """
+    Raised when a system does not have any virtual media available
+    """
+    pass
+
+class RedfishNoAcceptableVirtualMediaError( Exception ):
+    """
+    Raised when a system does not have virtual media available that meets criteria
     """
     pass
 
@@ -212,6 +224,210 @@ def system_reset( context, system_id = None, reset_type = None ):
     response = context.post( reset_uri, body = payload )
     verify_response( response )
     return response
+
+def get_virtual_media( context, system_id = None ):
+    """
+    Finds the system matching the given ID and gets its virtual media
+
+    Args:
+        context: The Redfish client object with an open session
+        system_id: The system to locate; if None, perform on the only system
+
+    Returns:
+        An array of dictionaries of the virtual media instances
+    """
+
+    # Get the virtual media collection
+    virtual_media_collection = get_virtual_media_collection( context, system_id = system_id )
+
+    # Iterate through the members and pull out each of the instances
+    virtual_media_list = []
+    for member in virtual_media_collection.dict["Members"]:
+        virtual_media = context.get( member["@odata.id"] )
+        virtual_media_list.append( virtual_media.dict )
+    return virtual_media_list
+
+def print_virtual_media( virtual_media_list ):
+    """
+    Prints the virtual media list into a table
+
+    Args:
+        virtual_media_list: The virtual media list to print
+    """
+
+    virtual_media_line_format = "  {:20s} | {}: {}"
+    virtual_media_properties = [ "Image", "MediaTypes", "ConnectedVia", "Inserted", "WriteProtected" ]
+    print( "" )
+    for virtual_media in virtual_media_list:
+        print( virtual_media_line_format.format( virtual_media["Id"], "ImageName", virtual_media.get( "ImageName", "" ) ) )
+        for property in virtual_media_properties:
+            if property in virtual_media:
+                prop_val = virtual_media[property]
+                if isinstance( prop_val, list ):
+                    prop_val = ", ".join( prop_val )
+                print( virtual_media_line_format.format( "", property, prop_val ) )
+        print( "" )
+
+def insert_virtual_media( context, image, system_id = None, media_id = None, media_types = None, inserted = None, write_protected = None ):
+    """
+    Finds the system matching the given ID and inserts virtual media
+
+    Args:
+        context: The Redfish client object with an open session
+        image: The URI of the media to insert
+        system_id: The system to locate; if None, perform on the only system
+        media_id: The virtual media instance to insert; if None, perform on an appropriate instance
+        media_types: A list of acceptable media types
+        inserted: Indicates if the media is to be marked as inserted for the system
+        write_protected: Indicates if the media is to be marked as write-protected for the system
+
+    Returns:
+        The response of the insert operation
+    """
+
+    # Set up acceptable media types based on the image URI if not specified
+    if media_types is None:
+        if image.lower().endswith( ".iso" ):
+            media_types = [ "CD", "DVD" ]
+        elif image.lower().endswith( ".img" ):
+            media_types = [ "USBStick" ]
+        elif image.lower().endswith( ".bin" ):
+            media_types = [ "USBStick" ]
+
+    # Get the virtual media collection
+    virtual_media_collection = get_virtual_media_collection( context, system_id = system_id )
+
+    # Scan the virtual media for an appropriate slot
+    match = False
+    for member in virtual_media_collection.dict["Members"]:
+        media = context.get( member["@odata.id"] )
+        if media.dict["Image"] is not None:
+            # In use; move on
+            continue
+
+        # Check for a match
+        if media_id is not None:
+            if media.dict["Id"] == media_id:
+                # Identifier match
+                match = True
+        else:
+            if media_types is None:
+                # No preferred media type; automatic match
+                match = True
+            else:
+                # Check if the preferred media type is in the reported list
+                for type in media_types:
+                    if type in media.dict["MediaTypes"]:
+                        # Acceptable media type found
+                        match = True
+
+        # If a match was found, attempt to insert the media
+        if match:
+            payload = {
+                "Image": image
+            }
+            if inserted:
+                payload["Inserted"] = inserted
+            if write_protected:
+                payload["WriteProtected"] = write_protected
+            try:
+                # Preference for using the InsertMedia action
+                response = context.post( media.dict["Actions"]["#VirtualMedia.InsertMedia"]["target"], body = payload )
+            except:
+                # Fallback to PATCH method
+                if "Inserted" not in payload:
+                    payload["Inserted"] = True
+                headers = None
+                etag = media.getheader( "ETag" )
+                if etag is not None:
+                    headers = { "If-Match": etag }
+                response = context.patch( media.dict["@odata.id"], body = payload, headers = headers )
+            verify_response( response )
+            return response
+
+    # No matches found
+    if media_id is not None:
+        reason = "'{}' not found or is already in use".format( media_id )
+    elif media_types is not None:
+        reason = "No available slots of types {}".format( ", ".join( media_types ) )
+    else:
+        reason = "No available slots"
+    raise RedfishNoAcceptableVirtualMediaError( "No acceptable virtual media: {}".format( reason ) )
+
+def eject_virtual_media( context, media_id, system_id = None ):
+    """
+    Finds the system matching the given ID and ejects virtual media
+
+    Args:
+        context: The Redfish client object with an open session
+        media_id: The virtual media instance to eject
+        system_id: The system to locate; if None, perform on the only system
+
+    Returns:
+        The response of the eject operation
+    """
+
+    # Get the virtual media collection
+    virtual_media_collection = get_virtual_media_collection( context, system_id = system_id )
+
+    # Scan the virtual media for the selected slot
+    for member in virtual_media_collection.dict["Members"]:
+        media = context.get( member["@odata.id"] )
+        if media.dict["Id"] == media_id:
+            # Found the selected slot; eject it
+            try:
+                # Preference for using the EjectMedia action
+                response = context.post( media.dict["Actions"]["#VirtualMedia.EjectMedia"]["target"], body = {} )
+            except:
+                # Fallback to PATCH method
+                payload = {
+                    "Image": None,
+                    "Inserted": False
+                }
+                headers = None
+                etag = media.getheader( "ETag" )
+                if etag is not None:
+                    headers = { "If-Match": etag }
+                response = context.patch( media.dict["@odata.id"], body = payload, headers = headers )
+            verify_response( response )
+            return response
+
+    # No matches found
+    raise RedfishNoAcceptableVirtualMediaError( "No acceptable virtual media: '{}' not found".format( media_id ) )
+
+def get_virtual_media_collection( context, system_id = None ):
+    """
+    Finds the system matching the given ID and gets its virtual media collection
+
+    Args:
+        context: The Redfish client object with an open session
+        system_id: The system to locate; if None, perform on the only system
+
+    Returns:
+        The virtual media collection
+    """
+
+    # Locate the system
+    system = get_system( context, system_id )
+
+    # Check if there is a VirtualMediaCollection; if not, try the older location in the Manager resource
+    virtual_media_uri = None
+    if "VirtualMedia" in system.dict:
+        virtual_media_uri = system.dict["VirtualMedia"]["@odata.id"]
+    else:
+        if "Links" in system.dict:
+            if "ManagedBy" in system.dict["Links"]:
+                for manager in system.dict["Links"]["ManagedBy"]:
+                    manager_resp = context.get( manager["@odata.id"] )
+                    if "VirtualMedia" in manager_resp.dict:
+                        # Get the first manager that contains virtual media
+                        virtual_media_uri = manager_resp.dict["VirtualMedia"]["@odata.id"]
+                        break
+    if virtual_media_uri is None:
+        raise RedfishVirtualMediaNotFoundError( "System does not support virtual media" )
+
+    # Get the VirtualMediaCollection
+    return context.get( virtual_media_uri )
 
 def get_system_bios( context, system_id = None ):
     """
