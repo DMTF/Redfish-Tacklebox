@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.1.2] - 2021-03-02
+- Added rf_virtual_media.py tool for managing virtual media on a system
+
 ## [1.1.1] - 2020-11-13
 - Added list of reset types to help text of rf_power_reset.py
 
