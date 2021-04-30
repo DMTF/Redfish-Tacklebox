@@ -21,6 +21,13 @@ from .logs import log_container
 from .logs import get_log_entries
 from .logs import print_log_entries
 from .logs import clear_log_entries
+from .managers import get_manager
+from .managers import print_manager
+from .managers import get_manager_reset_info
+from .managers import manager_reset
+from .managers import get_manager_ethernet_interface
+from .managers import set_manager_ethernet_interface
+from .managers import print_manager_ethernet_interface
 from .messages import print_error_payload
 from .messages import verify_response
 from .resets import reset_types

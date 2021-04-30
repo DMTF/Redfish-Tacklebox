@@ -173,7 +173,7 @@ required arguments:
 optional arguments:
   -h, --help            show this help message and exit
   --system SYSTEM, -s SYSTEM
-                        The ID of the system perform the operation
+                        The ID of the system to reset
   --type {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle}, -t {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle}
   --info, -info         Indicates if reset information should be reported
 ```
@@ -228,6 +228,142 @@ The tool will then perform an operation on the `Boot` object within the matching
 * If *target* is specified, it will update the `Boot` object to set the boot override to be *target*.
     * If *reset* is provided, it will reset the system after updating the `Boot` object.
 * If *target* is not specified, it will display the current boot override settings for the system.
+
+
+### Manager Configuration
+
+```
+usage: rf_manager_config.py [-h] --user USER --password PASSWORD --rhost RHOST
+                            [--manager MANAGER]
+                            {info,reset,getnet,setnet} ...
+
+A tool to manage managers in a service
+
+positional arguments:
+  {info,reset,getnet,setnet}
+    info                Displays information about a manager
+    reset               Resets a manager
+    getnet              Displays information about an Ethernet interface
+    setnet              Configures an Ethernet interface
+
+required arguments:
+  --user USER, -u USER  The user name for authentication
+  --password PASSWORD, -p PASSWORD
+                        The password for authentication
+  --rhost RHOST, -r RHOST
+                        The address of the Redfish service (with scheme)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --manager MANAGER, -m MANAGER
+                        The ID of the manager to target
+```
+
+
+#### Info
+
+```
+usage: rf_manager_config.py info [-h]
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 info`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the manager specified by the *manager* argument, and displays the manager instance.
+* If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
+
+
+#### Reset
+
+```
+usage: rf_manager_config.py info [-h]
+
+optional arguments:
+  -h, --help  show this help message and exit
+rainem1@rainem1-dev:/share/Redfish/Redfish-Tacklebox$ rf_manager_config.py reset -h
+usage: rf_manager_config.py reset [-h]
+                                  [--type {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle}]
+                                  [--info]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --type {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle}, -t {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle}
+                        The type of power/reset operation to perform
+  --info, -info         Indicates if reset information should be reported
+
+```
+
+Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 -t GracefulRestart`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It then traverses the manager collection for the service to find the matching system specified by the *manager* argument.
+It will perform the `Reset` action with the specified reset type from the *type* argument.
+* If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
+* If *type* is not specified, it will attempt a `GracefulRestart`.
+
+
+#### Get Network Interface
+
+```
+usage: rf_manager_config.py getnet [-h] [--id ID]
+
+optional arguments:
+  -h, --help      show this help message and exit
+  --id ID, -i ID  The identifier of the Ethernet interface to display
+```
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the manager specified by the *manager* argument, locate the Ethernet interface specified by the *id* argument, and displays the interface instance.
+* If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
+* If *id* is not specified, and if the manager has exactly one Ethernet interface, it will perform the operation on the one interface.
+
+
+#### Set Network Interface
+
+```
+usage: rf_manager_config.py setnet [-h] [--id ID] [--ipv4address IPV4ADDRESS]
+                                   [--ipv4netmask IPV4NETMASK]
+                                   [--ipv4gateway IPV4GATEWAY]
+                                   [--dhcpv4 {On,Off}]
+                                   [--ipv6addresses IPV6ADDRESSES [IPV6ADDRESSES ...]]
+                                   [--ipv6gateways IPV6GATEWAYS [IPV6GATEWAYS ...]]
+                                   [--dhcpv6 {Stateful,Stateless,Disabled}]
+                                   [--vlan {On,Off}] [--vlanid VLANID]
+                                   [--vlanpriority VLANPRIORITY]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --id ID, -i ID        The identifier of the Ethernet interface to configure
+  --ipv4address IPV4ADDRESS, -ipv4address IPV4ADDRESS
+                        The static IPv4 address to set
+  --ipv4netmask IPV4NETMASK, -ipv4netmask IPV4NETMASK
+                        The static IPv4 subnet mask to set
+  --ipv4gateway IPV4GATEWAY, -ipv4gateway IPV4GATEWAY
+                        The static IPv4 gateway to set
+  --dhcpv4 {On,Off}, -dhcpv4 {On,Off}
+                        The DHCPv4 configuration to set
+  --ipv6addresses IPV6ADDRESSES [IPV6ADDRESSES ...], -ipv6addresses IPV6ADDRESSES [IPV6ADDRESSES ...]
+                        The static IPv6 addresses to set with prefix length
+  --ipv6gateways IPV6GATEWAYS [IPV6GATEWAYS ...], -ipv6gateways IPV6GATEWAYS [IPV6GATEWAYS ...]
+                        The static IPv6 default gateways to set with prefix
+                        length
+  --dhcpv6 {Stateful,Stateless,Disabled}, -dhcpv6 {Stateful,Stateless,Disabled}
+                        The DHCPv6 configuration to set
+  --vlan {On,Off}, -vlan {On,Off}
+                        The VLAN enabled configuration to set
+  --vlanid VLANID, -vlanid VLANID
+                        The VLAN ID to set
+  --vlanpriority VLANPRIORITY, -vlanpriority VLANPRIORITY
+                        The VLAN priority to set
+```
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the manager specified by the *manager* argument, locate the Ethernet interface specified by the *id* argument, and apply the requested settings to the interface.
+* If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
+* If *id* is not specified, and if the manager has exactly one Ethernet interface, it will perform the operation on the one interface.
 
 
 ### BIOS Settings
@@ -383,6 +519,7 @@ optional arguments:
   -h, --help            show this help message and exit
 ```
 
+
 #### Info
 
 ```
@@ -478,8 +615,9 @@ required arguments:
 optional arguments:
   -h, --help            show this help message and exit
   --system SYSTEM, -s SYSTEM
-                        The ID of the system perform the operation
+                        The ID of the system containing the virtual media
 ```
+
 
 #### Info
 
