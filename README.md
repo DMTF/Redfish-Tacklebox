@@ -296,7 +296,7 @@ optional arguments:
 
 ```
 
-Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 -t GracefulRestart`
+Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 reset -t GracefulRestart`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It then traverses the manager collection for the service to find the matching system specified by the *manager* argument.
@@ -314,6 +314,8 @@ optional arguments:
   -h, --help      show this help message and exit
   --id ID, -i ID  The identifier of the Ethernet interface to display
 ```
+
+Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 getnet -i NIC2`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the manager specified by the *manager* argument, locate the Ethernet interface specified by the *id* argument, and displays the interface instance.
@@ -359,6 +361,8 @@ optional arguments:
   --vlanpriority VLANPRIORITY, -vlanpriority VLANPRIORITY
                         The VLAN priority to set
 ```
+
+Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 setnet -i NIC2 -ipv4address 192.168.1.101 -ipv4gateway 192.168.1.1`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the manager specified by the *manager* argument, locate the Ethernet interface specified by the *id* argument, and apply the requested settings to the interface.
