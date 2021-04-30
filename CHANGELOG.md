@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.1.3] - 2021-04-30
+- Added rf_manager_config.py tool for configuring managers
+
 ## [1.1.2] - 2021-03-02
 - Added rf_virtual_media.py tool for managing virtual media on a system
 
