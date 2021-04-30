@@ -20,7 +20,7 @@ argget = argparse.ArgumentParser( description = "A tool to manage virtual media 
 argget.add_argument( "--user", "-u", type = str, required = True, help = "The user name for authentication" )
 argget.add_argument( "--password", "-p",  type = str, required = True, help = "The password for authentication" )
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
-argget.add_argument( "--system", "-s", type = str, help = "The ID of the system perform the operation" )
+argget.add_argument( "--system", "-s", type = str, help = "The ID of the system containing the virtual media" )
 subparsers = argget.add_subparsers( dest = "command" )
 info_argget = subparsers.add_parser( "info", help = "Displays information about the virtual media for a system" )
 insert_argget = subparsers.add_parser( "insert", help = "Inserts virtual media for a system" )

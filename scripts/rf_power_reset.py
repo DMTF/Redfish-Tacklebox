@@ -20,7 +20,7 @@ argget = argparse.ArgumentParser( description = "A tool to perform a power/reset
 argget.add_argument( "--user", "-u", type = str, required = True, help = "The user name for authentication" )
 argget.add_argument( "--password", "-p",  type = str, required = True, help = "The password for authentication" )
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
-argget.add_argument( "--system", "-s", type = str, help = "The ID of the system perform the operation" )
+argget.add_argument( "--system", "-s", type = str, help = "The ID of the system to reset" )
 argget.add_argument( "--type", "-t", type = str, help = "The type of power/reset operation to perform", choices = redfish_utilities.reset_types )
 argget.add_argument( "--info", "-info", action = "store_true", help = "Indicates if reset information should be reported" )
 args = argget.parse_args()
