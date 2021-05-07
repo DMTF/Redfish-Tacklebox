@@ -39,6 +39,69 @@ class RedfishNoAcceptableVirtualMediaError( Exception ):
     """
     pass
 
+def get_system_uris( context ):
+    """
+    Finds the system collection and returns all of its URIs
+
+    Args:
+        context: The Redfish client object with an open session
+
+    Returns:
+        A list of URIs to the members of the system collection
+    """
+
+    # Get the service root to find the system collection
+    service_root = context.get( "/redfish/v1/" )
+    if "Systems" not in service_root.dict:
+        # No system collection
+        raise RedfishSystemNotFoundError( "Service does not contain a system collection" )
+
+    # Get the system collection and iterate through its collection
+    avail_systems = []
+    system_col = context.get( service_root.dict["Systems"]["@odata.id"] )
+    for system_member in system_col.dict["Members"]:
+        avail_systems.append( system_member["@odata.id"] )
+    return avail_systems
+
+def get_system( context, system_id = None ):
+    """
+    Finds a system matching the given ID and returns its resource
+
+    Args:
+        context: The Redfish client object with an open session
+        system_id: The system to locate; if None, perform on the only system
+
+    Returns:
+        The system resource
+    """
+
+    # If the given ID is a URI, just return the member
+    if system_id is not None:
+        if system_id.startswith( "/redfish" ):
+            system = context.get( system_id )
+            verify_response( system )
+            return system
+
+    # Get the system URIs and find a matching member
+    avail_systems = []
+    system_uris = get_system_uris( context )
+    if system_id is None:
+        if len( system_uris ) == 1:
+            return context.get( system_uris[0] )
+        else:
+            for system_member in system_uris:
+                system = context.get( system_member )
+                avail_systems.append( system.dict["Id"] )
+            raise RedfishSystemNotFoundError( "Service does not contain exactly one system; a target system needs to be specified: {}".format( ", ".join( avail_systems ) ) )
+    else:
+        for system_member in system_uris:
+            system = context.get( system_member )
+            avail_systems.append( system.dict["Id"] )
+            if system.dict["Id"] == system_id:
+                return system
+
+    raise RedfishSystemNotFoundError( "Service does not contain a system called {}; valid systems: {}".format( system_id, ", ".join( avail_systems ) ) )
+
 def get_system_boot( context, system_id = None ):
     """
     Finds a system matching the given ID and returns its Boot object
@@ -155,12 +218,12 @@ def get_system_reset_info( context, system_id = None ):
     if "#ComputerSystem.Reset" not in system.dict["Actions"]:
         raise RedfishSystemResetNotFoundError( "System does not support Reset" )
 
-    # Extract the info about the SimpleUpdate action
+    # Extract the info about the Reset action
     reset_action = system.dict["Actions"]["#ComputerSystem.Reset"]
     reset_uri = reset_action["target"]
 
     if "@Redfish.ActionInfo" not in reset_action:
-        # No Action Info; need to build this manually based on other annotations
+        # No action info; need to build this manually based on other annotations
 
         # Default parameter requirements
         reset_parameters = [
@@ -177,7 +240,7 @@ def get_system_reset_info( context, system_id = None ):
             if param["Name"] + "@Redfish.AllowableValues" in reset_action:
                 param["AllowableValues"] = reset_action[param["Name"] + "@Redfish.AllowableValues"]
     else:
-        # Get the Action Info and its parameter listing
+        # Get the action info and its parameter listing
         action_info = context.get( reset_action["@Redfish.ActionInfo"] )
         reset_parameters = action_info.dict["Parameters"]
 
@@ -512,41 +575,3 @@ def print_system_bios( current_settings, future_settings ):
             print( bios_line_format.format( attribute, str( current_settings[attribute] ), str( current_settings[attribute] ) ) )
 
     print( "" )
-
-def get_system( context, system_id = None ):
-    """
-    Finds a system matching the given ID and returns its resource
-
-    Args:
-        context: The Redfish client object with an open session
-        system_id: The system to locate; if None, perform on the only system
-
-    Returns:
-        The system resource
-    """
-
-    # Get the Service Root to find the System Collection
-    service_root = context.get( "/redfish/v1/" )
-    if "Systems" not in service_root.dict:
-        # No System collection
-        raise RedfishSystemNotFoundError( "Service does not contain a Systems Collection" )
-
-    # Get the System Collection and iterate through its collection
-    avail_systems = []
-    system_col = context.get( service_root.dict["Systems"]["@odata.id"] )
-    if system_id is None:
-        if len( system_col.dict["Members"] ) == 1:
-            return context.get( system_col.dict["Members"][0]["@odata.id"] )
-        else:
-            for system_member in system_col.dict["Members"]:
-                system = context.get( system_member["@odata.id"] )
-                avail_systems.append( system.dict["Id"] )
-            raise RedfishSystemNotFoundError( "Service does not contain exactly one system; a target system needs to be specified: {}".format( ", ".join( avail_systems ) ) )
-    else:
-        for system_member in system_col.dict["Members"]:
-            system = context.get( system_member["@odata.id"] )
-            avail_systems.append( system.dict["Id"] )
-            if system.dict["Id"] == system_id:
-                return system
-
-    raise RedfishSystemNotFoundError( "Service does not contain a system called {}; valid systems: {}".format( system_id, ", ".join( avail_systems ) ) )

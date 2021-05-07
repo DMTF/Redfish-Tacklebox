@@ -33,6 +33,30 @@ class RedfishManagerResetNotFoundError( Exception ):
     """
     pass
 
+def get_manager_uris( context ):
+    """
+    Finds the manager collection and returns all of its URIs
+
+    Args:
+        context: The Redfish client object with an open session
+
+    Returns:
+        A list of URIs to the members of the manager collection
+    """
+
+    # Get the service root to find the manager collection
+    service_root = context.get( "/redfish/v1/" )
+    if "Managers" not in service_root.dict:
+        # No manager collection
+        raise RedfishManagerNotFoundError( "Service does not contain a managers collection" )
+
+    # Get the manager collection and iterate through its collection
+    avail_managers = []
+    manager_col = context.get( service_root.dict["Managers"]["@odata.id"] )
+    for manager_member in manager_col.dict["Members"]:
+        avail_managers.append( manager_member["@odata.id"] )
+    return avail_managers
+
 def get_manager( context, manager_id = None ):
     """
     Finds a manager matching the given ID and returns its resource
@@ -45,26 +69,27 @@ def get_manager( context, manager_id = None ):
         The manager resource
     """
 
-    # Get the service root to find the manager collection
-    service_root = context.get( "/redfish/v1/" )
-    if "Managers" not in service_root.dict:
-        # No manager collection
-        raise RedfishManagerNotFoundError( "Service does not contain a managers collection" )
+    # If the given ID is a URI, just return the member
+    if manager_id is not None:
+        if manager_id.startswith( "/redfish" ):
+            manager = context.get( manager_id )
+            verify_response( manager )
+            return manager
 
-    # Get the manager collection and iterate through its collection
+    # Get the system URIs and find a matching member
     avail_managers = []
-    manager_col = context.get( service_root.dict["Managers"]["@odata.id"] )
+    manager_uris = get_manager_uris( context )
     if manager_id is None:
-        if len( manager_col.dict["Members"] ) == 1:
-            return context.get( manager_col.dict["Members"][0]["@odata.id"] )
+        if len( manager_uris ) == 1:
+            return context.get( manager_uris[0] )
         else:
-            for manager_member in manager_col.dict["Members"]:
-                manager = context.get( manager_member["@odata.id"] )
+            for manager_member in manager_uris:
+                manager = context.get( manager_member )
                 avail_managers.append( manager.dict["Id"] )
             raise RedfishManagerNotFoundError( "Service does not contain exactly one manager; a target manager needs to be specified: {}".format( ", ".join( avail_managers ) ) )
     else:
-        for manager_member in manager_col.dict["Members"]:
-            manager = context.get( manager_member["@odata.id"] )
+        for manager_member in manager_uris:
+            manager = context.get( manager_member )
             avail_managers.append( manager.dict["Id"] )
             if manager.dict["Id"] == manager_id:
                 return manager
@@ -184,6 +209,31 @@ def manager_reset( context, manager_id = None, reset_type = None ):
     verify_response( response )
     return response
 
+def get_manager_ethernet_interface_uris( context, manager_id = None ):
+    """
+    Finds the Ethernet interface collection for a manager and returns all of its URIs
+
+    Args:
+        context: The Redfish client object with an open session
+        manager_id: The manager to locate; if None, perform on the only manager
+
+    Returns:
+        A list of URIs to the members of the Ethernet interface collection
+    """
+
+    # Get the manager to find its Ethernet interface collection
+    manager = get_manager( context, manager_id )
+    if "EthernetInterfaces" not in manager.dict:
+        # No manager collection
+        raise RedfishManagerEthIntNotFoundError( "Manager {} does not contain an Ethernet interface collection".format( manager.dict["Id"] ) )
+
+    # Get the manager collection and iterate through its collection
+    avail_interfaces = []
+    interface_col = context.get( manager.dict["EthernetInterfaces"]["@odata.id"] )
+    for interface_member in interface_col.dict["Members"]:
+        avail_interfaces.append( interface_member["@odata.id"] )
+    return avail_interfaces
+
 def get_manager_ethernet_interface( context, manager_id = None, interface_id = None ):
     """
     Finds an Ethernet interface matching the given ID and returns its resource
@@ -197,30 +247,32 @@ def get_manager_ethernet_interface( context, manager_id = None, interface_id = N
         The Ethernet interface resource
     """
 
-    manager = get_manager( context, manager_id )
-    if "EthernetInterfaces" not in manager.dict:
-        # No manager collection
-        raise RedfishManagerEthIntNotFoundError( "Manager {} does not contain an Ethernet interface collection".format( manager.dict["Id"] ) )
+    # If the given ID is a URI, just return the member
+    if interface_id is not None:
+        if interface_id.startswith( "/redfish" ):
+            interface = context.get( interface_id )
+            verify_response( interface )
+            return interface
 
-    # Get the manager collection and iterate through its collection
+    # Get the system URIs and find a matching member
     avail_interfaces = []
-    interface_col = context.get( manager.dict["EthernetInterfaces"]["@odata.id"] )
+    interface_uris = get_manager_ethernet_interface_uris( context, manager_id )
     if interface_id is None:
-        if len( interface_col.dict["Members"] ) == 1:
-            return context.get( interface_col.dict["Members"][0]["@odata.id"] )
+        if len( interface_uris ) == 1:
+            return context.get( interface_uris[0] )
         else:
-            for interface_member in interface_col.dict["Members"]:
-                interface = context.get( interface_member["@odata.id"] )
+            for interface_member in interface_uris:
+                interface = context.get( interface_member )
                 avail_interfaces.append( interface.dict["Id"] )
-            raise RedfishManagerEthIntNotFoundError( "Manager {} does not contain exactly one interface; a target interface needs to be specified: {}".format( manager.dict["Id"], ", ".join( avail_interfaces ) ) )
+                raise RedfishManagerEthIntNotFoundError( "The manager does not contain exactly one interface; a target interface needs to be specified: {}".format( ", ".join( avail_interfaces ) ) )
     else:
-        for interface_member in interface_col.dict["Members"]:
-            interface = context.get( interface_member["@odata.id"] )
+        for interface_member in interface_uris:
+            interface = context.get( interface_member )
             avail_interfaces.append( interface.dict["Id"] )
             if interface.dict["Id"] == interface_id:
                 return interface
 
-    raise RedfishManagerEthIntNotFoundError( "Manager {} does not contain an interface called {}; valid interfaces: {}".format( manager.dict["Id"], interface_id, ", ".join( avail_interfaces ) ) )
+    raise RedfishManagerEthIntNotFoundError( "The manager does not contain an interface called {}; valid interfaces: {}".format( interface_id, ", ".join( avail_interfaces ) ) )
 
 def set_manager_ethernet_interface( context, manager_id = None, interface_id = None, vlan = None, ipv4_addresses = None, dhcpv4 = None, ipv6_addresses = None, ipv6_gateways = None, dhcpv6 = None ):
     """
