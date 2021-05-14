@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.1.4] - 2021-05-14
+- Added helper routines to collect identifiers for systems, managers, and Ethernet interfaces for managers
+- Modified collection searching routines to leverage standardized URI patterns to minimize the number of transactions performed
+
 ## [1.1.3] - 2021-04-30
 - Added rf_manager_config.py tool for configuring managers
 
