@@ -39,15 +39,15 @@ class RedfishNoAcceptableVirtualMediaError( Exception ):
     """
     pass
 
-def get_system_uris( context ):
+def get_system_ids( context ):
     """
-    Finds the system collection and returns all of its URIs
+    Finds the system collection and returns all of the member's identifiers
 
     Args:
         context: The Redfish client object with an open session
 
     Returns:
-        A list of URIs to the members of the system collection
+        A list of identifiers of the members of the system collection
     """
 
     # Get the service root to find the system collection
@@ -59,13 +59,17 @@ def get_system_uris( context ):
     # Get the system collection and iterate through its collection
     avail_systems = []
     system_col = context.get( service_root.dict["Systems"]["@odata.id"] )
-    for system_member in system_col.dict["Members"]:
-        avail_systems.append( system_member["@odata.id"] )
+    while True:
+        for system_member in system_col.dict["Members"]:
+            avail_systems.append( system_member["@odata.id"].split( "/" )[-1] )
+        if "Members@odata.nextLink" not in system_col.dict:
+            break
+        system_col = context.get( system_col.dict["Members@odata.nextLink"] )
     return avail_systems
 
 def get_system( context, system_id = None ):
     """
-    Finds a system matching the given ID and returns its resource
+    Finds a system matching the given identifier and returns its resource
 
     Args:
         context: The Redfish client object with an open session
@@ -75,32 +79,28 @@ def get_system( context, system_id = None ):
         The system resource
     """
 
-    # If the given ID is a URI, just return the member
+    system_uri_pattern = "/redfish/v1/Systems/{}"
+    avail_systems = None
+
+    # If given an identifier, get the system directly
     if system_id is not None:
-        if system_id.startswith( "/redfish" ):
-            system = context.get( system_id )
-            verify_response( system )
-            return system
-
-    # Get the system URIs and find a matching member
-    avail_systems = []
-    system_uris = get_system_uris( context )
-    if system_id is None:
-        if len( system_uris ) == 1:
-            return context.get( system_uris[0] )
-        else:
-            for system_member in system_uris:
-                system = context.get( system_member )
-                avail_systems.append( system.dict["Id"] )
-            raise RedfishSystemNotFoundError( "Service does not contain exactly one system; a target system needs to be specified: {}".format( ", ".join( avail_systems ) ) )
+        system = context.get( system_uri_pattern.format( system_id ) )
+    # No identifier given; see if there's exactly one member
     else:
-        for system_member in system_uris:
-            system = context.get( system_member )
-            avail_systems.append( system.dict["Id"] )
-            if system.dict["Id"] == system_id:
-                return system
+        avail_systems = get_system_ids( context )
+        if len( avail_systems ) == 1:
+            system = context.get( system_uri_pattern.format( avail_systems[0] ) )
+        else:
+            raise RedfishSystemNotFoundError( "Service does not contain exactly one system; a target system needs to be specified: {}".format( ", ".join( avail_systems ) ) )
 
-    raise RedfishSystemNotFoundError( "Service does not contain a system called {}; valid systems: {}".format( system_id, ", ".join( avail_systems ) ) )
+    # Check the response and return the system if the response is good
+    try:
+        verify_response( system )
+    except:
+        if avail_systems is None:
+            avail_systems = get_system_ids( context )
+        raise RedfishSystemNotFoundError( "Service does not contain a system called {}; valid systems: {}".format( system_id, ", ".join( avail_systems ) ) ) from None
+    return system
 
 def get_system_boot( context, system_id = None ):
     """
