@@ -110,7 +110,10 @@ def add_user( context, user_name, password, role ):
             account = context.get( account_member["@odata.id"] )
             if account.dict["UserName"] == "" and not account.dict.get( "Enabled", True ):
                 # Empty slot found; PATCH it
-                response = context.patch( account_member["@odata.id"], body = payload, headers = { "If-Match": account.getheader( "ETag" ) } )
+                headers = {}
+                if account.getheader( "ETag" ):
+                        headers = { "If-Match": account.getheader( "ETag" ) }
+                response = context.patch( account_member["@odata.id"], body = payload, headers = headers )
                 if response.status < 400:
                     # These implementations also might restrict which slots to modify...
                     account_added = True
@@ -177,9 +180,11 @@ def modify_user( context, user_name, new_name = None, new_password = None, new_r
         new_info["Locked"] = new_locked
     if new_enabled is not None:
         new_info["Enabled"] = new_enabled
-
+    headers = {}
+    if user_info.getheader( "ETag" ):
+        headers = { "If-Match": user_info.getheader( "ETag" ) }
     # Update the user
-    response = context.patch( user_uri, body = new_info, headers = { "If-Match": user_info.getheader( "ETag" ) } )
+    response = context.patch( user_uri, body = new_info, headers = headers )
     verify_response( response )
     return response
 
