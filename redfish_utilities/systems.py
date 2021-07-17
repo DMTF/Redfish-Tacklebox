@@ -61,7 +61,7 @@ def get_system_ids( context ):
     system_col = context.get( service_root.dict["Systems"]["@odata.id"] )
     while True:
         for system_member in system_col.dict["Members"]:
-            avail_systems.append( system_member["@odata.id"].split( "/" )[-1] )
+            avail_systems.append( system_member["@odata.id"].strip( "/" ).split( "/" )[-1] )
         if "Members@odata.nextLink" not in system_col.dict:
             break
         system_col = context.get( system_col.dict["Members@odata.nextLink"] )
