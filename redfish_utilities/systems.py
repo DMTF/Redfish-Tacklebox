@@ -12,6 +12,7 @@ Brief : This file contains the definitions and functionalities for interacting
         with the systems collection for a given Redfish service
 """
 
+import warnings
 from .messages import verify_response
 from .resets import reset_types
 
@@ -23,7 +24,24 @@ class RedfishSystemNotFoundError( Exception ):
 
 class RedfishSystemResetNotFoundError( Exception ):
     """
-    Raised when the Reset action cannot be found
+    Raised when the reset action cannot be found
+    """
+    pass
+
+class RedfishSystemBootNotFoundError( Exception ):
+    """
+    Raised when the boot object cannot be found
+    """
+    pass
+class RedfishSystemBiosNotFoundError( Exception ):
+    """
+    Raised when the BIOS resource cannot be found
+    """
+    pass
+
+class RedfishSystemBiosInvalidSettingsError( Exception ):
+    """
+    Raised when the BIOS resource contains a settings object, but it's not rendered properly
     """
     pass
 
@@ -115,6 +133,8 @@ def get_system_boot( context, system_id = None ):
     """
 
     system = get_system( context, system_id )
+    if "Boot" not in system.dict:
+        raise RedfishSystemBootNotFoundError( "System '{}' does not contain the boot object".format( system.dict["Id"] ) )
     return system.dict["Boot"]
 
 def set_system_boot( context, system_id = None, ov_target = None, ov_enabled = None, ov_mode = None, ov_uefi_target = None, ov_boot_next = None ):
@@ -214,9 +234,9 @@ def get_system_reset_info( context, system_id = None ):
 
     # Check that there is a Reset action
     if "Actions" not in system.dict:
-        raise RedfishSystemResetNotFoundError( "System does not support Reset" )
+        raise RedfishSystemResetNotFoundError( "System '{}' does not support the reset action".format( system.dict["Id"] ) )
     if "#ComputerSystem.Reset" not in system.dict["Actions"]:
-        raise RedfishSystemResetNotFoundError( "System does not support Reset" )
+        raise RedfishSystemResetNotFoundError( "System '{}' does not support the reset action".format( system.dict["Id"] ) )
 
     # Extract the info about the Reset action
     reset_action = system.dict["Actions"]["#ComputerSystem.Reset"]
@@ -487,18 +507,19 @@ def get_virtual_media_collection( context, system_id = None ):
                         virtual_media_uri = manager_resp.dict["VirtualMedia"]["@odata.id"]
                         break
     if virtual_media_uri is None:
-        raise RedfishVirtualMediaNotFoundError( "System does not support virtual media" )
+        raise RedfishVirtualMediaNotFoundError( "System '{}' does not support virtual media".format( system.dict["Id"] ) )
 
     # Get the VirtualMediaCollection
     return context.get( virtual_media_uri )
 
-def get_system_bios( context, system_id = None ):
+def get_system_bios( context, system_id = None, workaround = False ):
     """
     Finds a system matching the given ID and gets the BIOS settings
 
     Args:
         context: The Redfish client object with an open session
         system_id: The system to locate; if None, perform on the only system
+        workaround: Indicates if workarounds should be attempted for non-conformant services
 
     Returns:
         A dictionary of the current BIOS attributes
@@ -509,18 +530,20 @@ def get_system_bios( context, system_id = None ):
     system = get_system( context, system_id )
 
     # Get the Bios resource
+    if "Bios" not in system.dict:
+        raise RedfishSystemBiosNotFoundError( "System '{}' does not support representing BIOS".format( system.dict["Id"] ) )
     bios = context.get( system.dict["Bios"]["@odata.id"] )
     current_settings = bios.dict["Attributes"]
     future_settings = bios.dict["Attributes"]
 
     # Get the Settings object if present
     if "@Redfish.Settings" in bios.dict:
-        bios_settings = context.get( bios.dict["@Redfish.Settings"]["SettingsObject"]["@odata.id"] )
+        bios_settings = get_system_bios_settings( context, bios, system.dict["Id"], workaround )
         future_settings = bios_settings.dict["Attributes"]
 
     return current_settings, future_settings
 
-def set_system_bios( context, settings, system_id = None ):
+def set_system_bios( context, settings, system_id = None, workaround = False ):
     """
     Finds a system matching the given ID and sets the BIOS settings
 
@@ -528,6 +551,7 @@ def set_system_bios( context, settings, system_id = None ):
         context: The Redfish client object with an open session
         settings: The settings to apply to the system
         system_id: The system to locate; if None, perform on the only system
+        workaround: Indicates if workarounds should be attempted for non-conformant services
 
     Returns:
         The response of the PATCH
@@ -537,12 +561,14 @@ def set_system_bios( context, settings, system_id = None ):
     system = get_system( context, system_id )
 
     # Get the BIOS resource and determine if the settings need to be applied to the resource itself or the settings object
+    if "Bios" not in system.dict:
+        raise RedfishSystemBiosNotFoundError( "System '{}' does not support representing BIOS".format( system.dict["Id"] ) )
     bios_uri = system.dict["Bios"]["@odata.id"]
     bios = context.get( bios_uri )
     etag = bios.getheader( "ETag" )
     if "@Redfish.Settings" in bios.dict:
-        bios_uri = bios.dict["@Redfish.Settings"]["SettingsObject"]["@odata.id"]
-        bios_settings = context.get( bios_uri )
+        bios_settings = get_system_bios_settings( context, bios, system.dict["Id"], workaround )
+        bios_uri = bios_settings.dict["@odata.id"]
         etag = bios_settings.getheader( "ETag" )
 
     # Update the settings
@@ -553,6 +579,39 @@ def set_system_bios( context, settings, system_id = None ):
     response = context.patch( bios_uri, body = payload, headers = headers )
     verify_response( response )
     return response
+
+def get_system_bios_settings( context, bios, system_id, workaround ):
+    """
+    Gets the settings resource for BIOS and applies workarounds if needed
+
+    Args:
+        context: The Redfish client object with an open session
+        bios: The BIOS resource
+        system_id: The system identifier
+        workaround: Indicates if workarounds should be attempted for non-conformant services
+
+    Returns:
+        The Settings resource for BIOS
+    """
+
+    if "SettingsObject" in bios.dict["@Redfish.Settings"]:
+        bios_settings = context.get( bios.dict["@Redfish.Settings"]["SettingsObject"]["@odata.id"] )
+    else:
+        if workaround:
+            warnings.warn( "System '{}' BIOS resource contains the settings term, but no 'SettingsObject'.  Contact your vendor.  Attempting workarounds...".format( system_id ) )
+            settings_uris = [ "Settings", "SD" ]
+            for setting_ext in settings_uris:
+                bios_settings = context.get( bios.dict["@odata.id"] + "/" + setting_ext )
+                if bios_settings.status == 200:
+                    break
+            try:
+                verify_response( bios_settings )
+            except:
+                raise RedfishSystemBiosInvalidSettingsError( "System '{}' BIOS resource contains the settings term, but no 'SettingsObject'.  Workarounds exhausted.  Contact your vendor.".format( system_id ) ) from None
+        else:
+            raise RedfishSystemBiosInvalidSettingsError( "System '{}' BIOS resource contains the settings term, but no 'SettingsObject'.  Contact your vendor, or retry with the 'workaround' flag.".format( system_id ) )
+
+    return bios_settings
 
 def print_system_bios( current_settings, future_settings ):
     """
