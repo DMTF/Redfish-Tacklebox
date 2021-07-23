@@ -538,8 +538,14 @@ def get_system_bios( context, system_id = None, workaround = False ):
 
     # Get the Settings object if present
     if "@Redfish.Settings" in bios.dict:
-        bios_settings = get_system_bios_settings( context, bios, system.dict["Id"], workaround )
-        future_settings = bios_settings.dict["Attributes"]
+        try:
+            bios_settings = get_system_bios_settings( context, bios, system.dict["Id"], workaround )
+            future_settings = bios_settings.dict["Attributes"]
+        except:
+            if workaround:
+                warnings.warn( "System '{}' BIOS resource contains the settings term, but no 'SettingsObject'.  Contact your vendor.  Workarounds exhausted for reading the settings data and falling back on using the active attributes.".format( system_id ) )
+            else:
+                raise
 
     return current_settings, future_settings
 
