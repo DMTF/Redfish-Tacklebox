@@ -55,7 +55,7 @@ def get_manager_ids( context ):
     manager_col = context.get( service_root.dict["Managers"]["@odata.id"] )
     while True:
         for manager_member in manager_col.dict["Members"]:
-            avail_managers.append( manager_member["@odata.id"].split( "/" )[-1] )
+            avail_managers.append( manager_member["@odata.id"].strip( "/" ).split( "/" )[-1] )
         if "Members@odata.nextLink" not in manager_col.dict:
             break
         manager_col = context.get( manager_col.dict["Members@odata.nextLink"] )
@@ -225,14 +225,14 @@ def get_manager_ethernet_interface_ids( context, manager_id = None ):
     manager = get_manager( context, manager_id )
     if "EthernetInterfaces" not in manager.dict:
         # No Ethernet interface collection
-        raise RedfishManagerEthIntNotFoundError( "Manager {} does not contain an Ethernet interface collection".format( manager.dict["Id" ] ) )
+        raise RedfishManagerEthIntNotFoundError( "Manager {} does not contain an Ethernet interface collection".format( manager.dict["Id"] ) )
 
     # Get the Ethernet interface collection and iterate through its collection
     avail_interfaces = []
     interface_col = context.get( manager.dict["EthernetInterfaces"]["@odata.id"] )
     while True:
         for interface_member in interface_col.dict["Members"]:
-            avail_interfaces.append( interface_member["@odata.id"].split( "/" )[-1] )
+            avail_interfaces.append( interface_member["@odata.id"].strip( "/" ).split( "/" )[-1] )
         if "Members@odata.nextLink" not in interface_col.dict:
             break
         interface_col = context.get( interface_col.dict["Members@odata.nextLink"] )
