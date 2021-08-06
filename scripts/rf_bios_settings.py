@@ -22,6 +22,7 @@ argget.add_argument( "--password", "-p",  type = str, required = True, help = "T
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
 argget.add_argument( "--system", "-s", type = str, help = "The ID of the system to manage" )
 argget.add_argument( "--attribute", "-a", type = str, nargs = 2, metavar = ( "name", "value" ), action = "append", help = "Sets a BIOS attribute to a new value; can be supplied multiple times to set multiple attributes" )
+argget.add_argument( "--workaround", "-workaround", action = "store_true", help = "Indicates if workarounds should be attempted for non-conformant services", default = False )
 args = argget.parse_args()
 
 # Set up the Redfish object
@@ -30,7 +31,7 @@ redfish_obj.login( auth = "session" )
 
 try:
     # Get the BIOS settings
-    current_settings, future_settings = redfish_utilities.get_system_bios( redfish_obj, args.system )
+    current_settings, future_settings = redfish_utilities.get_system_bios( redfish_obj, args.system, args.workaround )
 
     if args.attribute is not None:
         new_settings = {}
@@ -54,7 +55,7 @@ try:
             # Set the specified attribute to the new value
             new_settings[attribute[0]] = new_value
             print( "Setting {} to {}...".format( attribute[0], attribute[1] ) )
-        redfish_utilities.set_system_bios( redfish_obj, new_settings, args.system )
+        redfish_utilities.set_system_bios( redfish_obj, new_settings, args.system, args.workaround )
     else:
         # Print the BIOS settings
         redfish_utilities.print_system_bios( current_settings, future_settings )
