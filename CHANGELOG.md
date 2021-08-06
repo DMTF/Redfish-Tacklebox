@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.1.5] - 2021-08-06
+- Added --workaround flag to rf_bios_settings.py to attempt workaround logic for non-conformant services
+- Added trailing slash checking in URI parsing of collections when extracting member identifiers
+
 ## [1.1.4] - 2021-05-14
 - Added helper routines to collect identifiers for systems, managers, and Ethernet interfaces for managers
 - Modified collection searching routines to leverage standardized URI patterns to minimize the number of transactions performed
