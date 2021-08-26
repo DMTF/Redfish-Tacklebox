@@ -24,6 +24,7 @@ pip install dist/redfish_utilities-x.x.x.tar.gz
 
 External modules:
 * redfish: https://pypi.python.org/pypi/redfish
+* XlsxWriter: https://pypi.org/project/XlsxWriter
 
 You may install the external modules by running:
 
@@ -99,6 +100,9 @@ optional arguments:
   --write [WRITE], -w [WRITE]
                         Indicates if the inventory should be written to a
                         spreadsheet and what the file name should be if given
+  --workaround, -workaround
+                        Indicates if workarounds should be attempted for non-
+                        conformant services
 ```
 
 Example: `rf_sys_inventory.py -u root -p root -r https://192.168.1.100 -details`
@@ -392,6 +396,9 @@ optional arguments:
   --attribute name value, -a name value
                         Sets a BIOS attribute to a new value; can be supplied
                         multiple times to set multiple attributes
+  --workaround, -workaround
+                        Indicates if workarounds should be attempted for non-
+                        conformant services
 ```
 
 Example: `rf_bios_settings.py -u root -p root -r https://192.168.1.100 -a BiosMode Legacy`
