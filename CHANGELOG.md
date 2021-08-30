@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.1.6] - 2021-08-30
+- Added --workaround flag to rf_sys_inventory.py to attempt workaround logic for non-conformant services
+- Added support for cataloging switches in rf_sys_inventory.py
+
 ## [1.1.5] - 2021-08-06
 - Added --workaround flag to rf_bios_settings.py to attempt workaround logic for non-conformant services
 - Added trailing slash checking in URI parsing of collections when extracting member identifiers
