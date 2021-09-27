@@ -80,6 +80,7 @@ def print_event_service( service ):
     print( "  Delivery Retry Policy: {}".format( retry_policy ) )
 
     # Subscription methods
+    print( "  Event Types: {}".format( ", ".join( service.get( "EventTypesForSubscription", [ "N/A" ] ) ) ) )
     print( "  Event Formats: {}".format( ", ".join( service.get( "EventFormatTypes", [ "N/A" ] ) ) ) )
     print( "  Registries: {}".format( ", ".join( service.get( "RegistryPrefixes", [ "N/A" ] ) ) ) )
     print( "  Resource Types: {}".format( ", ".join( service.get( "ResourceTypes", [ "N/A" ] ) ) ) )
@@ -147,13 +148,15 @@ def print_event_subscriptions( subscriptions ):
         if "Context" in subscription:
             print( subscription_line_format.format( "", "Context", subscription["Context"] ) )
         print( subscription_line_format.format( "", "Event Format", subscription.get( "EventFormatType", "Event" ) ) )
+        if "EventTypes" in subscription:
+            print( subscription_line_format.format( "", "Event Types", ", ".join(subscription["EventTypes"] ) ) )
         if "RegistryPrefixes" in subscription:
             print( subscription_line_format.format( "", "Registries", ", ".join( subscription["RegistryPrefixes"] ) ) )
         if "ResourceTypes" in subscription:
             print( subscription_line_format.format( "", "Resource Types", ", ".join( subscription["ResourceTypes"] ) ) )
 
 def create_event_subscription( context, destination, format = None, client_context = None, expand = None, resource_types = None,
-    registries = None, message_ids = None, origins = None, subordinate_resources = None ):
+    registries = None, message_ids = None, origins = None, subordinate_resources = None, event_types = None ):
     """
     Creates an event subscription
 
@@ -168,6 +171,7 @@ def create_event_subscription( context, destination, format = None, client_conte
         message_ids: The message IDs for the subscription
         origins: The origins for the subscription
         subordinate_resources: Indicates if subordinate resources to those referenced by 'origins' will also be monitored
+        event_types: The event types for the subscription; this method for subscriptions has been deprecated for other controls
 
     Returns:
         The response of the POST
@@ -200,6 +204,8 @@ def create_event_subscription( context, destination, format = None, client_conte
         payload["OriginResources"] = origins
     if subordinate_resources is not None:
         payload["SubordinateResources"] = subordinate_resources
+    if event_service is not None:
+        payload["EventTypes"] = event_types
 
     # Create the subscription
     response = context.post( event_service["Subscriptions"]["@odata.id"], body = payload )

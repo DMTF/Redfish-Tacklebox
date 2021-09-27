@@ -572,6 +572,10 @@ optional arguments:
                         A list of resource types for the subscription
   --registries REGISTRIES [REGISTRIES ...], -reg REGISTRIES [REGISTRIES ...]
                         A list of registries for the subscription
+  --eventtypes EVENTTYPES [EVENTTYPES ...], -et EVENTTYPES [EVENTTYPES ...]
+                        A list of event types for the subscription; this
+                        option has been deprecated in favor of other methods
+                        such as 'resource types' and 'registries'
 ``` 
 
 Example: `rf_event_service.py -u root -p root -r https://192.168.1.100 subscribe -dest http://someremotelistener/redfish_event_handler`

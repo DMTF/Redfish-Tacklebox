@@ -29,6 +29,7 @@ sub_argget.add_argument( "--expand", "-e", action = "store_true", help = "Indica
 sub_argget.add_argument( "--format", "-f", type = str, help = "The format of the event payloads" )
 sub_argget.add_argument( "--resourcetypes", "-rt", type = str, nargs = '+', help = "A list of resource types for the subscription" )
 sub_argget.add_argument( "--registries", "-reg", type = str, nargs = '+', help = "A list of registries for the subscription" )
+sub_argget.add_argument( "--eventtypes", "-et", type = str, nargs = '+', help = "A list of event types for the subscription; this option has been deprecated in favor of other methods such as 'resource types' and 'registries'" )
 unsub_argget = subparsers.add_parser( "unsubscribe", help = "Deletes an event subscription" )
 unsub_argget.add_argument( "--id", "-i", type = str, required = True, help = "The identifier of the event subscription to be deleted" )
 args = argget.parse_args()
