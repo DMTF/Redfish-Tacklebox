@@ -142,7 +142,7 @@ def print_event_subscriptions( subscriptions ):
         return
 
     for subscription in subscriptions:
-        print( subscription_line_format.format( subscription["Id"], "Destination", subscription["Destination"] ) )
+        print( subscription_line_format.format( subscription["Id"], "Destination", subscription.get( "Destination", "N/A" ) ) )
         print( subscription_line_format.format( "", "State", subscription.get( "Status", {} ).get( "State", "Enabled" ) ) )
         if "Context" in subscription:
             print( subscription_line_format.format( "", "Context", subscription["Context"] ) )
