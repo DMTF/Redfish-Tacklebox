@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.1.7] - 2021-10-04
+- Added handling for lack of 'Destination' property in an event subscription when displaying the list of subscriptions
+- Added support for legacy 'event types' subscriptions to enable usage with services that do not support newer methods of subscriptions
+
 ## [1.1.6] - 2021-08-30
 - Added --workaround flag to rf_sys_inventory.py to attempt workaround logic for non-conformant services
 - Added support for cataloging switches in rf_sys_inventory.py
