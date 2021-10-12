@@ -50,6 +50,8 @@ from .systems import get_system_bios
 from .systems import set_system_bios
 from .systems import print_system_bios
 from .systems import get_system_bios_info
+from .systems import reset_system_bios
+from .systems import change_bios_password
 from .tasks import poll_task_monitor
 from .update import get_simple_update_info
 from .update import simple_update

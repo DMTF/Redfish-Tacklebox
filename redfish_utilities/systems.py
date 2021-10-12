@@ -772,3 +772,103 @@ def get_system_bios_info(context, system_id=None, language=None, attribute=None)
                 if attr['AttributeName'] == attr_input:
                     return_attr.append(attr)
     return return_attr
+
+
+def reset_system_bios(context, system_id=None):
+    """
+    Finds a system matching the given ID and to load BIOS default
+
+    Args:
+        context: The Redfish client object with an open session
+        system_id: The system to locate; if None, perform on the only system
+
+    Returns:
+        A rest request for POST operation
+    """
+
+    # Locate the system
+    system = get_root_level_resource(context, 'Systems', system_id)
+
+    # Get the Bios resource
+    if 'Bios' not in system.dict:
+        raise RedfishNoResourceError('System "{}" does not support representing BIOS'.format(system.dict['Id']))
+    bios = context.get(system.dict['Bios']['@odata.id'])
+
+    # Get Actions from bios
+    if 'Actions' not in bios.dict:
+        raise RedfishNoResourceError('"{}" does not support representing Actions'.format(bios.dict['Id']))
+    actions = bios.dict['Actions']
+
+    # Get @Bios.ResetBios from bios
+    if '#Bios.ResetBios' not in actions:
+        raise RedfishNoResourceError('Actions does not support representing #Bios.ResetBios')
+
+    reset_bios_uri = actions['#Bios.ResetBios']['target']
+
+    # Check if have @Redfish.ActionInfo
+    if '@Redfish.ActionInfo' in actions['#Bios.ResetBios']:
+        action_info = context.get(actions['#Bios.ResetBios']['@Redfish.ActionInfo'])
+        if 'Parameters' in action_info.dict:
+            if len(action_info.dict['Parameters']) == 1:
+                if 'Name' in action_info.dict['Parameters'][0] and 'AllowableValues' in action_info.dict['Parameters'][0]:
+                    if 'Reset' in action_info.dict['Parameters'][0]['AllowableValues']:
+                        parameter = {action_info.dict['Parameters'][0]['Name']: 'Reset'}
+                        result = context.post(reset_bios_uri, body=parameter)
+                        try:
+                            verify_response(result)
+                        except:
+                            raise RedfishCommonError('POST error')
+                        return result
+
+    # If no @Redfish.ActionInfo, just POST it without body
+    result = context.post(reset_bios_uri)
+    try:
+        verify_response(result)
+    except:
+        raise RedfishCommonError('POST error')
+    return result
+
+
+def change_bios_password(context, password_list, system_id=None):
+    """
+    Finds a system matching the given ID and to change BIOS password
+
+    Args:
+        context: The Redfish client object with an open session
+        password_list: A list contain three strings: Password Name, Old Password, New Password
+        system_id: The system to locate; if None, perform on the only system
+
+    Returns:
+        A rest request for POST operation
+    """
+    # Check input
+    if len(password_list) != 3:
+        raise RedfishCommonError('Input parameters wrong, must be three')
+
+    # Locate the system
+    system = get_root_level_resource(context, 'Systems', system_id)
+
+    # Get the Bios resource
+    if 'Bios' not in system.dict:
+        raise RedfishNoResourceError('System "{}" does not support representing BIOS'.format(system.dict['Id']))
+    bios = context.get(system.dict['Bios']['@odata.id'])
+
+    # Get Actions from bios
+    if 'Actions' not in bios.dict:
+        raise RedfishNoResourceError('"{}" does not support representing Actions'.format(bios.dict['Id']))
+    actions = bios.dict['Actions']
+
+    # Get @Bios.ChangePassword from bios
+    if '#Bios.ChangePassword' not in actions:
+        raise RedfishNoResourceError('Actions does not support representing #Bios.ChangePassword')
+
+    change_password_uri = actions['#Bios.ChangePassword']['target']
+    parameters = {'PasswordName': password_list[0], 'OldPassword': password_list[1], 'NewPassword': password_list[2]}
+
+    # POST it
+    result = context.post(change_password_uri, body=parameters)
+    try:
+        verify_response(result)
+    except:
+        raise RedfishCommonError('POST error')
+    return result

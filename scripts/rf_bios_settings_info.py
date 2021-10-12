@@ -34,8 +34,10 @@ try:
     bios_settings = redfish_utilities.get_system_bios_info(redfish_obj, args.system, args.language, args.attribute)
     element_to_display = ['AttributeName', 'HelpText', 'Type', 'CurrentValue', 'DefaultValue', 'Value',
                           'UpperBound', 'LowerBound', 'ScalarIncrement', 'MaxLength', 'MinLength']
-    bios_line_format = "  {:16s} : {}"
+    bios_line_format = '  {:16s} : {}'
 
+    if not bios_settings:
+        print('No attribute "{}" found'.format(', '.join(args.attribute)))
     for index, bios_setting in enumerate(bios_settings):
         print('-' * 30 + str(index) + '-' * 30)
         for element in element_to_display:
@@ -50,6 +52,7 @@ try:
                 continue
             print(bios_line_format.format(element, bios_setting[element]))
         print('')
+    print('Operation successes')
 finally:
     # Log out
     redfish_obj.logout()
