@@ -15,6 +15,8 @@ Brief : This file contains the definitions and functionalities for interacting
 import warnings
 from .messages import verify_response
 from .resets import reset_types
+from .root import get_root_level_resource
+
 
 class RedfishSystemNotFoundError( Exception ):
     """
@@ -54,6 +56,20 @@ class RedfishVirtualMediaNotFoundError( Exception ):
 class RedfishNoAcceptableVirtualMediaError( Exception ):
     """
     Raised when a system does not have virtual media available that meets criteria
+    """
+    pass
+
+
+class RedfishNoResourceError(Exception):
+    """
+    Raise can't find resource error
+    """
+    pass
+
+
+class RedfishCommonError(Exception):
+    """
+    Raise common error
     """
     pass
 
@@ -640,3 +656,72 @@ def print_system_bios( current_settings, future_settings ):
             print( bios_line_format.format( attribute, str( current_settings[attribute] ), str( current_settings[attribute] ) ) )
 
     print( "" )
+
+
+def get_system_bios_info(context, system_id=None, language=None, attribute=None):
+    """
+    Finds a system matching the given ID and gets the BIOS settings info matching the given attribute
+
+    Args:
+        context: The Redfish client object with an open session
+        system_id: The system to locate; if None, perform on the only system
+        language: The language to get; if None, use en-US
+        attribute: The attribute to get; if None, get all
+
+    Returns:
+        A list contains all attributes asked
+    """
+
+    # Locate the system
+    system = get_root_level_resource(context, 'Systems', system_id)
+
+    # Get the Bios resource
+    if "Bios" not in system.dict:
+        raise RedfishNoResourceError("System '{}' does not support representing BIOS".format(system.dict["Id"]))
+    bios = context.get(system.dict["Bios"]["@odata.id"])
+
+    if "AttributeRegistry" not in bios.dict:
+        raise RedfishNoResourceError("'{}' does not support representing AttributeRegistry".format(bios.dict["Id"]))
+
+    # Get AttributeRegistry from root.Registries
+    bios_registry_id = bios.dict["AttributeRegistry"]
+    bios_registry_res = get_root_level_resource(context, 'Registries', bios_registry_id)
+    bios_registry_file_locations = bios_registry_res.dict['Location']
+    bios_registry_file_location = None
+    support_language_list = []
+    language = 'en-US' if language is None else language
+    for location in bios_registry_file_locations:
+        support_language_list.append(location['Language'])
+        if location['Language'] == language:
+            bios_registry_file_location = location['Uri']
+            break
+    if bios_registry_file_location is None:
+        raise RedfishCommonError("BIOS registry file doesn't support the language {}\nAvailable language: {}".format
+                                 (language, ','.join(support_language_list)))
+
+    # Get AttributeRegistry file content from *.json
+    bios_registry_file_content = context.get(bios_registry_file_location)
+    if 'RegistryEntries' not in bios_registry_file_content.dict:
+        raise RedfishCommonError("BIOS registry file doesn't contain 'RegistryEntries'")
+    if 'Attributes' not in bios_registry_file_content.dict['RegistryEntries']:
+        raise RedfishCommonError("BIOS registry file doesn't contain 'Attributes'")
+    attr_all = bios_registry_file_content.dict['RegistryEntries']['Attributes']
+    if len(attr_all) == 0:
+        raise RedfishCommonError("BIOS registry file doesn't contain any element in Attributes")
+
+    # If CurrentValue is not valid, then get it from Bios.Attributes
+    if 'CurrentValue' not in attr_all[0]:
+        current_settings, future_settings = get_system_bios(context, system_id, False)
+        for index, attr in enumerate(attr_all):
+            attr_all[index]['CurrentValue'] = current_settings[attr['AttributeName']]
+
+    return_attr = []
+    if attribute is None:
+        return_attr = attr_all
+    else:
+        for attr in attr_all:
+            for attr_input in attribute:
+                if attr['AttributeName'] == attr_input:
+                    return_attr.append(attr)
+    return return_attr
+
