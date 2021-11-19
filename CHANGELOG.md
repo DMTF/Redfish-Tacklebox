@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.1.8] - 2021-11-19
+- Updated rf_sensor_list.py to support new power and thermal models
+
 ## [1.1.7] - 2021-10-04
 - Added handling for lack of 'Destination' property in an event subscription when displaying the list of subscriptions
 - Added support for legacy 'event types' subscriptions to enable usage with services that do not support newer methods of subscriptions
