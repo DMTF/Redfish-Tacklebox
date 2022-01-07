@@ -35,6 +35,7 @@ setup(
         "scripts/rf_logs.py",
         "scripts/rf_manager_config.py",
         "scripts/rf_power_reset.py",
+        "scripts/rf_raw_request.py",
         "scripts/rf_sensor_list.py",
         "scripts/rf_sys_inventory.py",
         "scripts/rf_update.py",
