@@ -21,7 +21,7 @@ argget.add_argument( "--user", "-u", type = str, required = True, help = "The us
 argget.add_argument( "--password", "-p",  type = str, required = True, help = "The password for authentication" )
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
 argget.add_argument( "--method", "-m", type = str, required = False, help = "The HTTP method to perform", default = "GET", choices = [ "GET", "HEAD", "POST", "PATCH", "PUT", "DELETE" ] )
-argget.add_argument( "--path", "-P", type = str, required = True, help = "The URI path for the operation" )
+argget.add_argument( "--request", "-req", type = str, required = True, help = "The URI for the request" )
 argget.add_argument( "--body", "-b", type = str, required = False, help = "The body to provide with the request" )
 argget.add_argument( "--verbose", "-v", action = "store_true", help = "Indicates if HTTP response codes and headers are displayed", default = False )
 args = argget.parse_args()

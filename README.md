@@ -714,7 +714,8 @@ required arguments:
                         The password for authentication
   --rhost RHOST, -r RHOST
                         The address of the Redfish service (with scheme)
-  --path PATH, -P PATH  The URI path for the operation
+  --request REQUEST, -req REQUEST
+                        The URI for the request
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -725,10 +726,10 @@ optional arguments:
                         displayed
 ```
 
-Example: `rf_raw_request.py -u root -p root -r https://192.168.1.100 -P /redfish/v1/Systems/1 -m PATCH -b '{"AssetTag": "New tag"}'`
+Example: `rf_raw_request.py -u root -p root -r https://192.168.1.100 -req /redfish/v1/Systems/1 -m PATCH -b '{"AssetTag": "New tag"}'`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
-It will then perform the requested method on the specified URI with an optional body, specified by the *method*, *path*, and *body* arguments.
+It will then perform the requested method on the specified URI with an optional body, specified by the *method*, *request*, and *body* arguments.
 It will then display the response of the operation from the service.
 
 
