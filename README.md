@@ -703,7 +703,8 @@ It will then locate the virtual media instance with matching `Id` property with 
 
 ```
 usage: rf_raw_request.py [-h] --user USER --password PASSWORD --rhost RHOST
-                         [--verbose] --request REQUEST [REQUEST ...]
+                         [--method {GET,HEAD,POST,PATCH,PUT,DELETE}] --path
+                         PATH [--body BODY] [--verbose]
 
 A tool perform a raw request to a Redfish service
 
@@ -713,23 +714,22 @@ required arguments:
                         The password for authentication
   --rhost RHOST, -r RHOST
                         The address of the Redfish service (with scheme)
-  --request REQUEST [REQUEST ...], -req REQUEST [REQUEST ...]
-                        The method, URI, and body for the request; if the
-                        method is not provided, GET is performed
+  --path PATH, -P PATH  The URI path for the operation
 
 optional arguments:
   -h, --help            show this help message and exit
+  --method {GET,HEAD,POST,PATCH,PUT,DELETE}, -m {GET,HEAD,POST,PATCH,PUT,DELETE}
+                        The HTTP method to perform
+  --body BODY, -b BODY  The body to provide with the request
   --verbose, -v         Indicates if HTTP response codes and headers are
                         displayed
 ```
 
+Example: `rf_raw_request.py -u root -p root -r https://192.168.1.100 -P /redfish/v1/Systems/1 -m PATCH -b '{"AssetTag": "New tag"}'`
+
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
-* If the *request* argument contains one value, the tool will perform a `GET` on the specified URI
-    * Example: `rf_raw_request.py -u root -p root -r https://192.168.1.100 -req /redfish/v1/Systems/1`
-* If the *request* argument contains two values, the tool will perform the requested method on the specified URI with no request body
-    * Example: `rf_raw_request.py -u root -p root -r https://192.168.1.100 -req GET /redfish/v1/Systems/1`
-* If the *request* argument contains three values, the tool will perform the requested method on the specified URI and provide the given body
-    * Example: `rf_raw_request.py -u root -p root -r https://192.168.1.100 -req PATCH /redfish/v1/Systems/1 '{"AssetTag":"New tag"}'`
+It will then perform the requested method on the specified URI with an optional body, specified by the *method*, *path*, and *body* arguments.
+It will then display the response of the operation from the service.
 
 
 ## Release Process

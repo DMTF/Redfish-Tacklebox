@@ -20,49 +20,34 @@ argget = argparse.ArgumentParser( description = "A tool perform a raw request to
 argget.add_argument( "--user", "-u", type = str, required = True, help = "The user name for authentication" )
 argget.add_argument( "--password", "-p",  type = str, required = True, help = "The password for authentication" )
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
+argget.add_argument( "--method", "-m", type = str, required = False, help = "The HTTP method to perform", default = "GET", choices = [ "GET", "HEAD", "POST", "PATCH", "PUT", "DELETE" ] )
+argget.add_argument( "--path", "-P", type = str, required = True, help = "The URI path for the operation" )
+argget.add_argument( "--body", "-b", type = str, required = False, help = "The body to provide with the request" )
 argget.add_argument( "--verbose", "-v", action = "store_true", help = "Indicates if HTTP response codes and headers are displayed", default = False )
-argget.add_argument( "--request", "-req", type = str, required = True, nargs = "+", help = "The method, URI, and body for the request; if the method is not provided, GET is performed" )
 args = argget.parse_args()
-
-# Extract and verify the request
-allowed_methods = [ "GET", "HEAD", "POST", "PATCH", "PUT", "DELETE" ]
-method = "GET"
-uri = None
-body = None
-if len( args.request ) == 1:
-    uri = args.request[0]
-else:
-    method = args.request[0]
-    uri = args.request[1]
-    if len( args.request ) > 2:
-        body = args.request[2]
-if method.upper() not in allowed_methods:
-    print( "Invalid method: {} (choose from {})".format( method, ", ".join( allowed_methods ) ) )
-    exit( 2 )
-method = method.upper()
 
 # Connect to the service
 with redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password ) as redfish_obj:
     # Encode the body as a dictionary
     try:
-        body = json.loads( body )
+        body = json.loads( args.body )
     except:
         # Not valid JSON; try passing it into the request as a string
-        pass
+        body = args.body
 
     # Perform the requested operation
-    if method == "HEAD":
-        resp = redfish_obj.head( uri )
-    elif method == "POST":
-        resp = redfish_obj.post( uri, body = body )
-    elif method == "PATCH":
-        resp = redfish_obj.patch( uri, body = body )
-    elif method == "PUT":
-        resp = redfish_obj.put( uri, body = body )
-    elif method == "DELETE":
-        resp = redfish_obj.head( uri )
+    if args.method == "HEAD":
+        resp = redfish_obj.head( args.path )
+    elif args.method == "POST":
+        resp = redfish_obj.post( args.path, body = body )
+    elif args.method == "PATCH":
+        resp = redfish_obj.patch( args.path, body = body )
+    elif args.method == "PUT":
+        resp = redfish_obj.put( args.path, body = body )
+    elif args.method == "DELETE":
+        resp = redfish_obj.head( args.path )
     else:
-        resp = redfish_obj.get( uri )
+        resp = redfish_obj.get( args.path )
 
     # Print HTTP status and headers
     if args.verbose:
