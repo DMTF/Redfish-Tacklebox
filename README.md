@@ -703,8 +703,8 @@ It will then locate the virtual media instance with matching `Id` property with 
 
 ```
 usage: rf_raw_request.py [-h] --user USER --password PASSWORD --rhost RHOST
-                         [--method {GET,HEAD,POST,PATCH,PUT,DELETE}] --path
-                         PATH [--body BODY] [--verbose]
+                         [--method {GET,HEAD,POST,PATCH,PUT,DELETE}] --request
+                         REQUEST [--body BODY] [--verbose]
 
 A tool perform a raw request to a Redfish service
 
