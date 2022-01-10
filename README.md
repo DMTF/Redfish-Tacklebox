@@ -720,7 +720,8 @@ required arguments:
 optional arguments:
   -h, --help            show this help message and exit
   --method {GET,HEAD,POST,PATCH,PUT,DELETE}, -m {GET,HEAD,POST,PATCH,PUT,DELETE}
-                        The HTTP method to perform
+                        The HTTP method to perform; performs GET if not
+                        specified
   --body BODY, -b BODY  The body to provide with the request
   --verbose, -v         Indicates if HTTP response codes and headers are
                         displayed
