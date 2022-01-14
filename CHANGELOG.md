@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.1.9] - 2022-01-14
+- Added rf_raw_request.py for allowing a user to perform HTTP operations on a specified URI
+
 ## [1.1.8] - 2021-11-19
 - Updated rf_sensor_list.py to support new power and thermal models
 
