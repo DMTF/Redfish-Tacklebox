@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.2.0] - 2022-02-11
+- Fixed usage of 'EventTypes' when creating an event subscription
+
 ## [1.1.9] - 2022-01-14
 - Added rf_raw_request.py for allowing a user to perform HTTP operations on a specified URI
 
