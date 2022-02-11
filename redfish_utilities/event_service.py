@@ -204,7 +204,7 @@ def create_event_subscription( context, destination, format = None, client_conte
         payload["OriginResources"] = origins
     if subordinate_resources is not None:
         payload["SubordinateResources"] = subordinate_resources
-    if event_service is not None:
+    if event_types is not None:
         payload["EventTypes"] = event_types
 
     # Create the subscription
