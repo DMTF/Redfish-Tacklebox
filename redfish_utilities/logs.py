@@ -1,6 +1,6 @@
 #! /usr/bin/python
 # Copyright Notice:
-# Copyright 2019-2020 DMTF. All rights reserved.
+# Copyright 2019-2022 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
 
 """
@@ -29,13 +29,37 @@ class RedfishClearLogNotFoundError( Exception ):
     """
     pass
 
-class log_container( Enum ) :
+class RedfishCollectDiagnosticDataNotFoundError( Exception ):
+    """
+    Raised when a log service does not contain the collect diagnostic data action
+    """
+    pass
+
+class RedfishDiagnosticDataNotFoundError( Exception ):
+    """
+    Raised when the requested diagnostic data cannot be found
+    """
+    pass
+
+class log_container( Enum ):
     """
     Types of resources that contain log services
     """
     MANAGER = "Managers"
     CHASSIS = "Chassis"
     SYSTEM = "Systems"
+
+class diagnostic_data_types( Enum ):
+    """
+    Types of diagnostic data that can be requested
+    """
+    MANAGER = "Manager"
+    PRE_OS = "PreOS"
+    OS = "OS"
+    OEM = "OEM"
+
+    def __str__( self ):
+        return self.value
 
 def get_log_entries( context, container_type = log_container.MANAGER, container_id = None, log_service_id = None ):
     """
@@ -121,6 +145,71 @@ def clear_log_entries( context, container_type = log_container.MANAGER, containe
     response = context.post( clear_uri, body = {} )
     verify_response( response )
     return response
+
+def collect_diagnostic_data( context, container_type = log_container.MANAGER, container_id = None, log_service_id = None,
+    diagnostic_data_type = None, oem_data_type = None ):
+    """
+    Performs diagnostic data collection of a log service matching the given ID
+
+    Args:
+        context: The Redfish client object with an open session
+        container_type: The type of resource containing the log service (manager, system, or chassis)
+        container_id: The container instance with the log service; if None, perform on the only container
+        log_service_id: The log service with the logs; if None, perform on the only log service
+        diagnostic_data_type: The type of diagnostic data to collect (manager, pre OS, OS, OEM)
+        oem_data_type: The type of OEM data to collect
+
+    Returns:
+        The response of the action
+    """
+
+    log_service = get_log_service( context, container_type, container_id, log_service_id )
+
+    # Find the ClearLog action
+    if "Actions" not in log_service.dict:
+        raise RedfishCollectDiagnosticDataNotFoundError( "Log service does not support CollectDiagnosticData" )
+    if "#LogService.CollectDiagnosticData" not in log_service.dict["Actions"]:
+        raise RedfishCollectDiagnosticDataNotFoundError( "Log service does not support CollectDiagnosticData" )
+    collect_uri = log_service.dict["Actions"]["#LogService.CollectDiagnosticData"]["target"]
+
+    # Collect diagnostic data
+    if diagnostic_data_type is None:
+        diagnostic_data_type = diagnostic_data_types.MANAGER
+    payload = { "DiagnosticDataType": diagnostic_data_type.value }
+    if oem_data_type is not None and diagnostic_data_type == diagnostic_data_types.OEM:
+        # Only include OEMDiagnosticDataType if the OEM type is requested
+        payload["OEMDiagnosticDataType"] = oem_data_type
+    response = context.post( collect_uri, body = payload )
+    verify_response( response )
+    return response
+
+def download_diagnostic_data( context, collect_response ):
+    """
+    Downloads the diagnostic data based on the response from the collect action
+
+    Args:
+        context: The Redfish client object with an open session
+        collect_response: The response object from the collect diagnostic data action
+
+    Returns:
+        The name of the file downloaded from the service
+        An array of bytes containing the file contents
+    """
+
+    # Follow the Location header to the log entry
+    entry_uri = collect_response.getheader( "Location" )
+    if entry_uri is None:
+        raise RedfishDiagnosticDataNotFoundError( "The response to collecting diagnostic data does not contain a location for the data" )
+
+    # Get the log entry
+    response = context.get( entry_uri )
+    if "AdditionalDataURI" not in response.dict:
+        raise RedfishDiagnosticDataNotFoundError( "The log entry for the collected data does not contain an additional data link" )
+
+    # Download the file
+    filename = response.dict["AdditionalDataURI"].split( "/" )[-1]
+    response = context.get( response.dict["AdditionalDataURI"] )
+    return filename, response._http_response.content     # TODO: May need to push support in python-redfish-library to have a proper method of getting raw content
 
 def get_log_service( context, container_type = log_container.MANAGER, container_id = None, log_service_id = None ):
     """
