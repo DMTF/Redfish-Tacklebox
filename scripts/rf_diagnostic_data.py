@@ -25,9 +25,9 @@ argget.add_argument( "--manager", "-m", type = str, nargs = "?", default = False
 argget.add_argument( "--system", "-s", type = str, nargs = "?", default = False, help = "The ID of the system containing the log service" )
 argget.add_argument( "--chassis", "-c", type = str, nargs = "?", default = False, help = "The ID of the chassis containing the log service" )
 argget.add_argument( "--log", "-l", type = str, help = "The ID of the log service" )
-argget.add_argument( "--type", "-type", type = redfish_utilities.diagnostic_data_types, help = "The type of diagnostic data to collect.  Defaults to 'Manager' if not specified.", choices = redfish_utilities.diagnostic_data_types, default = redfish_utilities.diagnostic_data_types.MANAGER )
-argget.add_argument( "--oemtype", "-oemtype", type = str, help = "The OEM-specific type of diagnostic data to collect.  This option should only be used if the requested type is 'OEM'." )
-argget.add_argument( "--directory", "-d", type = str, help = "The directory to save the diagnostic data.  Defaults to the current directory if not specified", default = "." )
+argget.add_argument( "--type", "-type", type = redfish_utilities.diagnostic_data_types, help = "The type of diagnostic data to collect; defaults to 'Manager' if not specified", choices = redfish_utilities.diagnostic_data_types, default = redfish_utilities.diagnostic_data_types.MANAGER )
+argget.add_argument( "--oemtype", "-oemtype", type = str, help = "The OEM-specific type of diagnostic data to collect; this option should only be used if the requested type is 'OEM'" )
+argget.add_argument( "--directory", "-d", type = str, help = "The directory to save the diagnostic data; defaults to the current directory if not specified", default = "." )
 args = argget.parse_args()
 
 # Determine the target log service based on the inputs

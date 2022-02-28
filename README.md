@@ -727,14 +727,14 @@ optional arguments:
                         The ID of the chassis containing the log service
   --log LOG, -l LOG     The ID of the log service
   --type {Manager,PreOS,OS,OEM}, -type {Manager,PreOS,OS,OEM}
-                        The type of diagnostic data to collect. Defaults to
-                        'Manager' if not specified.
+                        The type of diagnostic data to collect; defaults to
+                        'Manager' if not specified
   --oemtype OEMTYPE, -oemtype OEMTYPE
-                        The OEM-specific type of diagnostic data to collect.
-                        This option should only be used if the requested type
-                        is 'OEM'.
+                        The OEM-specific type of diagnostic data to collect;
+                        this option should only be used if the requested type
+                        is 'OEM'
   --directory DIRECTORY, -d DIRECTORY
-                        The directory to save the diagnostic data. Defaults to
+                        The directory to save the diagnostic data; defaults to
                         the current directory if not specified
 ```
 
