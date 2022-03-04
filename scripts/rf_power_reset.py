@@ -22,7 +22,7 @@ argget.add_argument( "--password", "-p",  type = str, required = True, help = "T
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
 argget.add_argument( "--system", "-s", type = str, help = "The ID of the system to reset" )
 argget.add_argument( "--type", "-t", type = str, help = "The type of power/reset operation to perform", choices = redfish_utilities.reset_types )
-argget.add_argument( "--info", "-info", action = "store_true", help = "Indicates if reset information should be reported" )
+argget.add_argument( "--info", "-info", action = "store_true", help = "Indicates if reset and power information should be reported" )
 args = argget.parse_args()
 
 # Set up the Redfish object
@@ -31,7 +31,8 @@ redfish_obj.login( auth = "session" )
 
 try:
     if args.info:
-        reset_uri, reset_parameters = redfish_utilities.get_system_reset_info( redfish_obj, args.system )
+        system_info = redfish_utilities.get_system( redfish_obj, args.system )
+        reset_uri, reset_parameters = redfish_utilities.get_system_reset_info( redfish_obj, args.system, system_info )
         printed_reset_types = False
         for param in reset_parameters:
             if param["Name"] == "ResetType" and "AllowableValues" in param:
@@ -39,6 +40,10 @@ try:
                 printed_reset_types = True
         if not printed_reset_types:
             print( "No reset information found" )
+        if "PowerState" in system_info.dict:
+            print( "Current power state: {}".format( system_info.dict["PowerState"] ) )
+        else:
+            print( "No power state information found")
     else:
         print( "Resetting the system..." )
         response = redfish_utilities.system_reset( redfish_obj, args.system, args.type )

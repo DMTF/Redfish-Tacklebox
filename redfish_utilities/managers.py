@@ -118,20 +118,22 @@ def print_manager( manager ):
             print( manager_line_format.format( property, prop_val ) )
     print( "" )
 
-def get_manager_reset_info( context, manager_id = None ):
+def get_manager_reset_info( context, manager_id = None, manager = None ):
     """
     Finds a manager matching the given ID and returns its reset info
 
     Args:
         context: The Redfish client object with an open session
         manager_id: The manager to locate; if None, perform on the only manager
+        manager: Existing manager resource to inspect for reset info
 
     Returns:
         The URI of the Reset action
         A list of parameter requirements from the Action Info
     """
 
-    manager = get_manager( context, manager_id )
+    if manager is None:
+        manager = get_manager( context, manager_id )
 
     # Check that there is a Reset action
     if "Actions" not in manager.dict:
