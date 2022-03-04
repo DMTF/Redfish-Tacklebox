@@ -43,7 +43,7 @@ try:
         if "PowerState" in system_info.dict:
             print( "Current power state: {}".format( system_info.dict["PowerState"] ) )
         else:
-            print( "Not power state information found")
+            print( "No power state information found")
     else:
         print( "Resetting the system..." )
         response = redfish_utilities.system_reset( redfish_obj, args.system, args.type )
