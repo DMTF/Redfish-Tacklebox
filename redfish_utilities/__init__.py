@@ -1,6 +1,6 @@
 #! /usr/bin/python
 # Copyright Notice:
-# Copyright 2019-2021 DMTF. All rights reserved.
+# Copyright 2019-2022 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
 
 from .accounts import get_users
@@ -18,9 +18,12 @@ from .inventory import get_system_inventory
 from .inventory import print_system_inventory
 from .inventory import write_system_inventory
 from .logs import log_container
+from .logs import diagnostic_data_types
 from .logs import get_log_entries
 from .logs import print_log_entries
 from .logs import clear_log_entries
+from .logs import collect_diagnostic_data
+from .logs import download_diagnostic_data
 from .managers import get_manager_ids
 from .managers import get_manager
 from .managers import print_manager
