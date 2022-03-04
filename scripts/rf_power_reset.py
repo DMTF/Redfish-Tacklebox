@@ -31,8 +31,8 @@ redfish_obj.login( auth = "session" )
 
 try:
     if args.info:
-        reset_uri, reset_parameters = redfish_utilities.get_system_reset_info( redfish_obj, args.system )
         system_info = redfish_utilities.get_system( redfish_obj, args.system )
+        reset_uri, reset_parameters = redfish_utilities.get_system_reset_info( redfish_obj, args.system, system_info )
         printed_reset_types = False
         for param in reset_parameters:
             if param["Name"] == "ResetType" and "AllowableValues" in param:

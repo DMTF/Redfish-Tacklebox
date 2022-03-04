@@ -217,20 +217,22 @@ def print_system_boot( boot ):
 
     print( "" )
 
-def get_system_reset_info( context, system_id = None ):
+def get_system_reset_info( context, system_id = None, system = None ):
     """
     Finds a system matching the given ID and returns its reset info
 
     Args:
         context: The Redfish client object with an open session
         system_id: The system to locate; if None, perform on the only system
+        system: Existing system resource to inspect for reset info
 
     Returns:
         The URI of the Reset action
         A list of parameter requirements from the Action Info
     """
 
-    system = get_system( context, system_id )
+    if system is None:
+        system = get_system( context, system_id )
 
     # Check that there is a Reset action
     if "Actions" not in system.dict:
