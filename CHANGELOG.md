@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.2.2] - 2022-03-10
+- Corrected usage of the 'request' parameter in 'rf_raw_request.py'
+
 ## [1.2.1] - 2022-03-04
 - Added 'rf_diagnostic_data.py' to collect diagnostic data from a log service
 - Added power state reporting with the 'info' parameter in rf_power_reset.py
