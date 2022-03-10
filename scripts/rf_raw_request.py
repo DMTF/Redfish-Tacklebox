@@ -37,17 +37,17 @@ with redfish.redfish_client( base_url = args.rhost, username = args.user, passwo
 
     # Perform the requested operation
     if args.method == "HEAD":
-        resp = redfish_obj.head( args.path )
+        resp = redfish_obj.head( args.request )
     elif args.method == "POST":
-        resp = redfish_obj.post( args.path, body = body )
+        resp = redfish_obj.post( args.request, body = body )
     elif args.method == "PATCH":
-        resp = redfish_obj.patch( args.path, body = body )
+        resp = redfish_obj.patch( args.request, body = body )
     elif args.method == "PUT":
-        resp = redfish_obj.put( args.path, body = body )
+        resp = redfish_obj.put( args.request, body = body )
     elif args.method == "DELETE":
-        resp = redfish_obj.head( args.path )
+        resp = redfish_obj.head( args.request )
     else:
-        resp = redfish_obj.get( args.path )
+        resp = redfish_obj.get( args.request )
 
     # Print HTTP status and headers
     if args.verbose:
