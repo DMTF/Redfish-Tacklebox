@@ -24,6 +24,7 @@ argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The a
 argget.add_argument( "--system", "-s", type = str, help = "The ID of the system to set" )
 argget.add_argument( "--target", "-t", type = str, help = "The target boot device; if not provided the tool will display the current boot settings" )
 argget.add_argument( "--uefi", "-uefi", type = str, help = "If target is 'UefiTarget', the UEFI Device Path of the device to boot.  If target is 'UefiBootNext', the UEFI Boot Option string of the device to boot." )
+argget.add_argument( "--mode", "-m", type = str, help = "The requested boot mode (UEFI or Legacy)" )
 argget.add_argument( "--reset", "-reset", action = "store_true", help = "Signifies that the system is reset after the boot override is set" )
 args = argget.parse_args()
 
@@ -40,17 +41,17 @@ try:
         # Build and send the boot request based on the arguments given
         uefi_target = None
         boot_next = None
-        boot_mode = "Once"
+        boot_enable = "Once"
         if args.target == "UefiTarget":
             uefi_target = args.uefi
         if args.target == "UefiBootNext":
             boot_next = args.uefi
         if args.target == "None":
             print( "Disabling one time boot..." )
-            boot_mode = "Disabled"
+            boot_enable = "Disabled"
         else:
             print( "Setting a one time boot for {}...".format( args.target ) )
-        redfish_utilities.set_system_boot( redfish_obj, args.system, args.target, boot_mode, None, uefi_target, boot_next )
+        redfish_utilities.set_system_boot( redfish_obj, args.system, args.target, boot_enable, args.mode, uefi_target, boot_next )
 
         # Reset the system if requested
         if args.reset:

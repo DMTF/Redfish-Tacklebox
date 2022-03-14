@@ -219,6 +219,7 @@ optional arguments:
                         If target is 'UefiTarget', the UEFI Device Path of the
                         device to boot. If target is 'UefiBootNext', the UEFI
                         Boot Option string of the device to boot.
+  --mode MODE, -m MODE  The requested boot mode (UEFI or Legacy)
   --reset, -reset       Signifies that the system is reset after the boot
                         override is set
 ```
