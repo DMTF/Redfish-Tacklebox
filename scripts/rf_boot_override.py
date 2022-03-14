@@ -24,7 +24,7 @@ argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The a
 argget.add_argument( "--system", "-s", type = str, help = "The ID of the system to set" )
 argget.add_argument( "--target", "-t", type = str, help = "The target boot device; if not provided the tool will display the current boot settings" )
 argget.add_argument( "--uefi", "-uefi", type = str, help = "If target is 'UefiTarget', the UEFI Device Path of the device to boot.  If target is 'UefiBootNext', the UEFI Boot Option string of the device to boot." )
-argget.add_argument( "--mode", "-m", type = str, help = "The requested boot mode (UEFI or Legacy)" )
+argget.add_argument( "--mode", "-m", type = str, help = "The requested boot mode ('UEFI' or 'Legacy')" )
 argget.add_argument( "--reset", "-reset", action = "store_true", help = "Signifies that the system is reset after the boot override is set" )
 args = argget.parse_args()
 
