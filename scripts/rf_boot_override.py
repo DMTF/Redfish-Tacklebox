@@ -22,19 +22,25 @@ argget.add_argument( "--user", "-u", type = str, required = True, help = "The us
 argget.add_argument( "--password", "-p",  type = str, required = True, help = "The password for authentication" )
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
 argget.add_argument( "--system", "-s", type = str, help = "The ID of the system to set" )
+argget.add_argument( "--info", "-info", action = "store_true", help = "Indicates if boot information should be reported" )
 argget.add_argument( "--target", "-t", type = str, help = "The target boot device; if not provided the tool will display the current boot settings" )
 argget.add_argument( "--uefi", "-uefi", type = str, help = "If target is 'UefiTarget', the UEFI Device Path of the device to boot.  If target is 'UefiBootNext', the UEFI Boot Option string of the device to boot." )
 argget.add_argument( "--mode", "-m", type = str, help = "The requested boot mode ('UEFI' or 'Legacy')" )
 argget.add_argument( "--reset", "-reset", action = "store_true", help = "Signifies that the system is reset after the boot override is set" )
 args = argget.parse_args()
 
+# Verify the combination of arguments is correct
+if args.target is None:
+    args.info = True
+    if args.uefi or args.mode or args.reset:
+        argget.error( "Cannot use '--uefi', '--mode', or '--reset' without '--target'" )
+
 # Set up the Redfish object
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
 try:
-    if args.target is None:
-        # Target not specified; just get the settings and display them
+    if args.info:
         boot = redfish_utilities.get_system_boot( redfish_obj, args.system )
         redfish_utilities.print_system_boot( boot )
     else:

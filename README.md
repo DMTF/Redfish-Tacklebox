@@ -212,6 +212,7 @@ optional arguments:
   -h, --help            show this help message and exit
   --system SYSTEM, -s SYSTEM
                         The ID of the system to set
+  --info, -info         Indicates if boot information should be reported
   --target TARGET, -t TARGET
                         The target boot device; if not provided the tool will
                         display the current boot settings
