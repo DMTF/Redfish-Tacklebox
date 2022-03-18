@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.2.3] - 2022-03-18
+- Added --mode argument to 'rf_boot_override.py' to control Legacy vs UEFI
+- Added --info argument to 'rf_boot_override.py'
+
 ## [1.2.2] - 2022-03-10
 - Corrected usage of the 'request' parameter in 'rf_raw_request.py'
 
