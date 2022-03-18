@@ -212,6 +212,7 @@ optional arguments:
   -h, --help            show this help message and exit
   --system SYSTEM, -s SYSTEM
                         The ID of the system to set
+  --info, -info         Indicates if boot information should be reported
   --target TARGET, -t TARGET
                         The target boot device; if not provided the tool will
                         display the current boot settings
@@ -219,6 +220,7 @@ optional arguments:
                         If target is 'UefiTarget', the UEFI Device Path of the
                         device to boot. If target is 'UefiBootNext', the UEFI
                         Boot Option string of the device to boot.
+  --mode MODE, -m MODE  The requested boot mode ('UEFI' or 'Legacy')
   --reset, -reset       Signifies that the system is reset after the boot
                         override is set
 ```
