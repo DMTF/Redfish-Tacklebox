@@ -372,8 +372,12 @@ def get_sensor_status( sensor, readings ):
     if reading_val is None:
         reading_val = state
 
+    name = sensor.get( "Name", None )
+    if name is None:
+        name = "Sensor " + sensor["Id"]
+
     reading = {
-        "Name": sensor["Name"],
+        "Name": name,
         "Reading": reading_val,
         "Units": units,
         "State": state,
