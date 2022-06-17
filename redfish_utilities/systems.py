@@ -15,6 +15,7 @@ Brief : This file contains the definitions and functionalities for interacting
 import warnings
 from .messages import verify_response
 from .resets import reset_types
+from . import config
 
 class RedfishSystemNotFoundError( Exception ):
     """
@@ -514,14 +515,13 @@ def get_virtual_media_collection( context, system_id = None ):
     # Get the VirtualMediaCollection
     return context.get( virtual_media_uri )
 
-def get_system_bios( context, system_id = None, workaround = False ):
+def get_system_bios( context, system_id = None ):
     """
     Finds a system matching the given ID and gets the BIOS settings
 
     Args:
         context: The Redfish client object with an open session
         system_id: The system to locate; if None, perform on the only system
-        workaround: Indicates if workarounds should be attempted for non-conformant services
 
     Returns:
         A dictionary of the current BIOS attributes
@@ -541,17 +541,17 @@ def get_system_bios( context, system_id = None, workaround = False ):
     # Get the Settings object if present
     if "@Redfish.Settings" in bios.dict:
         try:
-            bios_settings = get_system_bios_settings( context, bios, system.dict["Id"], workaround )
+            bios_settings = get_system_bios_settings( context, bios, system.dict["Id"] )
             future_settings = bios_settings.dict["Attributes"]
         except:
-            if workaround:
+            if config.__workarounds__:
                 warnings.warn( "System '{}' BIOS resource contains the settings term, but no 'SettingsObject'.  Contact your vendor.  Workarounds exhausted for reading the settings data and falling back on using the active attributes.".format( system_id ) )
             else:
                 raise
 
     return current_settings, future_settings
 
-def set_system_bios( context, settings, system_id = None, workaround = False ):
+def set_system_bios( context, settings, system_id = None ):
     """
     Finds a system matching the given ID and sets the BIOS settings
 
@@ -559,7 +559,6 @@ def set_system_bios( context, settings, system_id = None, workaround = False ):
         context: The Redfish client object with an open session
         settings: The settings to apply to the system
         system_id: The system to locate; if None, perform on the only system
-        workaround: Indicates if workarounds should be attempted for non-conformant services
 
     Returns:
         The response of the PATCH
@@ -575,7 +574,7 @@ def set_system_bios( context, settings, system_id = None, workaround = False ):
     bios = context.get( bios_uri )
     etag = bios.getheader( "ETag" )
     if "@Redfish.Settings" in bios.dict:
-        bios_settings = get_system_bios_settings( context, bios, system.dict["Id"], workaround )
+        bios_settings = get_system_bios_settings( context, bios, system.dict["Id"] )
         bios_uri = bios_settings.dict["@odata.id"]
         etag = bios_settings.getheader( "ETag" )
 
@@ -588,15 +587,14 @@ def set_system_bios( context, settings, system_id = None, workaround = False ):
     verify_response( response )
     return response
 
-def get_system_bios_settings( context, bios, system_id, workaround ):
+def get_system_bios_settings( context, bios, system_id ):
     """
-    Gets the settings resource for BIOS and applies workarounds if needed
+    Gets the settings resource for BIOS
 
     Args:
         context: The Redfish client object with an open session
         bios: The BIOS resource
         system_id: The system identifier
-        workaround: Indicates if workarounds should be attempted for non-conformant services
 
     Returns:
         The Settings resource for BIOS
@@ -605,7 +603,7 @@ def get_system_bios_settings( context, bios, system_id, workaround ):
     if "SettingsObject" in bios.dict["@Redfish.Settings"]:
         bios_settings = context.get( bios.dict["@Redfish.Settings"]["SettingsObject"]["@odata.id"] )
     else:
-        if workaround:
+        if config.__workarounds__:
             warnings.warn( "System '{}' BIOS resource contains the settings term, but no 'SettingsObject'.  Contact your vendor.  Attempting workarounds...".format( system_id ) )
             settings_uris = [ "Settings", "SD" ]
             for setting_ext in settings_uris:
@@ -617,7 +615,7 @@ def get_system_bios_settings( context, bios, system_id, workaround ):
             except:
                 raise RedfishSystemBiosInvalidSettingsError( "System '{}' BIOS resource contains the settings term, but no 'SettingsObject'.  Workarounds exhausted.  Contact your vendor.".format( system_id ) ) from None
         else:
-            raise RedfishSystemBiosInvalidSettingsError( "System '{}' BIOS resource contains the settings term, but no 'SettingsObject'.  Contact your vendor, or retry with the 'workaround' flag.".format( system_id ) )
+            raise RedfishSystemBiosInvalidSettingsError( "System '{}' BIOS resource contains the settings term, but no 'SettingsObject'.  Contact your vendor, or retry with the '__workarounds__' flag.".format( system_id ) )
 
     return bios_settings
 
