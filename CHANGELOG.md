@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.2.4] - 2022-06-17
+- Enhancement added to fall back on using the Id property in Sensor for building the name if Name is not valid
+- Moved usage of 'workarounds' flag to be a module-level flag rather than an individual parameter on each method
+
 ## [1.2.3] - 2022-03-18
 - Added --mode argument to 'rf_boot_override.py' to control Legacy vs UEFI
 - Added --info argument to 'rf_boot_override.py'
