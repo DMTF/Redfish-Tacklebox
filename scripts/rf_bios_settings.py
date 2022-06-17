@@ -25,13 +25,16 @@ argget.add_argument( "--attribute", "-a", type = str, nargs = 2, metavar = ( "na
 argget.add_argument( "--workaround", "-workaround", action = "store_true", help = "Indicates if workarounds should be attempted for non-conformant services", default = False )
 args = argget.parse_args()
 
+if args.workaround:
+    redfish_utilities.config.__workarounds__ = True
+
 # Set up the Redfish object
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
 try:
     # Get the BIOS settings
-    current_settings, future_settings = redfish_utilities.get_system_bios( redfish_obj, args.system, args.workaround )
+    current_settings, future_settings = redfish_utilities.get_system_bios( redfish_obj, args.system )
 
     if args.attribute is not None:
         new_settings = {}

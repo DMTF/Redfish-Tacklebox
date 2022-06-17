@@ -15,6 +15,7 @@ Brief : This file contains the definitions and functionalities for scanning a
 import warnings
 import xlsxwriter
 from .messages import verify_response
+from . import config
 
 class RedfishChassisNotFoundError( Exception ):
     """
@@ -22,14 +23,13 @@ class RedfishChassisNotFoundError( Exception ):
     """
     pass
 
-def get_system_inventory( context, workaround = False ):
+def get_system_inventory( context ):
     """
     Walks a Redfish service for system component information, such as drives,
     processors, and memory
 
     Args:
         context: The Redfish client object with an open session
-        workaround: Indicates if workarounds should be attempted for non-conformant services
 
     Returns:
         A list containing all system component information
@@ -68,16 +68,16 @@ def get_system_inventory( context, workaround = False ):
         try:
             verify_response( chassis )
         except:
-            if workaround:
+            if config.__workarounds__:
                 warnings.warn( "Could not access '{}'.  Contact your vendor.  Skipping...".format( chassis_uri ) )
                 continue
             else:
                 raise
-        catalog_resource( context, chassis.dict, inventory_list, chassis_id, workaround )
+        catalog_resource( context, chassis.dict, inventory_list, chassis_id )
 
     return inventory_list
 
-def catalog_array( context, resource, name, inventory, chassis_id, workaround ):
+def catalog_array( context, resource, name, inventory, chassis_id ):
     """
     Catalogs an array of resources for the inventory list
 
@@ -87,7 +87,6 @@ def catalog_array( context, resource, name, inventory, chassis_id, workaround ):
         name: The name of the property of the array
         inventory: The inventory to update
         chassis_id: The identifier for the chassis being scanned
-        workaround: Indicates if workarounds should be attempted for non-conformant services
     """
 
     if name in resource:
@@ -96,14 +95,14 @@ def catalog_array( context, resource, name, inventory, chassis_id, workaround ):
             try:
                 verify_response( member_res )
             except:
-                if workaround:
+                if config.__workarounds__:
                     warnings.warn( "Could not access '{}'.  Contact your vendor.  Skipping...".format( member["@odata.id"] ) )
                     continue
                 else:
                     raise
-            catalog_resource( context, member_res.dict, inventory, chassis_id, workaround )
+            catalog_resource( context, member_res.dict, inventory, chassis_id )
 
-def catalog_collection( context, resource, name, inventory, chassis_id, workaround ):
+def catalog_collection( context, resource, name, inventory, chassis_id ):
     """
     Catalogs a collection of resources for the inventory list
 
@@ -113,7 +112,6 @@ def catalog_collection( context, resource, name, inventory, chassis_id, workarou
         name: The name of the property of the collection
         inventory: The inventory to update
         chassis_id: The identifier for the chassis being scanned
-        workaround: Indicates if workarounds should be attempted for non-conformant services
     """
 
     if name in resource:
@@ -121,14 +119,14 @@ def catalog_collection( context, resource, name, inventory, chassis_id, workarou
         try:
             verify_response( collection )
         except:
-            if workaround:
+            if config.__workarounds__:
                 warnings.warn( "Could not access '{}'.  Contact your vendor.  Skipping...".format( resource[name]["@odata.id"] ) )
                 return
             else:
                 raise
-        catalog_array( context, collection.dict, "Members", inventory, chassis_id, workaround )
+        catalog_array( context, collection.dict, "Members", inventory, chassis_id )
 
-def catalog_resource( context, resource, inventory, chassis_id, workaround ):
+def catalog_resource( context, resource, inventory, chassis_id ):
     """
     Catalogs a resource for the inventory list
 
@@ -137,7 +135,6 @@ def catalog_resource( context, resource, inventory, chassis_id, workaround ):
         resource: The resource to catalog
         inventory: The inventory to update
         chassis_id: The identifier for the chassis being scanned
-        workaround: Indicates if workarounds should be attempted for non-conformant services
     """
 
     resource_type = resource["@odata.type"].rsplit(".")[-1]
@@ -145,31 +142,31 @@ def catalog_resource( context, resource, inventory, chassis_id, workaround ):
     # Based on the resource type, see if anything needs to be cataloged within it
     if resource_type == "Chassis":
         # Catalog all of the components within the chassis
-        catalog_collection( context, resource, "NetworkAdapters", inventory, chassis_id, workaround )
-        catalog_collection( context, resource, "Drives", inventory, chassis_id, workaround )
-        catalog_collection( context, resource, "PCIeDevices", inventory, chassis_id, workaround )
-        catalog_collection( context, resource, "Memory", inventory, chassis_id, workaround )
+        catalog_collection( context, resource, "NetworkAdapters", inventory, chassis_id )
+        catalog_collection( context, resource, "Drives", inventory, chassis_id )
+        catalog_collection( context, resource, "PCIeDevices", inventory, chassis_id )
+        catalog_collection( context, resource, "Memory", inventory, chassis_id )
         if "Links" in resource:
-            catalog_array( context, resource["Links"], "Drives", inventory, chassis_id, workaround )
-            catalog_array( context, resource["Links"], "PCIeDevices", inventory, chassis_id, workaround )
-            catalog_array( context, resource["Links"], "Switches", inventory, chassis_id, workaround )
-            catalog_array( context, resource["Links"], "ComputerSystems", inventory, chassis_id, workaround )
+            catalog_array( context, resource["Links"], "Drives", inventory, chassis_id )
+            catalog_array( context, resource["Links"], "PCIeDevices", inventory, chassis_id )
+            catalog_array( context, resource["Links"], "Switches", inventory, chassis_id )
+            catalog_array( context, resource["Links"], "ComputerSystems", inventory, chassis_id )
     elif resource_type == "ComputerSystem":
         # Catalog all of the components within the system
-        catalog_collection( context, resource, "Processors", inventory, chassis_id, workaround )
-        catalog_collection( context, resource, "Memory", inventory, chassis_id, workaround )
-        catalog_collection( context, resource, "SimpleStorage", inventory, chassis_id, workaround )
-        catalog_collection( context, resource, "Storage", inventory, chassis_id, workaround )
+        catalog_collection( context, resource, "Processors", inventory, chassis_id )
+        catalog_collection( context, resource, "Memory", inventory, chassis_id )
+        catalog_collection( context, resource, "SimpleStorage", inventory, chassis_id )
+        catalog_collection( context, resource, "Storage", inventory, chassis_id )
         # The system itself does not get cataloged (the chassis representation should cover this)
         return
     elif resource_type == "Storage":
         # Catalog the drives and storage controllers in the storage subsystem
-        catalog_array( context, resource, "Drives", inventory, chassis_id, workaround )
+        catalog_array( context, resource, "Drives", inventory, chassis_id )
         if "StorageControllers" in resource:
             for index, controller in enumerate( resource["StorageControllers"] ):
                 controller["@odata.type"] = "#StorageController.StorageController"
                 controller["Id"] = controller["MemberId"]
-                catalog_resource( context, controller, inventory, chassis_id, workaround )
+                catalog_resource( context, controller, inventory, chassis_id )
         # The storage subsystem itself does not get cataloged
         return
     elif resource_type == "SimpleStorage":
@@ -184,7 +181,7 @@ def catalog_resource( context, resource, inventory, chassis_id, workaround ):
                 drive["@odata.id"] = "{}#/Devices/{}".format( resource["@odata.id"], index )
                 drive["@odata.type"] = "#Drive.Drive"
                 drive["Id"] = drive["Name"]
-                catalog_resource( context, drive, inventory, chassis_id, workaround )
+                catalog_resource( context, drive, inventory, chassis_id )
         # The simple storage subsystem itself does not get cataloged
         return
 

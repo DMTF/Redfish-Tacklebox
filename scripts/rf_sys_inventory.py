@@ -27,18 +27,20 @@ argget.add_argument( "--write", "-w", nargs = "?", const = "Device_Inventory", t
 argget.add_argument( "--workaround", "-workaround", action = "store_true", help = "Indicates if workarounds should be attempted for non-conformant services", default = False )
 args = argget.parse_args()
 
+if args.workaround:
+    redfish_utilities.config.__workarounds__ = True
+
 # Set up the Redfish object
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
 try:
     # Get and print the system inventory
-    inventory = redfish_utilities.get_system_inventory( redfish_obj, args.workaround )
+    inventory = redfish_utilities.get_system_inventory( redfish_obj )
     redfish_utilities.print_system_inventory( inventory, args.details, args.noabsent )
 
     if args.write:
         redfish_utilities.write_system_inventory( inventory, args.write )
-
 finally:
     # Log out
     redfish_obj.logout()
