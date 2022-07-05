@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.2.4] - 2022-07-05
+- Adding RPM packages to the build process
+
 ## [1.2.4] - 2022-06-17
 - Enhancement added to fall back on using the Id property in Sensor for building the name if Name is not valid
 - Moved usage of 'workarounds' flag to be a module-level flag rather than an individual parameter on each method
