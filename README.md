@@ -286,11 +286,6 @@ It will then locate the manager specified by the *manager* argument, and display
 #### Reset
 
 ```
-usage: rf_manager_config.py info [-h]
-
-optional arguments:
-  -h, --help  show this help message and exit
-rainem1@rainem1-dev:/share/Redfish/Redfish-Tacklebox$ rf_manager_config.py reset -h
 usage: rf_manager_config.py reset [-h]
                                   [--type {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle}]
                                   [--info]
