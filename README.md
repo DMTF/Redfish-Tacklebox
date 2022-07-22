@@ -214,8 +214,8 @@ optional arguments:
                         The ID of the system to set
   --info, -info         Indicates if boot information should be reported
   --target TARGET, -t TARGET
-                        The target boot device; if not provided the tool will
-                        display the current boot settings
+                        The target boot device; if this argument is omitted
+                        the tool will display the current boot settings
   --uefi UEFI, -uefi UEFI
                         If target is 'UefiTarget', the UEFI Device Path of the
                         device to boot. If target is 'UefiBootNext', the UEFI
