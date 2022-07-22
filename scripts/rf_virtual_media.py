@@ -47,6 +47,8 @@ try:
     else:
         virtual_media = redfish_utilities.get_virtual_media( redfish_obj, args.system )
         redfish_utilities.print_virtual_media( virtual_media )
+except Exception as e:
+    print( e )
 finally:
     # Log out
     redfish_obj.logout()

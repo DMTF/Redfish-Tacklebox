@@ -71,6 +71,8 @@ try:
     if print_accounts:
         user_list = redfish_utilities.get_users( redfish_obj )
         redfish_utilities.print_users( user_list )
+except Exception as e:
+    print( e )
 finally:
     # Log out
     redfish_obj.logout()

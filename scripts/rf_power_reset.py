@@ -49,6 +49,8 @@ try:
         response = redfish_utilities.system_reset( redfish_obj, args.system, args.type )
         response = redfish_utilities.poll_task_monitor( redfish_obj, response )
         redfish_utilities.verify_response( response )
+except Exception as e:
+    print( e )
 finally:
     # Log out
     redfish_obj.logout()

@@ -70,6 +70,8 @@ try:
     with open( path, "wb" ) as file:
         file.write( data )
     print( "Saved diagnostic data to '{}'".format( path ) )
+except Exception as e:
+    print( e )
 finally:
     # Log out
     redfish_obj.logout()

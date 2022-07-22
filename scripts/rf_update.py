@@ -113,6 +113,8 @@ try:
     # Display the results
     print( "" )
     redfish_utilities.print_error_payload( response )
+except Exception as e:
+    print( e )
 finally:
     # Log out and cleanup
     os.chdir( start_path )

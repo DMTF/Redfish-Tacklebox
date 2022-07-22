@@ -30,6 +30,8 @@ try:
     # Get and print the sensor info
     sensors = redfish_utilities.get_sensors( redfish_obj )
     redfish_utilities.print_sensors( sensors )
+except Exception as e:
+    print( e )
 finally:
     # Log out
     redfish_obj.logout()

@@ -62,6 +62,8 @@ try:
     else:
         # Print the BIOS settings
         redfish_utilities.print_system_bios( current_settings, future_settings )
+except Exception as e:
+    print( e )
 finally:
     # Log out
     redfish_obj.logout()

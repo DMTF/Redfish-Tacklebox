@@ -52,6 +52,8 @@ try:
         print( "" )
         event_subscriptions = redfish_utilities.get_event_subscriptions( redfish_obj )
         redfish_utilities.print_event_subscriptions( event_subscriptions )
+except Exception as e:
+    print( e )
 finally:
     # Log out
     redfish_obj.logout()

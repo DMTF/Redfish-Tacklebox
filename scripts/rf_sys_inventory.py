@@ -41,6 +41,8 @@ try:
 
     if args.write:
         redfish_utilities.write_system_inventory( inventory, args.write )
+except Exception as e:
+    print( e )
 finally:
     # Log out
     redfish_obj.logout()

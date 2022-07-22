@@ -118,6 +118,8 @@ try:
     else:
         manager = redfish_utilities.get_manager( redfish_obj, args.manager )
         redfish_utilities.print_manager( manager )
+except Exception as e:
+    print( e )
 finally:
     # Log out
     redfish_obj.logout()
