@@ -26,10 +26,15 @@ args = argget.parse_args()
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
+exit_code = 0
 try:
     # Get and print the sensor info
     sensors = redfish_utilities.get_sensors( redfish_obj )
     redfish_utilities.print_sensors( sensors )
+except Exception as e:
+    exit_code = 1
+    print( e )
 finally:
     # Log out
     redfish_obj.logout()
+exit( exit_code )

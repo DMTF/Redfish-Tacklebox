@@ -99,6 +99,7 @@ if os.path.isfile( args.image ):
 else:
     image_uri = args.image
 
+exit_code = 0
 try:
     # Send the Simple Update request
     targets = None
@@ -113,6 +114,9 @@ try:
     # Display the results
     print( "" )
     redfish_utilities.print_error_payload( response )
+except Exception as e:
+    exit_code = 1
+    print( e )
 finally:
     # Log out and cleanup
     os.chdir( start_path )
@@ -121,3 +125,4 @@ finally:
     except:
         pass
     redfish_obj.logout()
+exit( exit_code )
