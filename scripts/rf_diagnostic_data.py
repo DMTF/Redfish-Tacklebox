@@ -48,6 +48,7 @@ elif args.chassis != False:
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
+exit_code = 0
 try:
     print( "Collecting diagnostic data..." )
     response = redfish_utilities.collect_diagnostic_data( redfish_obj, container_type, container_id, args.log, args.type, args.oemtype )
@@ -71,7 +72,9 @@ try:
         file.write( data )
     print( "Saved diagnostic data to '{}'".format( path ) )
 except Exception as e:
+    exit_code = 1
     print( e )
 finally:
     # Log out
     redfish_obj.logout()
+exit( exit_code )

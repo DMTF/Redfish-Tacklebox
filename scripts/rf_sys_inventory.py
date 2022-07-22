@@ -34,6 +34,7 @@ if args.workaround:
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
+exit_code = 0
 try:
     # Get and print the system inventory
     inventory = redfish_utilities.get_system_inventory( redfish_obj )
@@ -42,7 +43,9 @@ try:
     if args.write:
         redfish_utilities.write_system_inventory( inventory, args.write )
 except Exception as e:
+    exit_code = 1
     print( e )
 finally:
     # Log out
     redfish_obj.logout()
+exit( exit_code )

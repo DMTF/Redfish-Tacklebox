@@ -34,6 +34,7 @@ args = argget.parse_args()
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
+exit_code = 0
 try:
     print_accounts = True
     if args.add is not None:
@@ -72,7 +73,9 @@ try:
         user_list = redfish_utilities.get_users( redfish_obj )
         redfish_utilities.print_users( user_list )
 except Exception as e:
+    exit_code = 1
     print( e )
 finally:
     # Log out
     redfish_obj.logout()
+exit( exit_code )

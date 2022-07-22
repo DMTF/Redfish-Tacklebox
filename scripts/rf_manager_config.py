@@ -46,6 +46,7 @@ args = argget.parse_args()
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
+exit_code = 0
 try:
     if args.command == "reset":
         if args.info:
@@ -119,7 +120,9 @@ try:
         manager = redfish_utilities.get_manager( redfish_obj, args.manager )
         redfish_utilities.print_manager( manager )
 except Exception as e:
+    exit_code = 1
     print( e )
 finally:
     # Log out
     redfish_obj.logout()
+exit( exit_code )

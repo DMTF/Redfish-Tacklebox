@@ -38,6 +38,7 @@ args = argget.parse_args()
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
+exit_code = 0
 try:
     if args.command == "subscribe":
         response = redfish_utilities.create_event_subscription( redfish_obj, args.destination, format = args.format, client_context = args.context,
@@ -53,7 +54,9 @@ try:
         event_subscriptions = redfish_utilities.get_event_subscriptions( redfish_obj )
         redfish_utilities.print_event_subscriptions( event_subscriptions )
 except Exception as e:
+    exit_code = 1
     print( e )
 finally:
     # Log out
     redfish_obj.logout()
+exit( exit_code )

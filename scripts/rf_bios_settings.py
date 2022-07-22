@@ -32,6 +32,7 @@ if args.workaround:
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
+exit_code = 0
 try:
     # Get the BIOS settings
     current_settings, future_settings = redfish_utilities.get_system_bios( redfish_obj, args.system )
@@ -63,7 +64,9 @@ try:
         # Print the BIOS settings
         redfish_utilities.print_system_bios( current_settings, future_settings )
 except Exception as e:
+    exit_code = 1
     print( e )
 finally:
     # Log out
     redfish_obj.logout()
+exit( exit_code )

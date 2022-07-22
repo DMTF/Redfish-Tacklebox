@@ -46,6 +46,7 @@ elif args.chassis != False:
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
+exit_code = 0
 try:
     # Either clear the logs or get/print the logs
     if args.clear:
@@ -59,7 +60,9 @@ try:
         log_entries = redfish_utilities.get_log_entries( redfish_obj, container_type, container_id, args.log )
         redfish_utilities.print_log_entries( log_entries, args.details )
 except Exception as e:
+    exit_code = 1
     print( e )
 finally:
     # Log out
     redfish_obj.logout()
+exit( exit_code )

@@ -39,6 +39,7 @@ if args.target is None:
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
+exit_code = 0
 try:
     if args.info:
         boot = redfish_utilities.get_system_boot( redfish_obj, args.system )
@@ -66,7 +67,9 @@ try:
             response = redfish_utilities.poll_task_monitor( redfish_obj, response )
             redfish_utilities.verify_response( response )
 except Exception as e:
+    exit_code = 1
     print( e )
 finally:
     # Log out
     redfish_obj.logout()
+exit( exit_code )
