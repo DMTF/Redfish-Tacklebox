@@ -1,5 +1,9 @@
 # Change Log
 
+## [1.2.6] - 2022-07-25
+- Added exception handling in each script to avoid printing full traces
+- Minor documentation updates
+
 ## [1.2.5] - 2022-07-05
 - Adding RPM packages to the build process
 
