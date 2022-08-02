@@ -196,6 +196,18 @@ def catalog_resource( context, resource, inventory, chassis_id ):
     if resource_type == "Drive":
         location_prop = "PhysicalLocation"
 
+    # Determine whether this unit can be replaced
+    replaceable = None
+    if resource_type == "Chassis" or resource_type == "Processor":
+        replaceable = resource.get("Replaceable", None )
+    if not replaceable:
+        location_type = resource.get( location_prop, {} ).get( "PartLocation", {} ).get( "LocationType", None )
+        if location_type:
+            if location_type == "Embedded":
+                replaceable = False
+            else:
+                replaceable = True
+
     # Pull out all relevant properties for the catalog
     catalog = {
         "Uri": resource["@odata.id"],
@@ -207,7 +219,8 @@ def catalog_resource( context, resource, inventory, chassis_id ):
         "AssetTag": resource.get( "AssetTag", None ),
         "Label": resource.get( location_prop, {} ).get( "PartLocation", {} ).get( "ServiceLabel", None ),
         "State": resource.get( "Status", {} ).get( "State", None ),
-        "Description": None
+        "Description": None,
+        "Replaceable": replaceable
     }
 
     # If no label was found, build a default name
