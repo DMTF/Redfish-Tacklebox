@@ -161,9 +161,8 @@ Once the desired log service is found, the tool will either perform the `ClearLo
 ```
 usage: rf_power_reset.py [-h] --user USER --password PASSWORD --rhost RHOST
                          [--system SYSTEM]
-                         [--type {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle}]
+                         [--type {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle,Suspend,Pause,Resume}]
                          [--info]
-
 
 A tool to perform a power/reset operation of a system
 
@@ -178,7 +177,8 @@ optional arguments:
   -h, --help            show this help message and exit
   --system SYSTEM, -s SYSTEM
                         The ID of the system to reset
-  --type {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle}, -t {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle}
+  --type {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle,Suspend,Pause,Resume}, -t {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle,Suspend,Pause,Resume}
+                        The type of power/reset operation to perform
   --info, -info         Indicates if reset and power information should be
                         reported
 ```
