@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.2.7] - 2022-08-05
+- Corrected 'rf_sensor_list.py' to not assume all excerpts contain a reading
+- Updated allowable reset types to include 'Suspend', 'Pause', and 'Resume'
+- Updated error path for system reset requests to append reset types allowed by the system to the exception message
+
 ## [1.2.6] - 2022-07-25
 - Added exception handling in each script to avoid printing full traces
 - Minor documentation updates
