@@ -12,4 +12,5 @@ Brief : This file contains the common definitions and functionalities for
         reset operations
 """
 
-reset_types = [ "On", "ForceOff", "GracefulShutdown", "GracefulRestart", "ForceRestart", "Nmi", "ForceOn", "PushPowerButton", "PowerCycle" ]
+reset_types = [ "On", "ForceOff", "GracefulShutdown", "GracefulRestart", "ForceRestart", "Nmi", "ForceOn",
+                "PushPowerButton", "PowerCycle", "Suspend", "Pause", "Resume" ]

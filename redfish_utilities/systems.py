@@ -13,6 +13,7 @@ Brief : This file contains the definitions and functionalities for interacting
 """
 
 import warnings
+import sys
 from .messages import verify_response
 from .resets import reset_types
 from . import config
@@ -308,7 +309,16 @@ def system_reset( context, system_id = None, reset_type = None ):
 
     # Reset the system
     response = context.post( reset_uri, body = payload )
-    verify_response( response )
+    try:
+        verify_response( response )
+    except Exception as e:
+        if response.status == 400:
+            # Append the list of valid reset types to 400 Bad Request responses
+            supported_reset_types = "No supported reset types listed"
+            for param in reset_parameters:
+                if param["Name"] == "ResetType" and "AllowableValues" in param:
+                    supported_reset_types = "Supported reset types: {}".format( ", ".join( param["AllowableValues"] ) )
+            raise type( e )( str( e ) + "\n" + supported_reset_types ).with_traceback( sys.exc_info()[2] )
     return response
 
 def get_virtual_media( context, system_id = None ):
