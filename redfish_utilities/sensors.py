@@ -328,7 +328,7 @@ def get_excerpt_status( name, field, units, object, readings ):
             if "DataSourceUri" not in item:
                 reading = {
                     "Name": "{} {} {}".format( name, field, i ),
-                    "Reading": item["Reading"],
+                    "Reading": item.get( "Reading", None ),
                     "Units": units,
                     "State": None,
                     "Health": None,
@@ -344,7 +344,7 @@ def get_excerpt_status( name, field, units, object, readings ):
         if "DataSourceUri" not in object[field]:
             reading = {
                 "Name": "{} {}".format( name, field ),
-                "Reading": object[field]["Reading"],
+                "Reading": object[field].get( "Reading", None ),
                 "Units": units,
                 "State": None,
                 "Health": None,
