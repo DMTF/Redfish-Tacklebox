@@ -50,6 +50,7 @@ def get_system_inventory( context ):
     for chassis_id in chassis_ids:
         chassis_instance = {
             "ChassisName": chassis_id,
+            "ContainedByChassis": None,
             "Chassis": [],
             "Processors": [],
             "Memory": [],
@@ -126,6 +127,28 @@ def catalog_collection( context, resource, name, inventory, chassis_id ):
                 raise
         catalog_array( context, collection.dict, "Members", inventory, chassis_id )
 
+def update_chassis_property( context, property_value, property_name, inventory, chassis_id ):
+    """
+    Updates a property for a chassis_id in the inventory list
+
+    Args:
+        context: The Redfish client object with an open session
+        property_value: The property value
+        property_name: The property name
+        inventory: The inventory to update
+        chassis_id: The identifier for the chassis being updated
+    """
+    # Find the inventory instance to update based on the chassis identifier
+    inventory_instance = None
+    for chassis_inventory in inventory:
+        if chassis_inventory["ChassisName"] == chassis_id:
+            inventory_instance = chassis_inventory
+    if inventory_instance is None:
+        # No matching entry in the inventory to update
+        return
+    inventory_instance[property_name] = property_value
+
+
 def catalog_resource( context, resource, inventory, chassis_id ):
     """
     Catalogs a resource for the inventory list
@@ -151,6 +174,9 @@ def catalog_resource( context, resource, inventory, chassis_id ):
             catalog_array( context, resource["Links"], "PCIeDevices", inventory, chassis_id )
             catalog_array( context, resource["Links"], "Switches", inventory, chassis_id )
             catalog_array( context, resource["Links"], "ComputerSystems", inventory, chassis_id )
+            if "ContainedBy" in resource["Links"]:
+                if "@odata.id" in resource["Links"]["ContainedBy"]:
+                    update_chassis_property( context, resource["Links"]["ContainedBy"]["@odata.id"], "ContainedByChassis", inventory, chassis_id)
     elif resource_type == "ComputerSystem":
         # Catalog all of the components within the system
         catalog_collection( context, resource, "Processors", inventory, chassis_id )
