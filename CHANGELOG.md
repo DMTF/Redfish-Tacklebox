@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.2.9] - 2022-09-23
+- Corrected passing of the event_types argument from rf_event_service.py when creating an event subscription
+
 ## [1.2.8] - 2022-08-12
 - Corrected flow when handling system reset exceptions to ensure it stays raised
 
