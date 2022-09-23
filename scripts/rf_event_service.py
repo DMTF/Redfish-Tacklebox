@@ -42,7 +42,7 @@ exit_code = 0
 try:
     if args.command == "subscribe":
         response = redfish_utilities.create_event_subscription( redfish_obj, args.destination, format = args.format, client_context = args.context,
-            expand = args.expand, resource_types = args.resourcetypes, registries = args.registries )
+            expand = args.expand, resource_types = args.resourcetypes, registries = args.registries, event_types = args.eventtypes )
         print( "Created subscription '{}'".format( response.getheader( "Location" ) ) )
     elif args.command == "unsubscribe":
         print( "Deleting subscription '{}'".format( args.id ) )
