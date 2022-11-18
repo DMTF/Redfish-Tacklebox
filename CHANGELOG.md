@@ -1,5 +1,8 @@
 # Change Log
 
+## [1.3.0] - 2022-11-18
+- Fixed bug where rf_raw_request.py would perform 'HEAD' instead of 'DELETE' when 'DELETE' is specified
+
 ## [1.2.9] - 2022-09-23
 - Corrected passing of the event_types argument from rf_event_service.py when creating an event subscription
 
