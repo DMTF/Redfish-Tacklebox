@@ -45,7 +45,7 @@ with redfish.redfish_client( base_url = args.rhost, username = args.user, passwo
     elif args.method == "PUT":
         resp = redfish_obj.put( args.request, body = body )
     elif args.method == "DELETE":
-        resp = redfish_obj.head( args.request )
+        resp = redfish_obj.delete( args.request )
     else:
         resp = redfish_obj.get( args.request )
 
