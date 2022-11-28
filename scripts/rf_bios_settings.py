@@ -59,7 +59,7 @@ try:
             # Set the specified attribute to the new value
             new_settings[attribute[0]] = new_value
             print( "Setting {} to {}...".format( attribute[0], attribute[1] ) )
-        redfish_utilities.set_system_bios( redfish_obj, new_settings, args.system, args.workaround )
+        redfish_utilities.set_system_bios( redfish_obj, new_settings, args.system )
     else:
         # Print the BIOS settings
         redfish_utilities.print_system_bios( current_settings, future_settings )
