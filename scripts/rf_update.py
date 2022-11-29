@@ -12,16 +12,18 @@ Brief : This script uses the redfish_utilities module to perform updates
 """
 
 import argparse
+import datetime
+import logging
 import os
 import re
+import redfish
+import redfish_utilities
 import shutil
 import socket
 import sys
 import threading
 import time
-
-import redfish
-import redfish_utilities
+import traceback
 
 if sys.version_info > ( 3, ):
     import http.server
@@ -67,7 +69,14 @@ argget.add_argument( "--password", "-p",  type = str, required = True, help = "T
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
 argget.add_argument( "--image", "-i", type = str, required = True, help = "The URI or filepath of the image" )
 argget.add_argument( "--target", "-t", type = str, help = "The target resource to apply the image" )
+argget.add_argument( "--debug", action = "store_true", help = "Creates debug file showing HTTP traces and exceptions" )
 args = argget.parse_args()
+
+if args.debug:
+    log_file = "rf_update-{}.log".format( datetime.datetime.now().strftime( "%Y-%m-%d-%H%M%S" ) )
+    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logger = redfish.redfish_logger( log_file, log_format, logging.DEBUG )
+    logger.info( "rf_update Trace" )
 
 # Set up the Redfish object
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
@@ -115,6 +124,8 @@ try:
     print( "" )
     redfish_utilities.print_error_payload( response )
 except Exception as e:
+    if args.debug:
+        logger.error( "Caught exception:\n\n{}\n".format( traceback.format_exc() ) )
     exit_code = 1
     print( e )
 finally:

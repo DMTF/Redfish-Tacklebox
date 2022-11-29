@@ -12,8 +12,11 @@ Brief : This script uses the redfish_utilities module to manage managers
 """
 
 import argparse
+import datetime
+import logging
 import redfish
 import redfish_utilities
+import traceback
 
 # Get the input arguments
 argget = argparse.ArgumentParser( description = "A tool to manage managers in a service" )
@@ -21,6 +24,7 @@ argget.add_argument( "--user", "-u", type = str, required = True, help = "The us
 argget.add_argument( "--password", "-p",  type = str, required = True, help = "The password for authentication" )
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
 argget.add_argument( "--manager", "-m", type = str, help = "The ID of the manager to target" )
+argget.add_argument( "--debug", action = "store_true", help = "Creates debug file showing HTTP traces and exceptions" )
 subparsers = argget.add_subparsers( dest = "command" )
 info_argget = subparsers.add_parser( "info", help = "Displays information about a manager" )
 reset_argget = subparsers.add_parser( "reset", help = "Resets a manager" )
@@ -41,6 +45,12 @@ setnet_argget.add_argument( "--vlan", "-vlan", type = str, help = "The VLAN enab
 setnet_argget.add_argument( "--vlanid", "-vlanid", type = int, help = "The VLAN ID to set" )
 setnet_argget.add_argument( "--vlanpriority", "-vlanpriority", type = int, help = "The VLAN priority to set" )
 args = argget.parse_args()
+
+if args.debug:
+    log_file = "rf_manager_config-{}.log".format( datetime.datetime.now().strftime( "%Y-%m-%d-%H%M%S" ) )
+    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logger = redfish.redfish_logger( log_file, log_format, logging.DEBUG )
+    logger.info( "rf_manager_config Trace" )
 
 # Set up the Redfish object
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
@@ -120,6 +130,8 @@ try:
         manager = redfish_utilities.get_manager( redfish_obj, args.manager )
         redfish_utilities.print_manager( manager )
 except Exception as e:
+    if args.debug:
+        logger.error( "Caught exception:\n\n{}\n".format( traceback.format_exc() ) )
     exit_code = 1
     print( e )
 finally:

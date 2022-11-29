@@ -13,8 +13,11 @@ Brief : This script uses the redfish_utilities module to manage a one time boot
 """
 
 import argparse
+import datetime
+import logging
 import redfish
 import redfish_utilities
+import traceback
 
 # Get the input arguments
 argget = argparse.ArgumentParser( description = "A tool to perform a one time boot override of a system" )
@@ -27,6 +30,7 @@ argget.add_argument( "--target", "-t", type = str, help = "The target boot devic
 argget.add_argument( "--uefi", "-uefi", type = str, help = "If target is 'UefiTarget', the UEFI Device Path of the device to boot.  If target is 'UefiBootNext', the UEFI Boot Option string of the device to boot." )
 argget.add_argument( "--mode", "-m", type = str, help = "The requested boot mode ('UEFI' or 'Legacy')" )
 argget.add_argument( "--reset", "-reset", action = "store_true", help = "Signifies that the system is reset after the boot override is set" )
+argget.add_argument( "--debug", action = "store_true", help = "Creates debug file showing HTTP traces and exceptions" )
 args = argget.parse_args()
 
 # Verify the combination of arguments is correct
@@ -34,6 +38,12 @@ if args.target is None:
     args.info = True
     if args.uefi or args.mode or args.reset:
         argget.error( "Cannot use '--uefi', '--mode', or '--reset' without '--target'" )
+
+if args.debug:
+    log_file = "rf_boot_override-{}.log".format( datetime.datetime.now().strftime( "%Y-%m-%d-%H%M%S" ) )
+    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logger = redfish.redfish_logger( log_file, log_format, logging.DEBUG )
+    logger.info( "rf_boot_override Trace" )
 
 # Set up the Redfish object
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
@@ -67,6 +77,8 @@ try:
             response = redfish_utilities.poll_task_monitor( redfish_obj, response )
             redfish_utilities.verify_response( response )
 except Exception as e:
+    if args.debug:
+        logger.error( "Caught exception:\n\n{}\n".format( traceback.format_exc() ) )
     exit_code = 1
     print( e )
 finally:

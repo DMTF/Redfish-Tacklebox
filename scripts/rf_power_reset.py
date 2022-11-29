@@ -12,8 +12,11 @@ Brief : This script uses the redfish_utilities module to perform a reset of the 
 """
 
 import argparse
+import datetime
+import logging
 import redfish
 import redfish_utilities
+import traceback
 
 # Get the input arguments
 argget = argparse.ArgumentParser( description = "A tool to perform a power/reset operation of a system" )
@@ -23,7 +26,14 @@ argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The a
 argget.add_argument( "--system", "-s", type = str, help = "The ID of the system to reset" )
 argget.add_argument( "--type", "-t", type = str, help = "The type of power/reset operation to perform", choices = redfish_utilities.reset_types )
 argget.add_argument( "--info", "-info", action = "store_true", help = "Indicates if reset and power information should be reported" )
+argget.add_argument( "--debug", action = "store_true", help = "Creates debug file showing HTTP traces and exceptions" )
 args = argget.parse_args()
+
+if args.debug:
+    log_file = "rf_power_reset-{}.log".format( datetime.datetime.now().strftime( "%Y-%m-%d-%H%M%S" ) )
+    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logger = redfish.redfish_logger( log_file, log_format, logging.DEBUG )
+    logger.info( "rf_power_reset Trace" )
 
 # Set up the Redfish object
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
@@ -51,6 +61,8 @@ try:
         response = redfish_utilities.poll_task_monitor( redfish_obj, response )
         redfish_utilities.verify_response( response )
 except Exception as e:
+    if args.debug:
+        logger.error( "Caught exception:\n\n{}\n".format( traceback.format_exc() ) )
     exit_code = 1
     print( e )
 finally:

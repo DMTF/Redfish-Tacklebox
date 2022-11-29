@@ -67,6 +67,7 @@ required arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
 Example: `rf_sensor_list.py -u root -p root -r https://192.168.1.100`
@@ -103,6 +104,7 @@ optional arguments:
   --workaround, -workaround
                         Indicates if workarounds should be attempted for non-
                         conformant services
+  --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
 Example: `rf_sys_inventory.py -u root -p root -r https://192.168.1.100 -details`
@@ -139,6 +141,7 @@ optional arguments:
   --log LOG, -l LOG     The ID of the resource containing the log service
   --details, -details   Indicates details to be shown for each log entry
   --clear, -clear       Indicates if the log should be cleared
+  --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
 Example: `rf_logs.py -u root -p root -r https://192.168.1.100 -m BMC`
@@ -181,6 +184,7 @@ optional arguments:
                         The type of power/reset operation to perform
   --info, -info         Indicates if reset and power information should be
                         reported
+  --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
 Example: `rf_power_reset.py -u root -p root -r https://192.168.1.100 -t GracefulRestart`
@@ -223,6 +227,7 @@ optional arguments:
   --mode MODE, -m MODE  The requested boot mode ('UEFI' or 'Legacy')
   --reset, -reset       Signifies that the system is reset after the boot
                         override is set
+  --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
 Example: `rf_boot_override.py -u root -p root -r https://192.168.1.100 -t Pxe -reset`
@@ -264,6 +269,7 @@ optional arguments:
   -h, --help            show this help message and exit
   --manager MANAGER, -m MANAGER
                         The ID of the manager to target
+  --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
 
@@ -397,6 +403,7 @@ optional arguments:
   --workaround, -workaround
                         Indicates if workarounds should be attempted for non-
                         conformant services
+  --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
 Example: `rf_bios_settings.py -u root -p root -r https://192.168.1.100 -a BiosMode Legacy`
@@ -447,6 +454,7 @@ optional arguments:
                         Disabled a user account with the given name
   --unlock UNLOCK, -unlock UNLOCK
                         Unlocks a user account with the given name
+  --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
@@ -492,6 +500,7 @@ optional arguments:
   -h, --help            show this help message and exit
   --target TARGET, -t TARGET
                         The target resource to apply the image
+  --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
 Example: `rf_update.py -u root -p root -r https://192.168.1.100 -i image.bin`
@@ -526,6 +535,7 @@ required arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
 
@@ -629,6 +639,7 @@ optional arguments:
   -h, --help            show this help message and exit
   --system SYSTEM, -s SYSTEM
                         The ID of the system containing the virtual media
+  --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
 
@@ -734,6 +745,7 @@ optional arguments:
   --directory DIRECTORY, -d DIRECTORY
                         The directory to save the diagnostic data; defaults to
                         the current directory if not specified
+  --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
 Example: `rf_diagnostic_data.py -u root -p root -r https://192.168.1.100 -m BMC`

@@ -12,8 +12,11 @@ Brief : This script uses the redfish_utilities module to manager BIOS settings o
 """
 
 import argparse
+import datetime
+import logging
 import redfish
 import redfish_utilities
+import traceback
 
 # Get the input arguments
 argget = argparse.ArgumentParser( description = "A tool to manager BIOS settings for a system" )
@@ -23,10 +26,17 @@ argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The a
 argget.add_argument( "--system", "-s", type = str, help = "The ID of the system to manage" )
 argget.add_argument( "--attribute", "-a", type = str, nargs = 2, metavar = ( "name", "value" ), action = "append", help = "Sets a BIOS attribute to a new value; can be supplied multiple times to set multiple attributes" )
 argget.add_argument( "--workaround", "-workaround", action = "store_true", help = "Indicates if workarounds should be attempted for non-conformant services", default = False )
+argget.add_argument( "--debug", action = "store_true", help = "Creates debug file showing HTTP traces and exceptions" )
 args = argget.parse_args()
 
 if args.workaround:
     redfish_utilities.config.__workarounds__ = True
+
+if args.debug:
+    log_file = "rf_bios_settings-{}.log".format( datetime.datetime.now().strftime( "%Y-%m-%d-%H%M%S" ) )
+    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logger = redfish.redfish_logger( log_file, log_format, logging.DEBUG )
+    logger.info( "rf_bios_settings Trace" )
 
 # Set up the Redfish object
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
@@ -64,6 +74,8 @@ try:
         # Print the BIOS settings
         redfish_utilities.print_system_bios( current_settings, future_settings )
 except Exception as e:
+    if args.debug:
+        logger.error( "Caught exception:\n\n{}\n".format( traceback.format_exc() ) )
     exit_code = 1
     print( e )
 finally:
