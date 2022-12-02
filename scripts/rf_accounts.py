@@ -12,8 +12,11 @@ Brief : This script uses the redfish_utilities module to manage user accounts
 """
 
 import argparse
+import datetime
+import logging
 import redfish
 import redfish_utilities
+import traceback
 
 # Get the input arguments
 argget = argparse.ArgumentParser( description = "A tool to manage user accounts on a Redfish service" )
@@ -28,7 +31,14 @@ argget.add_argument( "--setrole", "-setrole", type = str, nargs = 2, metavar = (
 argget.add_argument( "--enable", "-enable", type = str, help = "Enables a user account with the given name" )
 argget.add_argument( "--disable", "-disable", type = str, help = "Disabled a user account with the given name" )
 argget.add_argument( "--unlock", "-unlock", type = str, help = "Unlocks a user account with the given name" )
+argget.add_argument( "--debug", action = "store_true", help = "Creates debug file showing HTTP traces and exceptions" )
 args = argget.parse_args()
+
+if args.debug:
+    log_file = "rf_accounts-{}.log".format( datetime.datetime.now().strftime( "%Y-%m-%d-%H%M%S" ) )
+    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logger = redfish.redfish_logger( log_file, log_format, logging.DEBUG )
+    logger.info( "rf_accounts Trace" )
 
 # Set up the Redfish object
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
@@ -73,6 +83,8 @@ try:
         user_list = redfish_utilities.get_users( redfish_obj )
         redfish_utilities.print_users( user_list )
 except Exception as e:
+    if args.debug:
+        logger.error( "Caught exception:\n\n{}\n".format( traceback.format_exc() ) )
     exit_code = 1
     print( e )
 finally:

@@ -12,9 +12,12 @@ Brief : This script uses the redfish_utilities module to collect diagnostic data
 """
 
 import argparse
+import datetime
+import logging
 import os
 import redfish
 import redfish_utilities
+import traceback
 
 # Get the input arguments
 argget = argparse.ArgumentParser( description = "A tool to collect diagnostic data from a log service on a Redfish service" )
@@ -28,6 +31,7 @@ argget.add_argument( "--log", "-l", type = str, help = "The ID of the log servic
 argget.add_argument( "--type", "-type", type = redfish_utilities.diagnostic_data_types, help = "The type of diagnostic data to collect; defaults to 'Manager' if not specified", choices = redfish_utilities.diagnostic_data_types, default = redfish_utilities.diagnostic_data_types.MANAGER )
 argget.add_argument( "--oemtype", "-oemtype", type = str, help = "The OEM-specific type of diagnostic data to collect; this option should only be used if the requested type is 'OEM'" )
 argget.add_argument( "--directory", "-d", type = str, help = "The directory to save the diagnostic data; defaults to the current directory if not specified", default = "." )
+argget.add_argument( "--debug", action = "store_true", help = "Creates debug file showing HTTP traces and exceptions" )
 args = argget.parse_args()
 
 # Determine the target log service based on the inputs
@@ -43,6 +47,12 @@ elif args.system != False:
 elif args.chassis != False:
     container_type = redfish_utilities.log_container.CHASSIS
     container_id = args.chassis
+
+if args.debug:
+    log_file = "rf_diagnostic_data-{}.log".format( datetime.datetime.now().strftime( "%Y-%m-%d-%H%M%S" ) )
+    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logger = redfish.redfish_logger( log_file, log_format, logging.DEBUG )
+    logger.info( "rf_diagnostic_data Trace" )
 
 # Set up the Redfish object
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
@@ -72,6 +82,8 @@ try:
         file.write( data )
     print( "Saved diagnostic data to '{}'".format( path ) )
 except Exception as e:
+    if args.debug:
+        logger.error( "Caught exception:\n\n{}\n".format( traceback.format_exc() ) )
     exit_code = 1
     print( e )
 finally:
