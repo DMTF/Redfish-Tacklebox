@@ -1,5 +1,10 @@
 # Change Log
 
+## [1.3.1] - 2022-12-02
+- Corrected the usage of the 'workaround' flag in rf_bios_settings.py
+- Added 'debug' argument to capture HTTP traces and exceptions to a log
+- Enhanced system inventory logic to ensure properties are of the expected format instead of throwing an exception when malformed
+
 ## [1.3.0] - 2022-11-18
 - Fixed bug where rf_raw_request.py would perform 'HEAD' instead of 'DELETE' when 'DELETE' is specified
 
