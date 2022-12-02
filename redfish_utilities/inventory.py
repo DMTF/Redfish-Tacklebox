@@ -205,10 +205,23 @@ def catalog_resource( context, resource, inventory, chassis_id ):
         "Model": resource.get( "Model", None ),
         "SKU": resource.get( "SKU", None ),
         "AssetTag": resource.get( "AssetTag", None ),
-        "Label": resource.get( location_prop, {} ).get( "PartLocation", {} ).get( "ServiceLabel", None ),
-        "State": resource.get( "Status", {} ).get( "State", None ),
+        "Label": None,
+        "State": None,
         "Description": None
     }
+    # For nested properties, need to protect against malformed payloads to avoid exceptions
+    try:
+        catalog["Label"] = resource.get( location_prop, {} ).get( "PartLocation", {} ).get( "ServiceLabel", None )
+    except:
+        pass
+    try:
+        catalog["State"] = resource.get( "Status", {} ).get( "State", None )
+    except:
+        pass
+    # Ensure all fields are strings
+    for item in catalog:
+        if not isinstance( catalog[item], str ):
+            catalog[item] = None
 
     # If no label was found, build a default name
     if catalog["Label"] is None:
