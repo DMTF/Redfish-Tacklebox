@@ -82,39 +82,46 @@ if args.debug:
 redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
 redfish_obj.login( auth = "session" )
 
-# If the file is local, spin up a web server to host the image
 start_path = os.getcwd()
-if os.path.isfile( args.image ):
-    web_server_thread = threading.Thread( target = local_web_server, args = ( args.image, ) )
-    web_server_thread.setDaemon( True )
-    web_server_thread.start()
-    # Wait for the server to start up
-    time.sleep( 3 )
-
-    # Build the proper image URI for the call based on how the web server will be hosting it
-    # TODO: Find a better way of getting your own IP address
-    # socket.gethostbyname( socket.gethostname() ) returns 127.0.0.1 on many systems
-    # This will open a socket with the target, and pulls the address of the socket
-    groups = re.search( "^(https?)://([^:]+)(:(\d+))?$", args.rhost )
-    s = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
-    remote_port = groups.group( 4 )
-    if remote_port is None:
-        remote_port = "80"
-        if groups.group( 1 ) == "https":
-            remote_port = "443"
-    s.connect( ( groups.group( 2 ), int( remote_port ) ) )
-    image_uri = "http://{}:{}/{}".format( s.getsockname()[0], WEB_SERVER_PORT, args.image.rsplit( os.path.sep, 1 )[-1] )
-    s.close()
-else:
-    image_uri = args.image
-
+targets = None
+if args.target is not None:
+    targets = [ args.target ]
 exit_code = 0
 try:
-    # Send the Simple Update request
-    targets = None
-    if args.target is not None:
-        targets = [ args.target ]
-    response = redfish_utilities.simple_update( redfish_obj, image_uri, targets = targets )
+    # Determine what path to use to perform the update
+    update_service = redfish_utilities.get_update_service( redfish_obj )
+    if os.path.isfile( args.image ):
+        # Local image; see if we can push the image directly
+        if "MultipartHttpPushUri" in update_service.dict:
+            # Perform a multipart push update
+            print( "Pushing the image to the service directly; depending on the size of the image, this can take a few minutes..." )
+            response = redfish_utilities.multipart_push_update( redfish_obj, args.image, targets = targets )
+        else:
+            # Host a local web server and perform a SimpleUpdate for the local image
+            web_server_thread = threading.Thread( target = local_web_server, args=( args.image, ) )
+            web_server_thread.setDaemon( True )
+            web_server_thread.start()
+            # Wait for the server to start up
+            time.sleep( 3 )
+
+            # Build the proper image URI for the call based on how the web server will be hosting it
+            # TODO: Find a better way of getting your own IP address
+            # socket.gethostbyname( socket.gethostname() ) returns 127.0.0.1 on many systems
+            # This will open a socket with the target, and pulls the address of the socket
+            groups = re.search( "^(https?)://([^:]+)(:(\d+))?$", args.rhost )
+            s = socket.socket( socket.AF_INET, socket.SOCK_DGRAM )
+            remote_port = groups.group( 4 )
+            if remote_port is None:
+                remote_port = "80"
+                if groups.group( 1 ) == "https":
+                    remote_port = "443"
+            s.connect( ( groups.group(2), int( remote_port ) ) )
+            image_uri = "http://{}:{}/{}".format( s.getsockname()[0], WEB_SERVER_PORT, args.image.rsplit( os.path.sep, 1 )[-1] )
+            s.close()
+            response = redfish_utilities.simple_update( redfish_obj, image_uri, targets = targets )
+    else:
+        # Remote image; always use SimpleUpdate
+        response = redfish_utilities.simple_update( redfish_obj, args.image, targets = targets )
 
     # Monitor the response
     print( "Update initiated..." )

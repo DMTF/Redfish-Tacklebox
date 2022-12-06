@@ -26,15 +26,14 @@ def print_error_payload( response ):
         response: The response to print
     """
 
-    # Check if this response has no body
-    if response.dict is None:
+    try:
+        print( get_error_messages( response ) )
+    except:
+        # No response body
         if response.status >= 400:
             print( "Failed" )
         else:
             print( "Success" )
-        return
-
-    print( get_error_messages( response ) )
 
 def get_error_messages( response ):
     """
