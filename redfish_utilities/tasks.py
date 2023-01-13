@@ -38,9 +38,12 @@ def poll_task_monitor( context, response ):
         # Print the progress
         task_state = None
         task_percent = None
-        if task_monitor.dict is not None:
+        try:
             task_state = task_monitor.dict.get( "TaskState", None )
             task_percent = task_monitor.dict.get( "PercentComplete", None )
+        except:
+            # 202 responses are allowed to not have a response body
+            pass
         if task_state is None:
             task_state = "Running"
         if task_percent is None:

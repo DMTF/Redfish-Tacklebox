@@ -12,11 +12,13 @@ Brief : This file contains the definitions and functionalities for interacting
         with the UpdateService for a given Redfish service
 """
 
+import json
+import os
 from .messages import verify_response
 
 class RedfishUpdateServiceNotFoundError( Exception ):
     """
-    Raised when the Update Service or an update action cannot be found
+    Raised when the update service or an update action cannot be found
     """
     pass
 
@@ -28,11 +30,11 @@ def get_simple_update_info( context ):
         context: The Redfish client object with an open session
 
     Returns:
-        The URI of the Simple Update action
-        A list of parameter requirements from the Action Info
+        The URI of the SimpleUpdate action
+        A list of parameter requirements from the action info
     """
 
-    # Get the Update Service
+    # Get the update service
     update_service = get_update_service( context )
 
     # Check that there is a SimpleUpdate action
@@ -46,7 +48,7 @@ def get_simple_update_info( context ):
     simple_update_uri = simple_update_action["target"]
 
     if "@Redfish.ActionInfo" not in simple_update_action:
-        # No Action Info; need to build this manually based on other annotations
+        # No action info; need to build this manually based on other annotations
 
         # Default parameter requirements
         simple_update_parameters = [
@@ -78,12 +80,12 @@ def get_simple_update_info( context ):
             }
         ]
 
-        # Get the AllowableValues from annotations
+        # Get the allowable values from annotations
         for param in simple_update_parameters:
             if param["Name"] + "@Redfish.AllowableValues" in simple_update_action:
                 param["AllowableValues"] = simple_update_action[param["Name"] + "@Redfish.AllowableValues"]
     else:
-        # Get the Action Info and its parameter listing
+        # Get the action info and its parameter listing
         action_info = context.get( simple_update_action["@Redfish.ActionInfo"] )
         simple_update_parameters = action_info.dict["Parameters"]
 
@@ -91,7 +93,7 @@ def get_simple_update_info( context ):
 
 def simple_update( context, image_uri, protocol = None, targets = None, username = None, password = None ):
     """
-    Performs a Simple Update request
+    Performs a SimpleUpdate request
 
     Args:
         context: The Redfish client object with an open session
@@ -105,7 +107,7 @@ def simple_update( context, image_uri, protocol = None, targets = None, username
         The response from the request
     """
 
-    # Get the Simple Update info
+    # Get the SimpleUpdate info
     uri, params = get_simple_update_info( context )
 
     # Build the request body
@@ -122,6 +124,37 @@ def simple_update( context, image_uri, protocol = None, targets = None, username
         body["Password"] = password
 
     response = context.post( uri, body = body )
+    verify_response( response )
+    return response
+
+def multipart_push_update( context, image_path, targets = None ):
+    """
+    Performs an HTTP Multipart push update request
+
+    Args:
+        context: The Redfish client object with an open session
+        image_path: The filepath to the image for the update
+        targets: The targets receiving the update
+
+    Returns:
+        The response from the request
+    """
+
+    # Get the update service
+    update_service = get_update_service( context )
+    if "MultipartHttpPushUri" not in update_service.dict:
+        raise RedfishUpdateServiceNotFoundError( "Service does not support MultipartHttpPushUri" )
+
+    # Build the request body
+    update_parameters = {}
+    if targets is not None:
+        update_parameters["Targets"] = targets
+    body = {
+        "UpdateParameters": ( None, json.dumps( update_parameters ), "application/json" ),
+        "UpdateFile": ( image_path.split( os.path.sep )[-1], open( image_path, "rb" ), "application/octet-stream" )
+    }
+
+    response = context.post( update_service.dict["MultipartHttpPushUri"], body = body, headers = { "Content-Type": "multipart/form-data" } )
     verify_response( response )
     return response
 
