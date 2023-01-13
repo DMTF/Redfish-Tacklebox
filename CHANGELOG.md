@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.1.2] - 2023-01-13
+- Added support for multipart HTTP push updates
+
 ## [1.3.1] - 2022-12-02
 - Corrected the usage of the 'workaround' flag in rf_bios_settings.py
 - Added 'debug' argument to capture HTTP traces and exceptions to a log
