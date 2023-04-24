@@ -786,7 +786,9 @@ optional arguments:
   --method {GET,HEAD,POST,PATCH,PUT,DELETE}, -m {GET,HEAD,POST,PATCH,PUT,DELETE}
                         The HTTP method to perform; performs GET if not
                         specified
-  --body BODY, -b BODY  The body to provide with the request
+  --body BODY, -b BODY  The body to provide with the request; can be a JSON
+                        string for a JSON request, a filename to send binary
+                        data, or an unstructured string
   --verbose, -v         Indicates if HTTP response codes and headers are
                         displayed
 ```

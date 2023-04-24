@@ -13,6 +13,7 @@ Brief : This script performs a raw request specified by the user
 
 import argparse
 import json
+import os
 import redfish
 
 # Get the input arguments
@@ -22,18 +23,23 @@ argget.add_argument( "--password", "-p",  type = str, required = True, help = "T
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
 argget.add_argument( "--method", "-m", type = str, required = False, help = "The HTTP method to perform; performs GET if not specified", default = "GET", choices = [ "GET", "HEAD", "POST", "PATCH", "PUT", "DELETE" ] )
 argget.add_argument( "--request", "-req", type = str, required = True, help = "The URI for the request" )
-argget.add_argument( "--body", "-b", type = str, required = False, help = "The body to provide with the request" )
+argget.add_argument( "--body", "-b", type = str, required = False, help = "The body to provide with the request; can be a JSON string for a JSON request, a filename to send binary data, or an unstructured string" )
 argget.add_argument( "--verbose", "-v", action = "store_true", help = "Indicates if HTTP response codes and headers are displayed", default = False )
 args = argget.parse_args()
 
 # Connect to the service
 with redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password ) as redfish_obj:
-    # Encode the body as a dictionary
-    try:
-        body = json.loads( args.body )
-    except:
-        # Not valid JSON; try passing it into the request as a string
-        body = args.body
+    # Encode the body
+    # If the body argument points to a file, load the file
+    if args.body is not None and os.path.isfile(args.body):
+        with open(args.body, mode="rb") as file:
+            body = file.read()
+    else:
+        # Not a file; either JSON or a raw string
+        try:
+            body = json.loads( args.body )
+        except:
+            body = args.body
 
     # Perform the requested operation
     if args.method == "HEAD":
@@ -57,8 +63,11 @@ with redfish.redfish_client( base_url = args.rhost, username = args.user, passwo
         print()
 
     # Print the response
-    try:
-        print( json.dumps( resp.dict, sort_keys = True, indent = 4, separators = ( ",", ": " ) ) )
-    except:
-        # The response is either malformed JSON or not JSON at all
-        print( resp.text )
+    if resp.status != 204:
+        try:
+            print( json.dumps( resp.dict, sort_keys = True, indent = 4, separators = ( ",", ": " ) ) )
+        except:
+            # The response is either malformed JSON or not JSON at all
+            print( resp.text )
+    else:
+        print( "No response body" )
