@@ -31,8 +31,8 @@ args = argget.parse_args()
 with redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password ) as redfish_obj:
     # Encode the body
     # If the body argument points to a file, load the file
-    if args.body is not None and os.path.isfile(args.body):
-        with open(args.body, mode="rb") as file:
+    if args.body is not None and os.path.isfile( args.body ):
+        with open( args.body, mode="rb" ) as file:
             body = file.read()
     else:
         # Not a file; either JSON or a raw string
@@ -40,6 +40,9 @@ with redfish.redfish_client( base_url = args.rhost, username = args.user, passwo
             body = json.loads( args.body )
         except:
             body = args.body
+    if body is None:
+        # Default case if nothing resolves (empty JSON object)
+        body = {}
 
     # Perform the requested operation
     if args.method == "HEAD":
