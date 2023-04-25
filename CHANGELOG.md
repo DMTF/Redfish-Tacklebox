@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.1.3] - 2023-04-25
+- Extended 'rf_raw_request.py' to allow it to send binary data from a file
+
 ## [3.1.2] - 2023-01-13
 - Added support for multipart HTTP push updates
 
