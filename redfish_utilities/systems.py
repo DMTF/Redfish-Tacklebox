@@ -14,6 +14,7 @@ Brief : This file contains the definitions and functionalities for interacting
 
 import warnings
 import sys
+from .collections import get_collection_ids
 from .messages import verify_response
 from .resets import reset_types
 from . import config
@@ -77,15 +78,7 @@ def get_system_ids( context ):
         raise RedfishSystemNotFoundError( "Service does not contain a system collection" )
 
     # Get the system collection and iterate through its collection
-    avail_systems = []
-    system_col = context.get( service_root.dict["Systems"]["@odata.id"] )
-    while True:
-        for system_member in system_col.dict["Members"]:
-            avail_systems.append( system_member["@odata.id"].strip( "/" ).split( "/" )[-1] )
-        if "Members@odata.nextLink" not in system_col.dict:
-            break
-        system_col = context.get( system_col.dict["Members@odata.nextLink"] )
-    return avail_systems
+    return get_collection_ids( context, service_root.dict["Systems"]["@odata.id"] )
 
 def get_system( context, system_id = None ):
     """
@@ -114,12 +107,11 @@ def get_system( context, system_id = None ):
             raise RedfishSystemNotFoundError( "Service does not contain exactly one system; a target system needs to be specified: {}".format( ", ".join( avail_systems ) ) )
 
     # Check the response and return the system if the response is good
-    try:
-        verify_response( system )
-    except:
+    if system.status == 404:
         if avail_systems is None:
             avail_systems = get_system_ids( context )
-        raise RedfishSystemNotFoundError( "Service does not contain a system called {}; valid systems: {}".format( system_id, ", ".join( avail_systems ) ) ) from None
+        raise RedfishSystemNotFoundError( "Service does not contain a system called {}; valid systems: {}".format( system_id, ", ".join( avail_systems ) ) )
+    verify_response( system )
     return system
 
 def get_system_boot( context, system_id = None ):
