@@ -14,6 +14,7 @@ Brief : This file contains the definitions and functionalities for scanning a
 
 import warnings
 import xlsxwriter
+from .collections import get_collection_ids
 from .messages import verify_response
 from . import config
 
@@ -406,16 +407,8 @@ def get_chassis_ids( context ):
     # Get the service root to find the chassis collection
     service_root = context.get( "/redfish/v1/" )
     if "Chassis" not in service_root.dict:
-        # No system collection
+        # No chassis collection
         raise RedfishChassisNotFoundError( "Service does not contain a chassis collection" )
 
     # Get the chassis collection and iterate through its collection
-    avail_chassis = []
-    chassis_col = context.get( service_root.dict["Chassis"]["@odata.id"] )
-    while True:
-        for chassis_member in chassis_col.dict["Members"]:
-            avail_chassis.append( chassis_member["@odata.id"].strip( "/" ).split( "/" )[-1] )
-        if "Members@odata.nextLink" not in chassis_col.dict:
-            break
-        chassis_col = context.get( chassis_col.dict["Members@odata.nextLink"] )
-    return avail_chassis
+    return get_collection_ids( context, service_root.dict["Chassis"]["@odata.id"] )
