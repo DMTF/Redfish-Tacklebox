@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.1.4] - 2023-06-16
+- Updated collection handling for systems, managers, and chassis to differentiate between HTTP 404 from other non-successful responses
+
 ## [3.1.3] - 2023-04-25
 - Extended 'rf_raw_request.py' to allow it to send binary data from a file
 
