@@ -17,6 +17,10 @@ from .event_service import delete_event_subscription
 from .inventory import get_system_inventory
 from .inventory import print_system_inventory
 from .inventory import write_system_inventory
+from .licenses import get_licenses
+from .licenses import print_licenses
+from .licenses import install_license
+from .licenses import delete_license
 from .logs import log_container
 from .logs import diagnostic_data_types
 from .logs import get_log_entries
