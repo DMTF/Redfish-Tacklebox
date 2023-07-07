@@ -29,6 +29,8 @@ from .managers import get_manager
 from .managers import print_manager
 from .managers import get_manager_reset_info
 from .managers import manager_reset
+from .managers import get_manager_reset_to_defaults_info
+from .managers import manager_reset_to_defaults
 from .managers import get_manager_ethernet_interface_ids
 from .managers import get_manager_ethernet_interface
 from .managers import set_manager_ethernet_interface
@@ -36,6 +38,7 @@ from .managers import print_manager_ethernet_interface
 from .messages import print_error_payload
 from .messages import verify_response
 from .resets import reset_types
+from .resets import reset_to_defaults_types
 from .sensors import get_sensors
 from .sensors import print_sensors
 from .systems import get_system_ids
