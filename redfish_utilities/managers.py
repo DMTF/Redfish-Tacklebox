@@ -1,6 +1,6 @@
 #! /usr/bin/python
 # Copyright Notice:
-# Copyright 2019-2021 DMTF. All rights reserved.
+# Copyright 2019-2023 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/main/LICENSE.md
 
 """
@@ -12,9 +12,11 @@ Brief : This file contains the definitions and functionalities for interacting
         with the managers collection for a given Redfish service
 """
 
+import sys
 from .collections import get_collection_ids
 from .messages import verify_response
 from .resets import reset_types
+from .resets import reset_to_defaults_types
 
 class RedfishManagerNotFoundError( Exception ):
     """
@@ -34,6 +36,12 @@ class RedfishManagerResetNotFoundError( Exception ):
     """
     pass
 
+class RedfishManagerResetToDefaultsNotFoundError( Exception ):
+    """
+    Raised when the ResetToDefaults action cannot be found
+    """
+    pass
+
 def get_manager_ids( context ):
     """
     Finds the manager collection and returns all of the member's identifiers
@@ -49,7 +57,7 @@ def get_manager_ids( context ):
     service_root = context.get( "/redfish/v1/" )
     if "Managers" not in service_root.dict:
         # No manager collection
-        raise RedfishManagerNotFoundError( "Service does not contain a manager collection" )
+        raise RedfishManagerNotFoundError( "The service does not contain a manager collection" )
 
     # Get the manager collection and iterate through its collection
     return get_collection_ids( context, service_root.dict["Managers"]["@odata.id"] )
@@ -78,13 +86,13 @@ def get_manager( context, manager_id = None ):
         if len( avail_managers ) == 1:
             manager = context.get( manager_uri_pattern.format( avail_managers[0] ) )
         else:
-            raise RedfishManagerNotFoundError( "Service does not contain exactly one manager; a target manager needs to be specified: {}".format( ", ".join( avail_managers ) ) )
+            raise RedfishManagerNotFoundError( "The service does not contain exactly one manager; a target manager needs to be specified: {}".format( ", ".join( avail_managers ) ) )
 
     # Check the response and return the manager if the response is good
     if manager.status == 404:
         if avail_managers is None:
             avail_managers = get_manager_ids( context )
-        raise RedfishManagerNotFoundError( "Service does not contain a manager called {}; valid managers: {}".format( manager_id, ", ".join( avail_managers ) ) )
+        raise RedfishManagerNotFoundError( "The service does not contain a manager called {}; valid managers: {}".format( manager_id, ", ".join( avail_managers ) ) )
     verify_response( manager )
     return manager
 
@@ -121,7 +129,7 @@ def get_manager_reset_info( context, manager_id = None, manager = None ):
 
     Returns:
         The URI of the Reset action
-        A list of parameter requirements from the Action Info
+        A list of parameter requirements from the action info
     """
 
     if manager is None:
@@ -129,16 +137,16 @@ def get_manager_reset_info( context, manager_id = None, manager = None ):
 
     # Check that there is a Reset action
     if "Actions" not in manager.dict:
-        raise RedfishManagerResetNotFoundError( "Manager does not support Reset" )
+        raise RedfishManagerResetNotFoundError( "Manager {} does not support the Reset action".format( manager["Id"] ) )
     if "#Manager.Reset" not in manager.dict["Actions"]:
-        raise RedfishManagerResetNotFoundError( "Manager does not support Reset" )
+        raise RedfishManagerResetNotFoundError( "Manager {} does not support the Reset action".format( manager["Id"] ) )
 
-    # Extract the info about the SimpleUpdate action
+    # Extract the info about the Reset action
     reset_action = manager.dict["Actions"]["#Manager.Reset"]
     reset_uri = reset_action["target"]
 
     if "@Redfish.ActionInfo" not in reset_action:
-        # No Action Info; need to build this manually based on other annotations
+        # No action info; need to build this manually based on other annotations
 
         # Default parameter requirements
         reset_parameters = [
@@ -155,7 +163,7 @@ def get_manager_reset_info( context, manager_id = None, manager = None ):
             if param["Name"] + "@Redfish.AllowableValues" in reset_action:
                 param["AllowableValues"] = reset_action[param["Name"] + "@Redfish.AllowableValues"]
     else:
-        # Get the Action Info and its parameter listing
+        # Get the action info and its parameter listing
         action_info = context.get( reset_action["@Redfish.ActionInfo"] )
         reset_parameters = action_info.dict["Parameters"]
 
@@ -200,7 +208,120 @@ def manager_reset( context, manager_id = None, reset_type = None ):
 
     # Reset the manager
     response = context.post( reset_uri, body = payload )
-    verify_response( response )
+    try:
+        verify_response( response )
+    except Exception as e:
+        additional_message = ""
+        if response.status == 400:
+            # Append the list of valid reset types to 400 Bad Request responses
+            additional_message = "\nNo supported reset types listed"
+            for param in reset_parameters:
+                if param["Name"] == "ResetType" and "AllowableValues" in param:
+                    additional_message = "\nSupported reset types: {}".format( ", ".join( param["AllowableValues"] ) )
+        raise type( e )( str( e ) + additional_message ).with_traceback( sys.exc_info()[2] )
+    return response
+
+def get_manager_reset_to_defaults_info( context, manager_id = None, manager = None ):
+    """
+    Finds a manager matching the given ID and returns its reset-to-defaults info
+
+    Args:
+        context: The Redfish client object with an open session
+        manager_id: The manager to locate; if None, perform on the only manager
+        manager: Existing manager resource to inspect for reset info
+
+    Returns:
+        The URI of the Reset action
+        A list of parameter requirements from the action info
+    """
+
+    if manager is None:
+        manager = get_manager( context, manager_id )
+
+    # Check that there is a Reset action
+    if "Actions" not in manager.dict:
+        raise RedfishManagerResetToDefaultsNotFoundError( "Manager {} does not support the ResetToDefaults action".format( manager["Id"] ) )
+    if "#Manager.ResetToDefaults" not in manager.dict["Actions"]:
+        raise RedfishManagerResetToDefaultsNotFoundError( "Manager {} does not support the ResetToDefaults action".format( manager["Id"] ) )
+
+    # Extract the info about the ResetToDefaults action
+    reset_action = manager.dict["Actions"]["#Manager.ResetToDefaults"]
+    reset_uri = reset_action["target"]
+
+    if "@Redfish.ActionInfo" not in reset_action:
+        # No action info; need to build this manually based on other annotations
+
+        # Default parameter requirements
+        reset_parameters = [
+            {
+                "Name": "ResetType",
+                "Required": True,
+                "DataType": "String",
+                "AllowableValues": reset_to_defaults_types
+            }
+        ]
+
+        # Get the AllowableValues from annotations
+        for param in reset_parameters:
+            if param["Name"] + "@Redfish.AllowableValues" in reset_action:
+                param["AllowableValues"] = reset_action[param["Name"] + "@Redfish.AllowableValues"]
+    else:
+        # Get the action info and its parameter listing
+        action_info = context.get( reset_action["@Redfish.ActionInfo"] )
+        reset_parameters = action_info.dict["Parameters"]
+
+    return reset_uri, reset_parameters
+
+def manager_reset_to_defaults( context, manager_id = None, reset_type = None ):
+    """
+    Finds a manager matching the given ID and performs a reset-to-defaults
+
+    Args:
+        context: The Redfish client object with an open session
+        manager_id: The manager to locate; if None, perform on the only manager
+        reset_type: The type of reset to perform; if None, perform one of the common resets
+
+    Returns:
+        The response of the action
+    """
+
+    # Check that the values themselves are supported by the schema
+    reset_to_default_type_values = reset_to_defaults_types
+    if reset_type is not None:
+        if reset_type not in reset_to_default_type_values:
+            raise ValueError( "{} is not an allowable reset type ({})".format( reset_type, ", ".join( reset_to_default_type_values ) ) )
+
+    # Locate the reset action
+    reset_uri, reset_parameters = get_manager_reset_to_defaults_info( context, manager_id )
+
+    # Build the payload
+    if reset_type is None:
+        for param in reset_parameters:
+            if param["Name"] == "ResetType":
+                if "PreserveNetworkAndUsers" in param["AllowableValues"]:
+                    reset_type = "PreserveNetworkAndUsers"
+                elif "PreserveNetwork" in param["AllowableValues"]:
+                    reset_type = "PreserveNetwork"
+                elif "ResetAll" in param["AllowableValues"]:
+                    reset_type = "ResetAll"
+
+    payload = {}
+    if reset_type is not None:
+        payload["ResetType"] = reset_type
+
+    # Reset the manager to defaults
+    response = context.post( reset_uri, body = payload )
+    try:
+        verify_response( response )
+    except Exception as e:
+        additional_message = ""
+        if response.status == 400:
+            # Append the list of valid reset types to 400 Bad Request responses
+            additional_message = "\nNo supported reset types listed"
+            for param in reset_parameters:
+                if param["Name"] == "ResetType" and "AllowableValues" in param:
+                    additional_message = "\nSupported reset types: {}".format( ", ".join( param["AllowableValues"] ) )
+        raise type( e )( str( e ) + additional_message ).with_traceback( sys.exc_info()[2] )
     return response
 
 def get_manager_ethernet_interface_ids( context, manager_id = None ):

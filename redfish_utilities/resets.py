@@ -14,3 +14,5 @@ Brief : This file contains the common definitions and functionalities for
 
 reset_types = [ "On", "ForceOff", "GracefulShutdown", "GracefulRestart", "ForceRestart", "Nmi", "ForceOn",
                 "PushPowerButton", "PowerCycle", "Suspend", "Pause", "Resume" ]
+
+reset_to_defaults_types = [ "ResetAll", "PreserveNetworkAndUsers", "PreserveNetwork" ]

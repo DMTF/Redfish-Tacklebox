@@ -44,6 +44,9 @@ setnet_argget.add_argument( "--dhcpv6", "-dhcpv6", type = str, help = "The DHCPv
 setnet_argget.add_argument( "--vlan", "-vlan", type = str, help = "The VLAN enabled configuration to set", choices = [ "On", "Off" ] )
 setnet_argget.add_argument( "--vlanid", "-vlanid", type = int, help = "The VLAN ID to set" )
 setnet_argget.add_argument( "--vlanpriority", "-vlanpriority", type = int, help = "The VLAN priority to set" )
+reset_to_defaults_argget = subparsers.add_parser( "resettodefaults", help = "Resets a manager to default settings" )
+reset_to_defaults_argget.add_argument( "--type", "-t", type = str, help = "The type of reset-to-defaults operation to perform", choices = redfish_utilities.reset_to_defaults_types )
+reset_to_defaults_argget.add_argument( "--info", "-info", action = "store_true", help = "Indicates if reset-to-defaults information should be reported" )
 args = argget.parse_args()
 
 if args.debug:
@@ -71,6 +74,21 @@ try:
         else:
             print( "Resetting the manager..." )
             response = redfish_utilities.manager_reset( redfish_obj, args.manager, args.type )
+            response = redfish_utilities.poll_task_monitor( redfish_obj, response )
+            redfish_utilities.verify_response( response )
+    elif args.command == "resettodefaults":
+        if args.info:
+            reset_uri, reset_parameters = redfish_utilities.get_manager_reset_to_defaults_info( redfish_obj, args.manager )
+            printed_reset_types = False
+            for param in reset_parameters:
+                if param["Name"] == "ResetType" and "AllowableValues" in param:
+                    print( "Supported reset types: {}".format( ", ".join( param["AllowableValues"] ) ) )
+                    printed_reset_types = True
+            if not printed_reset_types:
+                print( "No reset information found" )
+        else:
+            print( "Resetting the manager to defaults..." )
+            response = redfish_utilities.manager_reset_to_defaults( redfish_obj, args.manager, args.type )
             response = redfish_utilities.poll_task_monitor( redfish_obj, response )
             redfish_utilities.verify_response( response )
     elif args.command == "getnet":

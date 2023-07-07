@@ -252,11 +252,12 @@ usage: rf_manager_config.py [-h] --user USER --password PASSWORD --rhost RHOST
 A tool to manage managers in a service
 
 positional arguments:
-  {info,reset,getnet,setnet}
+  {info,reset,getnet,setnet,resettodefaults}
     info                Displays information about a manager
     reset               Resets a manager
     getnet              Displays information about an Ethernet interface
     setnet              Configures an Ethernet interface
+    resettodefaults     Resets a manager to default setting
 
 required arguments:
   --user USER, -u USER  The user name for authentication
@@ -301,7 +302,6 @@ optional arguments:
   --type {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle}, -t {On,ForceOff,GracefulShutdown,GracefulRestart,ForceRestart,Nmi,ForceOn,PushPowerButton,PowerCycle}
                         The type of power/reset operation to perform
   --info, -info         Indicates if reset information should be reported
-
 ```
 
 Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 reset -t GracefulRestart`
@@ -376,6 +376,30 @@ The tool will log into the service specified by the *rhost* argument using the c
 It will then locate the manager specified by the *manager* argument, locate the Ethernet interface specified by the *id* argument, and apply the requested settings to the interface.
 * If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
 * If *id* is not specified, and if the manager has exactly one Ethernet interface, it will perform the operation on the one interface.
+
+
+#### Reset to Defaults
+
+```
+usage: rf_manager_config.py resettodefaults [-h]
+                                            [--type {ResetAll,PreserveNetworkAndUsers,PreserveNetwork}]
+                                            [--info]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --type {ResetAll,PreserveNetworkAndUsers,PreserveNetwork}, -t {ResetAll,PreserveNetworkAndUsers,PreserveNetwork}
+                        The type of reset-to-defaults operation to perform
+  --info, -info         Indicates if reset-to-defaults information should be
+                        reported
+```
+
+Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 resettodefaults -t ResetAll`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It then traverses the manager collection for the service to find the matching system specified by the *manager* argument.
+It will perform the `ResetToDefaults` action with the specified reset type from the *type* argument.
+* If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
+* If *type* is not specified, it will attempt to perform the action with `PreserveNetworkAndUsers`.
 
 
 ### BIOS Settings
