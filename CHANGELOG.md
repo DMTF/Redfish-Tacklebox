@@ -1,5 +1,10 @@
 # Change Log
 
+## [3.1.5] - 2023-07-07
+- Added 'rf_licenses.py' tool to manage licenses on a Redfish service
+- Added 'resettodefaults' subcommand to 'rf_manager_config.py'
+- Updated 'setnet' in 'rf_manager_config.py' to allow for the 'Enabled' value for DHCPv6 control
+
 ## [3.1.4] - 2023-06-16
 - Updated collection handling for systems, managers, and chassis to differentiate between HTTP 404 from other non-successful responses
 
