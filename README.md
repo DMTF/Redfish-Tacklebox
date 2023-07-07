@@ -340,7 +340,7 @@ usage: rf_manager_config.py setnet [-h] [--id ID] [--ipv4address IPV4ADDRESS]
                                    [--dhcpv4 {On,Off}]
                                    [--ipv6addresses IPV6ADDRESSES [IPV6ADDRESSES ...]]
                                    [--ipv6gateways IPV6GATEWAYS [IPV6GATEWAYS ...]]
-                                   [--dhcpv6 {Stateful,Stateless,Disabled}]
+                                   [--dhcpv6 {Stateful,Stateless,Disabled,Enabled}]
                                    [--vlan {On,Off}] [--vlanid VLANID]
                                    [--vlanpriority VLANPRIORITY]
 
@@ -360,7 +360,7 @@ optional arguments:
   --ipv6gateways IPV6GATEWAYS [IPV6GATEWAYS ...], -ipv6gateways IPV6GATEWAYS [IPV6GATEWAYS ...]
                         The static IPv6 default gateways to set with prefix
                         length
-  --dhcpv6 {Stateful,Stateless,Disabled}, -dhcpv6 {Stateful,Stateless,Disabled}
+  --dhcpv6 {Stateful,Stateless,Disabled,Enabled}, -dhcpv6 {Stateful,Stateless,Disabled,Enabled}
                         The DHCPv6 configuration to set
   --vlan {On,Off}, -vlan {On,Off}
                         The VLAN enabled configuration to set

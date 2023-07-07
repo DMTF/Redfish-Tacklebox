@@ -40,7 +40,7 @@ setnet_argget.add_argument( "--ipv4gateway", "-ipv4gateway", type = str, help = 
 setnet_argget.add_argument( "--dhcpv4", "-dhcpv4", type = str, help = "The DHCPv4 configuration to set", choices = [ "On", "Off" ] )
 setnet_argget.add_argument( "--ipv6addresses", "-ipv6addresses", type = str, nargs = '+', help = "The static IPv6 addresses to set with prefix length" )
 setnet_argget.add_argument( "--ipv6gateways", "-ipv6gateways", type = str, nargs = '+', help = "The static IPv6 default gateways to set with prefix length" )
-setnet_argget.add_argument( "--dhcpv6", "-dhcpv6", type = str, help = "The DHCPv6 configuration to set", choices = [ "Stateful", "Stateless", "Disabled" ] )
+setnet_argget.add_argument( "--dhcpv6", "-dhcpv6", type = str, help = "The DHCPv6 configuration to set", choices = [ "Stateful", "Stateless", "Disabled", "Enabled" ] )
 setnet_argget.add_argument( "--vlan", "-vlan", type = str, help = "The VLAN enabled configuration to set", choices = [ "On", "Off" ] )
 setnet_argget.add_argument( "--vlanid", "-vlanid", type = int, help = "The VLAN ID to set" )
 setnet_argget.add_argument( "--vlanpriority", "-vlanpriority", type = int, help = "The VLAN priority to set" )
