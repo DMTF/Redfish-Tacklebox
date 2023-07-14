@@ -188,7 +188,9 @@ def get_license_service( context ):
     """
 
     # Get the service root to find the license service
-    service_root = context.get( "/redfish/v1/" )
+    service_root = context.get( "/redfish/v1" )
+    verify_response( service_root )
+    
     if "LicenseService" not in service_root.dict:
         # No event service
         raise RedfishLicenseServiceNotFoundError( "Service does not contain a license service" )

@@ -13,6 +13,7 @@ Brief : This file contains the definitions and functionalities for managing
 """
 
 from .messages import verify_response
+from .messages import RedfishPasswordChangeRequiredError
 
 class RedfishAccountCollectionNotFoundError( Exception ):
     """
@@ -47,8 +48,10 @@ def get_users( context ):
 
     # Go through each Account in the Account Collection
     account_col = context.get( get_account_collection( context ), None )
+    verify_response( account_col )
     for account_member in account_col.dict["Members"]:
         account = context.get( account_member["@odata.id"], None )
+        verify_response( account )
         account_info = {
             "UserName": account.dict["UserName"],
             "RoleId": account.dict["RoleId"],
@@ -100,14 +103,17 @@ def add_user( context, user_name, password, role ):
         "RoleId": role
     }
     account_col_uri = get_account_collection( context )
+    verify_response( account_col_uri )
     response = context.post( account_col_uri, body = payload )
     if response.status == 405:
         # Some implementations allocate slots for users and don't allow adding in the proper sense
         # Find an empty slot to use
         account_added = False
         account_col = context.get( account_col_uri )
+        verify_response( account_col_uri )
         for account_member in account_col.dict["Members"]:
             account = context.get( account_member["@odata.id"] )
+            verify_response( account )
             if account.dict["UserName"] == "" and not account.dict.get( "Enabled", True ):
                 # Empty slot found; PATCH it
                 response = context.patch( account_member["@odata.id"], body = payload, headers = { "If-Match": account.getheader( "ETag" ) } )
@@ -195,13 +201,16 @@ def get_account_collection( context ):
     """
 
     # Get the Service Root to find the Account Service
-    service_root = context.get( "/redfish/v1/" )
+    service_root = context.get( "/redfish/v1" )
+    verify_response( service_root )
+
     if "AccountService" not in service_root.dict:
         # No Account Service
         raise RedfishAccountCollectionNotFoundError( "Service does not contain an Account Service" )
 
     # Get the Account Service to find the Account Collection
     account_service = context.get( service_root.dict["AccountService"]["@odata.id"] )
+    verify_response( account_service )
     if "Accounts" not in account_service.dict:
         # No Account Collection
         raise RedfishAccountCollectionNotFoundError( "Service does not contain an Account Collection" )
@@ -222,10 +231,32 @@ def get_user( context, user_name ):
     """
 
     avail_users = []
-    account_col = context.get( get_account_collection( context ) )
+
+    # if Password Change Required and user is same as login user, then redirect to Password Change Required's url
+    try:
+        account_col = context.get( get_account_collection( context ) )
+        verify_response( account_col )
+    except RedfishPasswordChangeRequiredError as e:
+        account = context.get(e.args[1])
+        verify_response( account )
+        if account.dict["UserName"] == user_name:
+            return e.args[1], account
+        else:
+            raise RedfishAccountCollectionNotFoundError( "User '{}' is not found;".format( user_name) )
+            
     for account_member in account_col.dict["Members"]:
         account = context.get( account_member["@odata.id"] )
-
+        verify_response( account )
+        # if Password Change Required and user is same as login user, then redirect to Password Change Required's url
+        try:
+            verify_response( account )
+        except RedfishPasswordChangeRequiredError as e:
+            account = context.get(e.args[1])
+            verify_response( account )
+            if account.dict["UserName"] == user_name:
+                return e.args[1], account
+            else:
+                raise RedfishAccountCollectionNotFoundError( "User '{}' is not found;".format( user_name) )
         # Some implementations always expose "slots" for users; ignore empty slots
         if account.dict["UserName"] == "" and not account.dict.get( "Enabled", True ):
             continue

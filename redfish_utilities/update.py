@@ -87,6 +87,8 @@ def get_simple_update_info( context ):
     else:
         # Get the action info and its parameter listing
         action_info = context.get( simple_update_action["@Redfish.ActionInfo"] )
+        verify_response( action_info )
+
         simple_update_parameters = action_info.dict["Parameters"]
 
     return simple_update_uri, simple_update_parameters
@@ -170,9 +172,13 @@ def get_update_service( context ):
     """
 
     # Get the Service Root to find the Update Service
-    service_root = context.get( "/redfish/v1/" )
+    service_root = context.get( "/redfish/v1" )
+    verify_response( service_root )
+    
     if "UpdateService" not in service_root.dict:
         # No Update Service
         raise RedfishUpdateServiceNotFoundError( "Service does not have an UpdateService" )
 
-    return context.get( service_root.dict["UpdateService"]["@odata.id"] )
+    response = context.get( service_root.dict["UpdateService"]["@odata.id"] )
+    verify_response( response )
+    return response

@@ -38,13 +38,15 @@ def get_event_service( context ):
     """
 
     # Get the service root to find the event service
-    service_root = context.get( "/redfish/v1/" )
+    service_root = context.get( "/redfish/v1" )
+    verify_response( service_root )
     if "EventService" not in service_root.dict:
         # No event service
         raise RedfishEventServiceNotFoundError( "Service does not contain an event service" )
 
     # Get the event service
     event_service = context.get( service_root.dict["EventService"]["@odata.id"] )
+    verify_response( event_service )
     return event_service.dict
 
 def print_event_service( service ):
@@ -121,8 +123,10 @@ def get_event_subscriptions( context ):
     # Get each of the event subscriptions
     subscriptions = []
     subscription_col = context.get( event_service["Subscriptions"]["@odata.id"] )
+    verify_response( subscription_col )
     for subscription_member in subscription_col.dict["Members"]:
         subscription = context.get( subscription_member["@odata.id"] )
+        verify_response( subscription )
         subscriptions.append( subscription.dict )
     return subscriptions
 

@@ -26,15 +26,20 @@ def get_sensors( context ):
     sensor_list = []
 
     # Get the service root to find the chassis collection
-    service_root = context.get( "/redfish/v1/" )
+    service_root = context.get( "/redfish/v1" )
+    verify_response( service_root )
+
     if "Chassis" not in service_root.dict:
         # No chassis collection
         return sensor_list
 
     # Get the chassis collection and iterate through its collection
     chassis_col = context.get( service_root.dict["Chassis"]["@odata.id"] )
+    verify_response( chassis_col )
+
     for chassis_member in chassis_col.dict["Members"]:
         chassis = context.get( chassis_member["@odata.id"] )
+        verify_response( chassis )
 
         # Get the chassis status
         chassis_instance = {
@@ -49,6 +54,8 @@ def get_sensors( context ):
             # Get readings from the EnvironmentMetrics resource if available
             if "EnvironmentMetrics" in chassis.dict:
                 environment = context.get( chassis.dict["EnvironmentMetrics"]["@odata.id"] )
+                verify_response( environment )
+
                 get_excerpt_status( chassis_instance["ChassisName"], "TemperatureCelsius", "Cel", environment.dict, chassis_instance["Readings"] )
                 get_excerpt_status( chassis_instance["ChassisName"], "HumidityPercent", "%", environment.dict, chassis_instance["Readings"] )
                 get_excerpt_status( chassis_instance["ChassisName"], "PowerWatts", "W", environment.dict, chassis_instance["Readings"] )
@@ -59,16 +66,23 @@ def get_sensors( context ):
             # Get readings from the PowerSubsystem resource if available
             if "PowerSubsystem" in chassis.dict:
                 power = context.get( chassis.dict["PowerSubsystem"]["@odata.id"] )
+                verify_response( power )
 
                 # Add information for each power supply reported
                 if "PowerSupplies" in power.dict:
                     power_supplies = context.get( power.dict["PowerSupplies"]["@odata.id"] )
+                    verify_response( power_supplies )
+
                     for power_supply_member in power_supplies.dict["Members"]:
                         power_supply = context.get( power_supply_member["@odata.id"] )
+                        verify_response( power_supply )
+
                         power_supply_name = "Power Supply " + power_supply.dict["Id"]
                         get_discrete_status( power_supply_name + " State", power_supply.dict, chassis_instance["Readings"] )
                         if "Metrics" in power_supply.dict:
                             metrics = context.get( power_supply.dict["Metrics"]["@odata.id"] )
+                            verify_response( metrics )
+
                             get_excerpt_status( power_supply_name, "InputVoltage", "V", metrics.dict, chassis_instance["Readings"] )
                             get_excerpt_status( power_supply_name, "InputCurrentAmps", "A", metrics.dict, chassis_instance["Readings"] )
                             get_excerpt_status( power_supply_name, "InputPowerWatts", "W", metrics.dict, chassis_instance["Readings"] )
@@ -84,13 +98,19 @@ def get_sensors( context ):
                 # Add information for each battery reported
                 if "Batteries" in power.dict:
                     batteries = context.get( power.dict["Batteries"]["@odata.id"] )
+                    verify_response( batteries )
+
                     for battery_member in batteries.dict["Members"]:
                         battery = context.get( battery_member["@odata.id"] )
+                        verify_response( battery )
+
                         battery_name = "Battery " + battery.dict["Id"]
                         get_discrete_status( battery_name + " State", battery.dict, chassis_instance["Readings"] )
                         get_excerpt_status( battery_name, "StateOfHealthPercent", "%", battery.dict, chassis_instance["Readings"])
                         if "Metrics" in battery.dict:
                             metrics = context.get( battery.dict["Metrics"]["@odata.id"] )
+                            verify_response( metrics )
+
                             get_excerpt_status( battery_name, "InputVoltage", "V", metrics.dict, chassis_instance["Readings"] )
                             get_excerpt_status( battery_name, "InputCurrentAmps", "A", metrics.dict, chassis_instance["Readings"] )
                             get_excerpt_status( battery_name, "OutputVoltages", "V", metrics.dict, chassis_instance["Readings"] )
@@ -109,10 +129,13 @@ def get_sensors( context ):
             # Get readings from the ThermalSubsystem resource if available
             if "ThermalSubsystem" in chassis.dict:
                 thermal = context.get( chassis.dict["ThermalSubsystem"]["@odata.id"] )
+                verify_response( thermal )
 
                 # Add overall thermal metrics
                 if "ThermalMetrics" in thermal.dict:
                     metrics = context.get( thermal.dict["ThermalMetrics"]["@odata.id"] )
+                    verify_response( metrics )
+
                     if "TemperatureSummaryCelsius" in metrics.dict:
                         get_excerpt_status( chassis_instance["ChassisName"], "Internal", "Cel", metrics.dict["TemperatureSummaryCelsius"], chassis_instance["Readings"] )
                         get_excerpt_status( chassis_instance["ChassisName"], "Intake", "Cel", metrics.dict["TemperatureSummaryCelsius"], chassis_instance["Readings"] )
@@ -122,8 +145,12 @@ def get_sensors( context ):
                 # Add information for each fan reported
                 if "Fans" in thermal.dict:
                     fans = context.get( thermal.dict["Fans"]["@odata.id"] )
+                    verify_response( fans )
+
                     for fan_member in fans.dict["Members"]:
                         fan = context.get( fan_member["@odata.id"] )
+                        verify_response( fan )
+
                         fan_name = "Fan " + fan.dict["Id"]
                         get_discrete_status( fan_name + " State", fan.dict, chassis_instance["Readings"] )
                         get_excerpt_status( fan_name, "SpeedPercent", "%", fan.dict, chassis_instance["Readings"])
@@ -136,8 +163,12 @@ def get_sensors( context ):
             # Get all sensor readings if available
             if "Sensors" in chassis.dict:
                 sensors = context.get( chassis.dict["Sensors"]["@odata.id"] )
+                verify_response( sensors )
+
                 for sensor_member in sensors.dict["Members"]:
                     sensor = context.get( sensor_member["@odata.id"] )
+                    verify_response( sensor )
+
                     get_sensor_status( sensor.dict, chassis_instance["Readings"] )
 
         # Older power/thermal models
@@ -145,6 +176,7 @@ def get_sensors( context ):
             # Get readings from the Power resource if available
             if "Power" in chassis.dict:
                 power = context.get( chassis.dict["Power"]["@odata.id"] )
+                verify_response( power )
 
                 # Add information for each power supply reported
                 if "PowerSupplies" in power.dict:
@@ -174,6 +206,7 @@ def get_sensors( context ):
             # Get readings from the Thermal resource if available
             if "Thermal" in chassis.dict:
                 thermal = context.get( chassis.dict["Thermal"]["@odata.id"] )
+                verify_response( thermal )
 
                 # Add information for each of the temperatures reported
                 if "Temperatures" in thermal.dict:

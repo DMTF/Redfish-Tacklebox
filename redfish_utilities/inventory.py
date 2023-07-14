@@ -405,7 +405,8 @@ def get_chassis_ids( context ):
     """
 
     # Get the service root to find the chassis collection
-    service_root = context.get( "/redfish/v1/" )
+    service_root = context.get( "/redfish/v1" )
+    verify_response( service_root )
     if "Chassis" not in service_root.dict:
         # No chassis collection
         raise RedfishChassisNotFoundError( "Service does not contain a chassis collection" )

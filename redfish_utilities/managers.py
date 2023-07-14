@@ -54,7 +54,9 @@ def get_manager_ids( context ):
     """
 
     # Get the service root to find the manager collection
-    service_root = context.get( "/redfish/v1/" )
+    service_root = context.get( "/redfish/v1" )
+    verify_response( service_root )
+
     if "Managers" not in service_root.dict:
         # No manager collection
         raise RedfishManagerNotFoundError( "The service does not contain a manager collection" )
@@ -80,11 +82,13 @@ def get_manager( context, manager_id = None ):
     # If given an identifier, get the manager directly
     if manager_id is not None:
         manager = context.get( manager_uri_pattern.format( manager_id ) )
+        verify_response( manager )
     # No identifier given; see if there's exactly one member
     else:
         avail_managers = get_manager_ids( context )
         if len( avail_managers ) == 1:
             manager = context.get( manager_uri_pattern.format( avail_managers[0] ) )
+            verify_response( manager )
         else:
             raise RedfishManagerNotFoundError( "The service does not contain exactly one manager; a target manager needs to be specified: {}".format( ", ".join( avail_managers ) ) )
 
@@ -165,6 +169,8 @@ def get_manager_reset_info( context, manager_id = None, manager = None ):
     else:
         # Get the action info and its parameter listing
         action_info = context.get( reset_action["@Redfish.ActionInfo"] )
+        verify_response( action_info )
+
         reset_parameters = action_info.dict["Parameters"]
 
     return reset_uri, reset_parameters
@@ -268,6 +274,8 @@ def get_manager_reset_to_defaults_info( context, manager_id = None, manager = No
     else:
         # Get the action info and its parameter listing
         action_info = context.get( reset_action["@Redfish.ActionInfo"] )
+        verify_response( action_info )
+
         reset_parameters = action_info.dict["Parameters"]
 
     return reset_uri, reset_parameters
@@ -369,11 +377,13 @@ def get_manager_ethernet_interface( context, manager_id = None, interface_id = N
     # If given an identifier, get the Ethernet interface directly
     if interface_id is not None:
         interface = context.get( interface_uri_pattern.format( manager_id, interface_id ) )
+        verify_response( interface )
     # No identifier given; see if there's exactly one member
     else:
         avail_interfaces = get_manager_ethernet_interface_ids( context, manager_id )
         if len( avail_interfaces ) == 1:
             interface = context.get( interface_uri_pattern.format( manager_id, avail_interfaces[0] ) )
+            verify_response( interface )
         else:
             raise RedfishManagerEthIntNotFoundError( "Manager {} does not contain exactly one Ethernet interface; a target Ethernet interface needs to be specified: {}".format( manager_id, ", ".join( avail_interfaces ) ) )
 

@@ -80,11 +80,14 @@ def get_log_entries( context, container_type = log_container.MANAGER, container_
     # Read in the log entries
     log_entries = []
     log_entry_col = context.get( log_service.dict["Entries"]["@odata.id"] )
+    verify_response( log_entry_col )
+
     log_entries.extend( log_entry_col.dict["Members"] )
 
     # If a next link is provided, iterate over it and add to the log entry list
     while "Members@odata.nextLink" in log_entry_col.dict:
         log_entry_col = context.get( log_entry_col.dict["Members@odata.nextLink"] )
+        verify_response( log_entry_col )
         log_entries.extend( log_entry_col.dict["Members"] )
 
     return log_entries
@@ -203,12 +206,15 @@ def download_diagnostic_data( context, collect_response ):
 
     # Get the log entry
     response = context.get( entry_uri )
+    verify_response( response )
+
     if "AdditionalDataURI" not in response.dict:
         raise RedfishDiagnosticDataNotFoundError( "The log entry for the collected data does not contain an additional data link" )
 
     # Download the file
     filename = response.dict["AdditionalDataURI"].split( "/" )[-1]
     response = context.get( response.dict["AdditionalDataURI"] )
+    verify_response( response )
     return filename, response._http_response.content     # TODO: May need to push support in python-redfish-library to have a proper method of getting raw content
 
 def get_log_service( context, container_type = log_container.MANAGER, container_id = None, log_service_id = None ):
@@ -226,7 +232,9 @@ def get_log_service( context, container_type = log_container.MANAGER, container_
     """
 
     # Get the Service Root to find the resource collection
-    service_root = context.get( "/redfish/v1/" )
+    service_root = context.get( "/redfish/v1" )
+    verify_response( service_root )
+
     if container_type.value not in service_root.dict:
         # No resource collection
         raise RedfishLogServiceNotFoundError( "Service does not contain a {} collection".format( container_type.value ) )
@@ -234,19 +242,24 @@ def get_log_service( context, container_type = log_container.MANAGER, container_
     # Get the resource collection and iterate through its collection to find the matching container instance
     avail_resources = []
     resource_col = context.get( service_root.dict[container_type.value]["@odata.id"] )
+    verify_response( resource_col )
+
     if container_id is None:
         if len( resource_col.dict["Members"] ) == 1:
             resource = context.get( resource_col.dict["Members"][0]["@odata.id"] )
+            verify_response( resource )
             container_id = resource.dict["Id"]
         else:
             for resource_member in resource_col.dict["Members"]:
                 resource = context.get( resource_member["@odata.id"] )
+                verify_response( resource )
                 avail_resources.append( resource.dict["Id"] )
             raise RedfishLogServiceNotFoundError( "Service does not contain exactly one resource in {}; a target container needs to be specified: {}".format( container_type.value, ", ".join( avail_resources ) ) )
     else:
         container_found = False
         for resource_member in resource_col.dict["Members"]:
             resource = context.get( resource_member["@odata.id"] )
+            verify_response( resource )
             avail_resources.append( resource.dict["Id"] )
             if resource.dict["Id"] == container_id:
                 container_found = True
@@ -262,17 +275,27 @@ def get_log_service( context, container_type = log_container.MANAGER, container_
     # Get the log service collection and iterate through its collection
     avail_logs = []
     log_serv_col = context.get( resource.dict["LogServices"]["@odata.id"] )
+    verify_response( log_serv_col )
+
     if log_service_id is None:
         if len( log_serv_col.dict["Members"] ) == 1:
-            return context.get( log_serv_col.dict["Members"][0]["@odata.id"] )
+           log_serv = context.get( log_serv_col.dict["Members"][0]["@odata.id"] )
+           verify_response( log_serv )
+
+           avail_logs.append( log_serv.dict["Id"] )
+            return log_serv
         else:
             for log_serv_member in log_serv_col.dict["Members"]:
                 log_serv = context.get( log_serv_member["@odata.id"] )
+                verify_response( log_serv )
+
                 avail_logs.append( log_serv.dict["Id"] )
             raise RedfishLogServiceNotFoundError( "{} does not contain exactly one log service; a target log service needs to be specified: {}".format( container_id, ", ".join( avail_logs ) ) )
     else:
         for log_serv_member in log_serv_col.dict["Members"]:
             log_serv = context.get( log_serv_member["@odata.id"] )
+            verify_response( log_serv )
+            
             avail_logs.append( log_serv.dict["Id"] )
             if log_serv.dict["Id"] == log_service_id:
                 return log_serv

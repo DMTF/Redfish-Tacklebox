@@ -72,7 +72,9 @@ def get_system_ids( context ):
     """
 
     # Get the service root to find the system collection
-    service_root = context.get( "/redfish/v1/" )
+    service_root = context.get( "/redfish/v1" )
+    verify_response( service_root )
+
     if "Systems" not in service_root.dict:
         # No system collection
         raise RedfishSystemNotFoundError( "Service does not contain a system collection" )
@@ -98,11 +100,13 @@ def get_system( context, system_id = None ):
     # If given an identifier, get the system directly
     if system_id is not None:
         system = context.get( system_uri_pattern.format( system_id ) )
+        verify_response( system )
     # No identifier given; see if there's exactly one member
     else:
         avail_systems = get_system_ids( context )
         if len( avail_systems ) == 1:
             system = context.get( system_uri_pattern.format( avail_systems[0] ) )
+            verify_response( system )
         else:
             raise RedfishSystemNotFoundError( "Service does not contain exactly one system; a target system needs to be specified: {}".format( ", ".join( avail_systems ) ) )
 
@@ -258,6 +262,8 @@ def get_system_reset_info( context, system_id = None, system = None ):
     else:
         # Get the action info and its parameter listing
         action_info = context.get( reset_action["@Redfish.ActionInfo"] )
+        verify_response( action_info )
+
         reset_parameters = action_info.dict["Parameters"]
 
     return reset_uri, reset_parameters
@@ -333,6 +339,8 @@ def get_virtual_media( context, system_id = None ):
     virtual_media_list = []
     for member in virtual_media_collection.dict["Members"]:
         virtual_media = context.get( member["@odata.id"] )
+        verify_response( virtual_media )
+
         virtual_media_list.append( virtual_media.dict )
     return virtual_media_list
 
@@ -390,6 +398,8 @@ def insert_virtual_media( context, image, system_id = None, media_id = None, med
     match = False
     for member in virtual_media_collection.dict["Members"]:
         media = context.get( member["@odata.id"] )
+        verify_response( media )
+
         if media.dict["Image"] is not None:
             # In use; move on
             continue
@@ -462,6 +472,8 @@ def eject_virtual_media( context, media_id, system_id = None ):
     # Scan the virtual media for the selected slot
     for member in virtual_media_collection.dict["Members"]:
         media = context.get( member["@odata.id"] )
+        verify_response( media )
+
         if media.dict["Id"] == media_id:
             # Found the selected slot; eject it
             try:
@@ -508,6 +520,8 @@ def get_virtual_media_collection( context, system_id = None ):
             if "ManagedBy" in system.dict["Links"]:
                 for manager in system.dict["Links"]["ManagedBy"]:
                     manager_resp = context.get( manager["@odata.id"] )
+                    verify_response( manager_resp )
+
                     if "VirtualMedia" in manager_resp.dict:
                         # Get the first manager that contains virtual media
                         virtual_media_uri = manager_resp.dict["VirtualMedia"]["@odata.id"]
@@ -516,7 +530,10 @@ def get_virtual_media_collection( context, system_id = None ):
         raise RedfishVirtualMediaNotFoundError( "System '{}' does not support virtual media".format( system.dict["Id"] ) )
 
     # Get the VirtualMediaCollection
-    return context.get( virtual_media_uri )
+    response = context.get( virtual_media_uri )
+    verify_response( response )
+
+    return response
 
 def get_system_bios( context, system_id = None ):
     """
@@ -538,6 +555,8 @@ def get_system_bios( context, system_id = None ):
     if "Bios" not in system.dict:
         raise RedfishSystemBiosNotFoundError( "System '{}' does not support representing BIOS".format( system.dict["Id"] ) )
     bios = context.get( system.dict["Bios"]["@odata.id"] )
+    verify_response( bios )
+
     current_settings = bios.dict["Attributes"]
     future_settings = bios.dict["Attributes"]
 
@@ -575,6 +594,8 @@ def set_system_bios( context, settings, system_id = None ):
         raise RedfishSystemBiosNotFoundError( "System '{}' does not support representing BIOS".format( system.dict["Id"] ) )
     bios_uri = system.dict["Bios"]["@odata.id"]
     bios = context.get( bios_uri )
+    verify_response( bios )
+
     etag = bios.getheader( "ETag" )
     if "@Redfish.Settings" in bios.dict:
         bios_settings = get_system_bios_settings( context, bios, system.dict["Id"] )
@@ -605,6 +626,7 @@ def get_system_bios_settings( context, bios, system_id ):
 
     if "SettingsObject" in bios.dict["@Redfish.Settings"]:
         bios_settings = context.get( bios.dict["@Redfish.Settings"]["SettingsObject"]["@odata.id"] )
+        verify_response( bios_settings )
     else:
         if config.__workarounds__:
             warnings.warn( "System '{}' BIOS resource contains the settings term, but no 'SettingsObject'.  Contact your vendor.  Attempting workarounds...".format( system_id ) )
