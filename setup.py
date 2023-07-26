@@ -4,7 +4,41 @@
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/main/LICENSE.md
 
 from setuptools import setup
+from setuptools import Command as _Command
 from codecs import open
+import sys
+import os
+
+class Pyinstaller(_Command):
+    description: 'Pyinstaller'
+    user_options = []
+    def __init__(self, dist, **kw):
+        super().__init__(dist, **kw)
+        self.flags = ""
+        self.scripts = []
+        self.packages = []
+        if not os.path.exists("./dist"):
+            os.mkdir("dist")
+        if not os.path.exists("./spec"):
+            os.mkdir("spec")
+    def initialize_options(self):
+        self.flags = ""
+        self.scripts = []
+        self.packages = []
+
+    def finalize_options(self):
+        self.flags = "--specpath ./spec"
+        self.scripts = self.distribution.scripts
+        self.packages = self.distribution.packages
+        for package in self.packages:
+            self.flags = "{} --collect-all {}".format(self.flags,package)
+
+    def pyinstaller(self, target):
+        if os.system("pyinstaller --onefile {} {}".format(target, self.flags)):
+            raise Exception("PyInstaller failed!")
+    def run(self):
+        for scripts in self.scripts:
+            self.pyinstaller(scripts)
 
 with open( "README.md", "r", "utf-8" ) as f:
     long_description = f.read()
@@ -43,5 +77,8 @@ setup(
         "scripts/rf_update.py",
         "scripts/rf_virtual_media.py"
     ],
-    install_requires = [ "redfish", "XlsxWriter" ]
+    install_requires = [ "redfish", "XlsxWriter" ],
+    cmdclass={
+        'pyinstaller': Pyinstaller
+    }
 )

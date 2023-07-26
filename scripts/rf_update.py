@@ -143,4 +143,4 @@ finally:
     except:
         pass
     redfish_obj.logout()
-exit( exit_code )
+sys.exit( exit_code )
