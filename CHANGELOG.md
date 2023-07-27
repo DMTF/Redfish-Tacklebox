@@ -1,5 +1,9 @@
 # Change Log
 
+## [3.1.6] - 2023-07-27
+- Corrected excaption raising in several manager methods to properly reference the manager's identifier
+- Added 'settime' command to 'rf_manager_config.py'
+
 ## [3.1.5] - 2023-07-07
 - Added 'rf_licenses.py' tool to manage licenses on a Redfish service
 - Added 'resettodefaults' subcommand to 'rf_manager_config.py'
