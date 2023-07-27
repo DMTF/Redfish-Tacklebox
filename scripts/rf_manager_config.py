@@ -47,6 +47,9 @@ setnet_argget.add_argument( "--vlanpriority", "-vlanpriority", type = int, help 
 reset_to_defaults_argget = subparsers.add_parser( "resettodefaults", help = "Resets a manager to default settings" )
 reset_to_defaults_argget.add_argument( "--type", "-t", type = str, help = "The type of reset-to-defaults operation to perform", choices = redfish_utilities.reset_to_defaults_types )
 reset_to_defaults_argget.add_argument( "--info", "-info", action = "store_true", help = "Indicates if reset-to-defaults information should be reported" )
+set_time_argget = subparsers.add_parser( "settime", help = "Sets the date-time on a manager" )
+set_time_argget.add_argument( "--datetime", "-dt", type = str, help = "The date-time value to set" )
+set_time_argget.add_argument( "--offset", "-o", type = str, help = "The date-time offset value to set" )
 args = argget.parse_args()
 
 if args.debug:
@@ -91,6 +94,8 @@ try:
             response = redfish_utilities.manager_reset_to_defaults( redfish_obj, args.manager, args.type )
             response = redfish_utilities.poll_task_monitor( redfish_obj, response )
             redfish_utilities.verify_response( response )
+    elif args.command == "settime":
+        redfish_utilities.set_manager( redfish_obj, args.manager, args.datetime, args.offset )
     elif args.command == "getnet":
         interface = redfish_utilities.get_manager_ethernet_interface( redfish_obj, args.manager, args.id )
         redfish_utilities.print_manager_ethernet_interface( interface )

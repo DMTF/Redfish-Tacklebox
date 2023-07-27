@@ -96,6 +96,39 @@ def get_manager( context, manager_id = None ):
     verify_response( manager )
     return manager
 
+def set_manager( context, manager_id = None, date_time = None, date_time_offset = None ):
+    """
+    Finds a manager matching the given identifier and sets one or more properties
+
+    Args:
+        context: The Redfish client object with an open session
+        manager_id: The manager to locate; if None, perform on the only manager
+        date_time: The date-time value to set
+        date_time_offset: The date-time offset value to set
+
+    Returns:
+        The response of the PATCH
+    """
+
+    # Locate the manager
+    manager = get_manager( context, manager_id )
+
+    # Build the payload
+    payload = {}
+    if date_time is not None:
+        payload["DateTime"] = date_time
+    if date_time_offset is not None:
+        payload["DateTimeOffset"] = date_time_offset
+
+    # Update the manager
+    headers = None
+    etag = manager.getheader( "ETag" )
+    if etag is not None:
+        headers = { "If-Match": etag }
+    response = context.patch( manager.dict["@odata.id"], body = payload, headers = headers )
+    verify_response( response )
+    return response
+
 def print_manager( manager ):
     """
     Prints the manager info

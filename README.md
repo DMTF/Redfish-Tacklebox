@@ -247,17 +247,19 @@ The tool will then perform an operation on the `Boot` object within the matching
 ```
 usage: rf_manager_config.py [-h] --user USER --password PASSWORD --rhost RHOST
                             [--manager MANAGER]
-                            {info,reset,getnet,setnet} ...
+                            {info,reset,getnet,setnet,resettodefaults,settime}
+                            ...
 
 A tool to manage managers in a service
 
 positional arguments:
-  {info,reset,getnet,setnet,resettodefaults}
+  {info,reset,getnet,setnet,resettodefaults,settime}
     info                Displays information about a manager
     reset               Resets a manager
     getnet              Displays information about an Ethernet interface
     setnet              Configures an Ethernet interface
-    resettodefaults     Resets a manager to default setting
+    resettodefaults     Resets a manager to default settings
+    settime             Sets the date-time on a manager
 
 required arguments:
   --user USER, -u USER  The user name for authentication
@@ -307,10 +309,32 @@ optional arguments:
 Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 reset -t GracefulRestart`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
-It then traverses the manager collection for the service to find the matching system specified by the *manager* argument.
+It then traverses the manager collection for the service to find the matching manager specified by the *manager* argument.
 It will perform the `Reset` action with the specified reset type from the *type* argument.
 * If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
 * If *type* is not specified, it will attempt a `GracefulRestart`.
+
+
+#### Set Time
+
+```
+usage: rf_manager_config.py settime [-h] [--datetime DATETIME] [--offset OFFSET]
+
+options:
+  -h, --help            show this help message and exit
+  --datetime DATETIME, -dt DATETIME
+                        The date-time value to set
+  --offset OFFSET, -o OFFSET
+                        The date-time offset value to set
+```
+
+Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 settime -dt 2023-07-27T12:00:00-05:00`
+
+Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 settime -o=-05:00`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the manager specified by the *manager* argument, and applies the *datetime* and *offset* values to the manager instance.
+* If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
 
 
 #### Get Network Interface

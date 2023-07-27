@@ -30,6 +30,7 @@ from .logs import collect_diagnostic_data
 from .logs import download_diagnostic_data
 from .managers import get_manager_ids
 from .managers import get_manager
+from .managers import set_manager
 from .managers import print_manager
 from .managers import get_manager_reset_info
 from .managers import manager_reset
