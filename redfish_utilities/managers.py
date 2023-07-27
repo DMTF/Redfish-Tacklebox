@@ -137,9 +137,9 @@ def get_manager_reset_info( context, manager_id = None, manager = None ):
 
     # Check that there is a Reset action
     if "Actions" not in manager.dict:
-        raise RedfishManagerResetNotFoundError( "Manager {} does not support the Reset action".format( manager["Id"] ) )
+        raise RedfishManagerResetNotFoundError( "Manager {} does not support the Reset action".format( manager.dict["Id"] ) )
     if "#Manager.Reset" not in manager.dict["Actions"]:
-        raise RedfishManagerResetNotFoundError( "Manager {} does not support the Reset action".format( manager["Id"] ) )
+        raise RedfishManagerResetNotFoundError( "Manager {} does not support the Reset action".format( manager.dict["Id"] ) )
 
     # Extract the info about the Reset action
     reset_action = manager.dict["Actions"]["#Manager.Reset"]
@@ -240,9 +240,9 @@ def get_manager_reset_to_defaults_info( context, manager_id = None, manager = No
 
     # Check that there is a Reset action
     if "Actions" not in manager.dict:
-        raise RedfishManagerResetToDefaultsNotFoundError( "Manager {} does not support the ResetToDefaults action".format( manager["Id"] ) )
+        raise RedfishManagerResetToDefaultsNotFoundError( "Manager {} does not support the ResetToDefaults action".format( manager.dict["Id"] ) )
     if "#Manager.ResetToDefaults" not in manager.dict["Actions"]:
-        raise RedfishManagerResetToDefaultsNotFoundError( "Manager {} does not support the ResetToDefaults action".format( manager["Id"] ) )
+        raise RedfishManagerResetToDefaultsNotFoundError( "Manager {} does not support the ResetToDefaults action".format( manager.dict["Id"] ) )
 
     # Extract the info about the ResetToDefaults action
     reset_action = manager.dict["Actions"]["#Manager.ResetToDefaults"]
