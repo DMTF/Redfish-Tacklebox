@@ -17,6 +17,16 @@ import logging
 import redfish
 import redfish_utilities
 import traceback
+import sys
+from redfish.messages import RedfishPasswordChangeRequiredError
+
+def print_password_change_required_and_logout(redfish_obj, args):
+    print("Password change required\n run rf_accounts.py -r {} -u {} -p <old password> --setpassword {} <new password> \nto set your password\n".format(args.rhost ,args.user, args.user))
+    try:
+        redfish_obj.logout()
+    except Exception as e:
+        pass
+    sys.exit(1)
 
 # Get the input arguments
 argget = argparse.ArgumentParser( description = "A tool to manage user accounts on a Redfish service" )
@@ -41,8 +51,38 @@ if args.debug:
     logger.info( "rf_accounts Trace" )
 
 # Set up the Redfish object
-redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
-redfish_obj.login( auth = "session" )
+try:
+    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password , timeout=5, max_retry=3)
+    redfish_obj.login( auth = "session" )
+except RedfishPasswordChangeRequiredError as e:
+    if args.setpassword is None:
+        print_password_change_required_and_logout(redfish_obj, args)
+        sys.exit(1)
+    else:
+        if args.setpassword[0] == args.user:
+            pass
+        else:
+            print_password_change_required_and_logout(redfish_obj, args)
+            sys.exit(1)
+except Exception as e:
+    # other error
+    error_string = str(e)
+    if len(error_string) > 0:
+        print("{}\nLogin Failed\n".format(error_string))
+    else:
+        print("Login Failed\n")
+    
+    try:
+        redfish_obj.logout()
+    except Exception as e:
+        pass
+    sys.exit(1)
+
+try:
+    redfish_obj
+except Exception as e:
+    print("Login Failed\n")
+    sys.exit(1)
 
 exit_code = 0
 try:
@@ -89,5 +129,8 @@ except Exception as e:
     print( e )
 finally:
     # Log out
-    redfish_obj.logout()
-exit( exit_code )
+    try:
+        redfish_obj.logout()
+    except Exception as e:
+        pass
+sys.exit( exit_code )

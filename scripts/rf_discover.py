@@ -14,6 +14,7 @@ Brief : This script uses the redfish module to discover Redfish services
 import argparse
 import re
 import redfish
+import sys
 
 # No arguments, but having help text is useful
 argget = argparse.ArgumentParser( description = "A tool to discover Redfish services" )
@@ -23,6 +24,7 @@ args = argget.parse_args()
 services = redfish.discover_ssdp()
 if len( services ) == 0:
     print( "No Redfish services discovered" )
+    sys.exit(1)
 else:
     print( "Redfish services:" )
 
@@ -35,7 +37,9 @@ for service in services:
         # Need to strip off /redfish/v1 from the SSDP response to use the URL with the library
         groups = re.search( "^(.+)\/redfish\/v1\/?$", services[service] )
         url = groups.group( 1 )
-        redfish_obj = redfish.redfish_client( base_url = url )
+        redfish_obj = redfish.redfish_client( base_url = url, timeout=5, max_retry=3)
         print( "{}: {} ({})".format( service, services[service], redfish_obj.root["Product"] ) )
     except:
         print( "{}: {}".format( service, services[service] ) )
+
+sys.exit(0)

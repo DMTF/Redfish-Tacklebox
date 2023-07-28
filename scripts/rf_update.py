@@ -24,6 +24,7 @@ import sys
 import threading
 import time
 import traceback
+from redfish.messages import RedfishPasswordChangeRequiredError
 
 if sys.version_info > ( 3, ):
     import http.server
@@ -79,8 +80,28 @@ if args.debug:
     logger.info( "rf_update Trace" )
 
 # Set up the Redfish object
-redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
-redfish_obj.login( auth = "session" )
+try:
+    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password , timeout=5, max_retry=3)
+    redfish_obj.login( auth = "session" )
+except RedfishPasswordChangeRequiredError as e:
+    print("Password change required\n run rf_accounts.py -r {} -u {} -p <old password> --setpassword {} <new password> \nto set your password\n".format(args.rhost ,args.user, args.user))
+    try:
+        redfish_obj.logout()
+    except Exception as e:
+        pass
+    sys.exit(1)
+except Exception as e:
+    # other error
+    error_string = str(e)
+    if len(error_string) > 0:
+        print("{}\nLogin Failed\n".format(error_string))
+    else:
+        print("Login Failed\n")
+    try:
+        redfish_obj.logout()
+    except Exception as e:
+        pass
+    sys.exit(1)
 
 start_path = os.getcwd()
 targets = None
@@ -142,5 +163,9 @@ finally:
         shutil.rmtree( WEB_SERVER_FOLDER )
     except:
         pass
-    redfish_obj.logout()
-exit( exit_code )
+    # Log out
+    try:
+        redfish_obj.logout()
+    except Exception as e:
+        pass
+sys.exit( exit_code )

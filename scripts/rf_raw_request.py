@@ -15,6 +15,8 @@ import argparse
 import json
 import os
 import redfish
+import sys
+from redfish.messages import RedfishPasswordChangeRequiredError
 
 # Get the input arguments
 argget = argparse.ArgumentParser( description = "A tool perform a raw request to a Redfish service" )
@@ -28,49 +30,78 @@ argget.add_argument( "--verbose", "-v", action = "store_true", help = "Indicates
 args = argget.parse_args()
 
 # Connect to the service
-with redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password ) as redfish_obj:
-    # Encode the body
-    # If the body argument points to a file, load the file
-    if args.body is not None and os.path.isfile( args.body ):
-        with open( args.body, mode="rb" ) as file:
-            body = file.read()
+try:
+    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password , timeout=5, max_retry=3)
+    redfish_obj.login( auth = "session" )
+except RedfishPasswordChangeRequiredError as e:
+    print("Password change required\n run rf_accounts.py -r {} -u {} -p <old password> --setpassword {} <new password> \nto set your password\n".format(args.rhost ,args.user, args.user))
+    try:
+        redfish_obj.logout()
+    except Exception as e:
+        pass
+    sys.exit(1)
+except Exception as e:
+    # other error
+    error_string = str(e)
+    if len(error_string) > 0:
+        print("{}\nLogin Failed\n".format(error_string))
     else:
-        # Not a file; either JSON or a raw string
-        try:
-            body = json.loads( args.body )
-        except:
-            body = args.body
-    if body is None:
-        # Default case if nothing resolves (empty JSON object)
-        body = {}
+        print("Login Failed\n")
+    try:
+        redfish_obj.logout()
+    except Exception as e:
+        pass
+    sys.exit(1)
 
-    # Perform the requested operation
-    if args.method == "HEAD":
-        resp = redfish_obj.head( args.request )
-    elif args.method == "POST":
-        resp = redfish_obj.post( args.request, body = body )
-    elif args.method == "PATCH":
-        resp = redfish_obj.patch( args.request, body = body )
-    elif args.method == "PUT":
-        resp = redfish_obj.put( args.request, body = body )
-    elif args.method == "DELETE":
-        resp = redfish_obj.delete( args.request )
-    else:
-        resp = redfish_obj.get( args.request )
+# Encode the body
+# If the body argument points to a file, load the file
+if args.body is not None and os.path.isfile( args.body ):
+    with open( args.body, mode="rb" ) as file:
+        body = file.read()
+else:
+    # Not a file; either JSON or a raw string
+    try:
+        body = json.loads( args.body )
+    except:
+        body = args.body
+if body is None:
+    # Default case if nothing resolves (empty JSON object)
+    body = {}
 
-    # Print HTTP status and headers
-    if args.verbose:
-        print( "HTTP {}".format( resp.status ) )
-        for header in resp.getheaders():
-            print( "{}: {}".format( header[0], header[1] ) )
-        print()
+# Perform the requested operation
+if args.method == "HEAD":
+    resp = redfish_obj.head( args.request )
+elif args.method == "POST":
+    resp = redfish_obj.post( args.request, body = body )
+elif args.method == "PATCH":
+    resp = redfish_obj.patch( args.request, body = body )
+elif args.method == "PUT":
+    resp = redfish_obj.put( args.request, body = body )
+elif args.method == "DELETE":
+    resp = redfish_obj.delete( args.request )
+else:
+    resp = redfish_obj.get( args.request )
 
-    # Print the response
-    if resp.status != 204:
-        try:
-            print( json.dumps( resp.dict, sort_keys = True, indent = 4, separators = ( ",", ": " ) ) )
-        except:
-            # The response is either malformed JSON or not JSON at all
-            print( resp.text )
-    else:
-        print( "No response body" )
+# Print HTTP status and headers
+if args.verbose:
+    print( "HTTP {}".format( resp.status ) )
+    for header in resp.getheaders():
+        print( "{}: {}".format( header[0], header[1] ) )
+    print()
+
+# Print the response
+if resp.status != 204:
+    try:
+        print( json.dumps( resp.dict, sort_keys = True, indent = 4, separators = ( ",", ": " ) ) )
+    except:
+        # The response is either malformed JSON or not JSON at all
+        print( resp.text )
+else:
+    print( "No response body" )
+
+# Log out
+try:
+    redfish_obj.logout()
+except Exception as e:
+    pass
+sys.exit(0)
