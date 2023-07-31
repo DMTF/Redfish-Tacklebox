@@ -72,13 +72,13 @@ if body is None:
 if args.method == "HEAD":
     resp = redfish_obj.head( args.request )
 elif args.method == "POST":
-    resp = redfish_obj.post( args.request, body = body )
+    resp = redfish_obj.post( args.request, body = body, ifmatch=True)
 elif args.method == "PATCH":
-    resp = redfish_obj.patch( args.request, body = body )
+    resp = redfish_obj.patch( args.request, body = body, ifmatch=True)
 elif args.method == "PUT":
-    resp = redfish_obj.put( args.request, body = body )
+    resp = redfish_obj.put( args.request, body = body, ifmatch=True)
 elif args.method == "DELETE":
-    resp = redfish_obj.delete( args.request )
+    resp = redfish_obj.delete( args.request, ifmatch=True)
 else:
     resp = redfish_obj.get( args.request )
 
