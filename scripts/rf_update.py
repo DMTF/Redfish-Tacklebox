@@ -81,7 +81,7 @@ if args.debug:
 
 # Set up the Redfish object
 try:
-    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password , timeout=5, max_retry=3)
+    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password , timeout=20, max_retry=3)
     redfish_obj.login( auth = "session" )
 except RedfishPasswordChangeRequiredError as e:
     print("Password change required\n run rf_accounts.py -r {} -u {} -p <old password> --setpassword {} <new password> \nto set your password\n".format(args.rhost ,args.user, args.user))
