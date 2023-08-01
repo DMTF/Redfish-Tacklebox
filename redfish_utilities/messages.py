@@ -13,3 +13,23 @@ Brief : This file contains the definitions and functionalities for interacting
 """
 
 from redfish.messages import *
+
+"""
+    for backend capability
+"""
+def print_error_payload( response ):
+    """
+    Prints an error payload, which can also be used for action responses
+
+    Args:
+        response: The response to print
+    """
+
+    try:
+        print( get_error_messages( response ) )
+    except:
+        # No response body
+        if response.status >= 400:
+            print( "Failed" )
+        else:
+            print( "Success" )
