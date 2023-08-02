@@ -17,6 +17,7 @@ import logging
 import redfish
 import redfish_utilities
 import traceback
+import sys
 
 # Get the input arguments
 argget = argparse.ArgumentParser( description = "A tool to perform a power/reset operation of a system" )
@@ -68,4 +69,4 @@ except Exception as e:
 finally:
     # Log out
     redfish_obj.logout()
-exit( exit_code )
+sys.exit( exit_code )
