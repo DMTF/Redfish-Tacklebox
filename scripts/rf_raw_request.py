@@ -32,13 +32,10 @@ def ifmatch_header(redfish_obj, path, headers=None):
     if headers is None:
         headers = {}
     try:
-        actions_search = "^/redfish/v1/.*/Actions/.*$"
-        resault = re.search(actions_search, path)
-        if not resault:
-            response = redfish_obj.get(path)
-            etag = response.getheader( "ETag" )
-            if etag is not None:
-                headers[ "If-Match"] = etag
+        response = redfish_obj.get(path)
+        etag = response.getheader( "ETag" )
+        if etag is not None:
+            headers[ "If-Match"] = etag
     except Exception:
         pass
     return headers
