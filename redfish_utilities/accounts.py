@@ -13,6 +13,7 @@ Brief : This file contains the definitions and functionalities for managing
 """
 
 from .messages import verify_response
+from .messages import RedfishPasswordChangeRequiredError
 
 class RedfishAccountCollectionNotFoundError( Exception ):
     """
@@ -195,13 +196,15 @@ def get_account_collection( context ):
     """
 
     # Get the Service Root to find the Account Service
-    service_root = context.get( "/redfish/v1/" )
+    service_root = context.get( "/redfish/v1" )
+    verify_response( service_root )
     if "AccountService" not in service_root.dict:
         # No Account Service
         raise RedfishAccountCollectionNotFoundError( "Service does not contain an Account Service" )
 
     # Get the Account Service to find the Account Collection
     account_service = context.get( service_root.dict["AccountService"]["@odata.id"] )
+    verify_response( account_service )
     if "Accounts" not in account_service.dict:
         # No Account Collection
         raise RedfishAccountCollectionNotFoundError( "Service does not contain an Account Collection" )
@@ -222,7 +225,19 @@ def get_user( context, user_name ):
     """
 
     avail_users = []
-    account_col = context.get( get_account_collection( context ) )
+
+    # if Password Change Required and user is same as login user, then redirect to Password Change Required's url
+    try:
+        account_col = context.get( get_account_collection( context ) )
+        verify_response( account_col )
+    except RedfishPasswordChangeRequiredError as e:
+        account = context.get(e.args[1])
+        verify_response( account )
+        if account.dict["UserName"] == user_name:
+            return e.args[1], account
+        else:
+            raise RedfishAccountCollectionNotFoundError( "User '{}' is not found;".format( user_name) )
+            
     for account_member in account_col.dict["Members"]:
         account = context.get( account_member["@odata.id"] )
 

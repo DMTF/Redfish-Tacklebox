@@ -18,6 +18,7 @@ import redfish
 import redfish_utilities
 import traceback
 import sys
+from redfish.messages import RedfishPasswordChangeRequiredError
 
 # Get the input arguments
 argget = argparse.ArgumentParser( description = "A tool to perform a power/reset operation of a system" )
@@ -37,8 +38,28 @@ if args.debug:
     logger.info( "rf_power_reset Trace" )
 
 # Set up the Redfish object
-redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
-redfish_obj.login( auth = "session" )
+try:
+    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password , timeout=5, max_retry=3)
+    redfish_obj.login( auth = "session" )
+except RedfishPasswordChangeRequiredError as e:
+    print("Password change required\n run rf_accounts.py -r {} -u {} -p <old password> --setpassword {} <new password> \nto set your password\n".format(args.rhost ,args.user, args.user))
+    try:
+        redfish_obj.logout()
+    except Exception as e:
+        pass
+    sys.exit(1)
+except Exception as e:
+    # other error
+    error_string = str(e)
+    if len(error_string) > 0:
+        print("{}\nLogin Failed\n".format(error_string))
+    else:
+        print("Login Failed\n")
+    try:
+        redfish_obj.logout()
+    except Exception as e:
+        pass
+    sys.exit(1)
 
 exit_code = 0
 try:
@@ -68,5 +89,9 @@ except Exception as e:
     print( e )
 finally:
     # Log out
-    redfish_obj.logout()
+    try:
+        redfish_obj.logout()
+    except Exception as e:
+        pass
+
 sys.exit( exit_code )

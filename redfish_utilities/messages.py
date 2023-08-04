@@ -12,12 +12,30 @@ Brief : This file contains the definitions and functionalities for interacting
         with Messages for a given Redfish service
 """
 
-class RedfishOperationFailedError( Exception ):
-    """
-    Raised when an operation has failed (HTTP Status >= 400)
-    """
-    pass
+from redfish.messages import *
 
+def verify_response( response ):
+    """
+    Verifies a response and raises an exception if there was a failure
+
+    Args:
+        response: The response to verify
+    """
+
+    if response.status >= 400:
+        messages_detail = get_messages_detail(response)
+        exception_string = get_error_messages( messages_detail )
+        message_item = search_message(messages_detail, "Base", "PasswordChangeRequired")
+        if not message_item is None:
+            raise RedfishPasswordChangeRequiredError( "Operation failed: HTTP {}\n{}".format( response.status, exception_string ), message_item["MessageArgs"][0])
+        else:
+            raise RedfishOperationFailedError( "Operation failed: HTTP {}\n{}".format( response.status, exception_string ) )
+
+    return
+
+"""
+    for backend capability
+"""
 def print_error_payload( response ):
     """
     Prints an error payload, which can also be used for action responses
@@ -34,39 +52,3 @@ def print_error_payload( response ):
             print( "Failed" )
         else:
             print( "Success" )
-
-def get_error_messages( response ):
-    """
-    Builds a string based on the error messages in the payload
-
-    Args:
-        response: The response to print
-
-    Returns:
-        The string containing error messages
-    """
-
-    # Pull out the error payload and the messages
-    out_string = response.dict["error"]["message"]
-    if "@Message.ExtendedInfo" in response.dict["error"]:
-        for message in response.dict["error"]["@Message.ExtendedInfo"]:
-            if "Message" in message:
-                out_string = out_string + "\n" + message["Message"]
-            else:
-                out_string = out_string + "\n" + message["MessageId"]
-
-    return out_string
-
-def verify_response( response ):
-    """
-    Verifies a response and raises an exception if there was a failure
-
-    Args:
-        response: The response to verify
-    """
-
-    if response.status >= 400:
-        exception_string = get_error_messages( response )
-        raise RedfishOperationFailedError( "Operation failed: HTTP {}\n{}".format( response.status, exception_string ) )
-
-    return
