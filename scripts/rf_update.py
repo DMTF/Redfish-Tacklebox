@@ -120,6 +120,12 @@ except Exception as e:
         pass
     sys.exit(1)
 
+try:
+    redfish_obj
+except Exception as e:
+    print("Login Failed\n")
+    sys.exit(1)
+
 start_path = os.getcwd()
 targets = None
 if args.target is not None:

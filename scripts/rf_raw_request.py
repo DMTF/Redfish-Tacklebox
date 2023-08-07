@@ -65,6 +65,12 @@ except Exception as e:
         pass
     sys.exit(1)
 
+try:
+    redfish_obj
+except Exception as e:
+    print("Login Failed\n")
+    sys.exit(1)
+
 # Encode the body
 # If the body argument points to a file, load the file
 if args.body is not None and os.path.isfile( args.body ):

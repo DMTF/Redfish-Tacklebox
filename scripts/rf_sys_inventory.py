@@ -66,6 +66,12 @@ except Exception as e:
         pass
     sys.exit(1)
 
+try:
+    redfish_obj
+except Exception as e:
+    print("Login Failed\n")
+    sys.exit(1)
+
 exit_code = 0
 try:
     # Get and print the system inventory
