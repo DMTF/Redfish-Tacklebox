@@ -14,6 +14,7 @@ Brief : This file contains the definitions and functionalities for interacting
 
 import json
 import os
+import errno
 import math
 from .messages import verify_response
 
@@ -155,19 +156,14 @@ def multipart_push_update( context, image_path, targets = None , timeout = None)
     Returns:
         The response from the request
     """
+    if os.path.isfile(image_path) is False:
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), image_path)
 
     # Get the update service
     if timeout is None:
         timeout = 5
-        file_size = 0
-        try:
-            if os.path.isfile(image_path) is True:
-                file_size = get_size(image_path, "mb")
-            else:
-                raise FileNotFoundError
-        except FileNotFoundError:
-            raise RedfishUpdateFileNotFoundError( "{} is not found".format(image_path) )
-        
+        file_size = get_size(image_path, "mb")
+
         if file_size >= 16:
             timeout = math.ceil((5 / 16)* file_size)
 
