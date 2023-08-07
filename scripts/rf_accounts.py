@@ -50,6 +50,7 @@ if args.debug:
     logger = redfish.redfish_logger( log_file, log_format, logging.DEBUG )
     logger.info( "rf_accounts Trace" )
 
+user_uri = None
 # Set up the Redfish object
 try:
     redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password , timeout=5, max_retry=3)
@@ -59,6 +60,7 @@ except RedfishPasswordChangeRequiredError as e:
         print_password_change_required_and_logout(redfish_obj, args)
         sys.exit(1)
     else:
+        user_uri = e.args[1]
         if args.setpassword[0] == args.user:
             pass
         else:
@@ -101,7 +103,7 @@ try:
         print_accounts = False
     if args.setpassword is not None:
         print( "Changing password of user '{}'".format( args.setpassword[0] ) )
-        redfish_utilities.modify_user( redfish_obj, args.setpassword[0], new_password = args.setpassword[1] )
+        redfish_utilities.modify_user( redfish_obj, args.setpassword[0], new_password = args.setpassword[1], user_uri = user_uri )
         print_accounts = False
     if args.setrole is not None:
         print( "Changing role of user '{}' to '{}'".format( args.setrole[0], args.setrole[1] ) )
