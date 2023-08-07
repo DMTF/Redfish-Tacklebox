@@ -23,11 +23,6 @@ class RedfishUpdateServiceNotFoundError( Exception ):
     Raised when the update service or an update action cannot be found
     """
     pass
-class RedfishUpdateFileNotFoundError( Exception ):
-    """
-    Raised when the update file cannot be found
-    """
-    pass
 
 def get_simple_update_info( context ):
     """
