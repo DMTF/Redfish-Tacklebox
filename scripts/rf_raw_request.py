@@ -56,16 +56,17 @@ with redfish.redfish_client( base_url = args.rhost, username = args.user, passwo
         # Default case if nothing resolves (empty JSON object)
         body = {}
 
+    headers = {}
     # Perform the requested operation
     if args.method == "HEAD":
         resp = redfish_obj.head( args.request )
     elif args.method == "POST":
         resp = redfish_obj.post( args.request, body = body )
     elif args.method == "PATCH":
-	headers = ifmatch_header(redfish_obj, args.request, headers = headers)
+        headers = ifmatch_header(redfish_obj, args.request, headers = headers)
         resp = redfish_obj.patch( args.request, body = body, headers = headers)
     elif args.method == "PUT":
-	headers = ifmatch_header(redfish_obj, args.request, headers = headers)
+        headers = ifmatch_header(redfish_obj, args.request, headers = headers)
         resp = redfish_obj.put( args.request, body = body, headers = headers)
     elif args.method == "DELETE":
         resp = redfish_obj.delete( args.request )
