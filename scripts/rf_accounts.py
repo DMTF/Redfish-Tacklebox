@@ -20,14 +20,6 @@ import traceback
 import sys
 from redfish.messages import RedfishPasswordChangeRequiredError
 
-def print_password_change_required_and_logout(redfish_obj, args):
-    print("Password change required\n run rf_accounts.py -r {} -u {} -p <old password> --setpassword {} <new password> \nto set your password\n".format(args.rhost ,args.user, args.user))
-    try:
-        redfish_obj.logout()
-    except Exception as e:
-        pass
-    sys.exit(1)
-
 # Get the input arguments
 argget = argparse.ArgumentParser( description = "A tool to manage user accounts on a Redfish service" )
 argget.add_argument( "--user", "-u", type = str, required = True, help = "The user name for authentication" )
@@ -50,21 +42,25 @@ if args.debug:
     logger = redfish.redfish_logger( log_file, log_format, logging.DEBUG )
     logger.info( "rf_accounts Trace" )
 
-user_uri = None
 # Set up the Redfish object
+user_uri = None
+redfish_obj = None
 try:
     redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password , timeout=5, max_retry=3)
     redfish_obj.login( auth = "session" )
 except RedfishPasswordChangeRequiredError as e:
     if args.setpassword is None:
-        print_password_change_required_and_logout(redfish_obj, args)
+        redfish_utilities.print_password_change_required_and_logout(redfish_obj, args)
         sys.exit(1)
     else:
         user_uri = e.args[1]
         if args.setpassword[0] == args.user:
-            pass
+            print( "Changing password of user '{}'".format( args.setpassword[0] ) )
+            redfish_utilities.modify_user( redfish_obj, args.setpassword[0], new_password = args.setpassword[1], user_uri = user_uri )
+            redfish_utilities.logout(redfish_obj, print_error = True)
+            sys.exit(0)
         else:
-            print_password_change_required_and_logout(redfish_obj, args)
+            redfish_utilities.print_password_change_required_and_logout(redfish_obj, args)
             sys.exit(1)
 except Exception as e:
     # other error
@@ -74,16 +70,7 @@ except Exception as e:
     else:
         print("Login Failed\n")
     
-    try:
-        redfish_obj.logout()
-    except Exception as e:
-        pass
-    sys.exit(1)
-
-try:
-    redfish_obj
-except Exception as e:
-    print("Login Failed\n")
+    redfish_utilities.logout(redfish_obj, print_error = False)
     sys.exit(1)
 
 exit_code = 0
@@ -103,7 +90,7 @@ try:
         print_accounts = False
     if args.setpassword is not None:
         print( "Changing password of user '{}'".format( args.setpassword[0] ) )
-        redfish_utilities.modify_user( redfish_obj, args.setpassword[0], new_password = args.setpassword[1], user_uri = user_uri )
+        redfish_utilities.modify_user( redfish_obj, args.setpassword[0], new_password = args.setpassword[1])
         print_accounts = False
     if args.setrole is not None:
         print( "Changing role of user '{}' to '{}'".format( args.setrole[0], args.setrole[1] ) )
@@ -131,8 +118,5 @@ except Exception as e:
     print( e )
 finally:
     # Log out
-    try:
-        redfish_obj.logout()
-    except Exception as e:
-        pass
+    redfish_utilities.logout(redfish_obj, print_error = True)
 sys.exit( exit_code )

@@ -65,5 +65,6 @@ from .update import get_update_service
 from .update import get_simple_update_info
 from .update import simple_update
 from .update import multipart_push_update
+from .misc import *
 
 from . import config

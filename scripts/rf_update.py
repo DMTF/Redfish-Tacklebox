@@ -97,15 +97,12 @@ if args.debug:
     logger.info( "rf_update Trace" )
 
 # Set up the Redfish object
+redfish_obj = None
 try:
     redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password , timeout=5, max_retry=3)
     redfish_obj.login( auth = "session" )
 except RedfishPasswordChangeRequiredError as e:
-    print("Password change required\n run rf_accounts.py -r {} -u {} -p <old password> --setpassword {} <new password> \nto set your password\n".format(args.rhost ,args.user, args.user))
-    try:
-        redfish_obj.logout()
-    except Exception as e:
-        pass
+    redfish_utilities.print_password_change_required_and_logout(redfish_obj, args)
     sys.exit(1)
 except Exception as e:
     # other error
@@ -114,16 +111,7 @@ except Exception as e:
         print("{}\nLogin Failed\n".format(error_string))
     else:
         print("Login Failed\n")
-    try:
-        redfish_obj.logout()
-    except Exception as e:
-        pass
-    sys.exit(1)
-
-try:
-    redfish_obj
-except Exception as e:
-    print("Login Failed\n")
+    redfish_utilities.logout(redfish_obj, print_error = False)
     sys.exit(1)
 
 start_path = os.getcwd()
@@ -187,9 +175,6 @@ finally:
     except:
         pass
     # Log out
-    try:
-        redfish_obj.logout()
-    except Exception as e:
-        pass
+    redfish_utilities.logout(redfish_obj, print_error = True)
 
 sys.exit( exit_code )
