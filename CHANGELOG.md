@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.1.7] - 2023-08-04
+- Added ETag handling for PATCH and PUT operations in 'rf_raw_request.py'
+
 ## [3.1.6] - 2023-07-27
 - Corrected excaption raising in several manager methods to properly reference the manager's identifier
 - Added 'settime' command to 'rf_manager_config.py'

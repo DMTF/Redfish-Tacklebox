@@ -14,6 +14,8 @@ Brief : This file contains the definitions and functionalities for interacting
 
 import json
 import os
+import errno
+import math
 from .messages import verify_response
 
 class RedfishUpdateServiceNotFoundError( Exception ):
@@ -127,7 +129,17 @@ def simple_update( context, image_uri, protocol = None, targets = None, username
     verify_response( response )
     return response
 
-def multipart_push_update( context, image_path, targets = None ):
+def get_size(file_path, unit='bytes'):
+    file_size = os.path.getsize(file_path)
+    exponents_map = {'bytes': 0, 'kb': 1, 'mb': 2, 'gb': 3}
+    if unit not in exponents_map:
+        raise ValueError("Must select from \
+        ['bytes', 'kb', 'mb', 'gb']")
+    else:
+        size = file_size / 1024 ** exponents_map[unit]
+        return round(size, 3)
+    
+def multipart_push_update( context, image_path, targets = None , timeout = None):
     """
     Performs an HTTP Multipart push update request
 
@@ -139,8 +151,17 @@ def multipart_push_update( context, image_path, targets = None ):
     Returns:
         The response from the request
     """
+    if os.path.isfile(image_path) is False:
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), image_path)
 
     # Get the update service
+    if timeout is None:
+        timeout = 5
+        file_size = get_size(image_path, "mb")
+
+        if file_size >= 16:
+            timeout = math.ceil((5 / 16)* file_size)
+
     update_service = get_update_service( context )
     if "MultipartHttpPushUri" not in update_service.dict:
         raise RedfishUpdateServiceNotFoundError( "Service does not support MultipartHttpPushUri" )
@@ -154,7 +175,7 @@ def multipart_push_update( context, image_path, targets = None ):
         "UpdateFile": ( image_path.split( os.path.sep )[-1], open( image_path, "rb" ), "application/octet-stream" )
     }
 
-    response = context.post( update_service.dict["MultipartHttpPushUri"], body = body, headers = { "Content-Type": "multipart/form-data" } )
+    response = context.post( update_service.dict["MultipartHttpPushUri"], body = body, headers = { "Content-Type": "multipart/form-data" } , timeout=timeout, max_retry=3)
     verify_response( response )
     return response
 

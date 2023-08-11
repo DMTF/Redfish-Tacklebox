@@ -24,6 +24,7 @@ import sys
 import threading
 import time
 import traceback
+from redfish.messages import RedfishPasswordChangeRequiredError
 
 if sys.version_info > ( 3, ):
     import http.server
@@ -62,6 +63,23 @@ def local_web_server( filepath ):
 
     return
 
+def print_error_payload( response ):
+    """
+    Prints an error payload, which can also be used for action responses
+
+    Args:
+        response: The response to print
+    """
+
+    try:
+        print(redfish_utilities.get_error_messages( response ) )
+    except:
+        # No response body
+        if response.status >= 400:
+            print( "Failed" )
+        else:
+            print( "Success" )
+
 # Get the input arguments
 argget = argparse.ArgumentParser( description = "A tool to perform an update with a Redfish service" )
 argget.add_argument( "--user", "-u", type = str, required = True, help = "The user name for authentication" )
@@ -79,8 +97,22 @@ if args.debug:
     logger.info( "rf_update Trace" )
 
 # Set up the Redfish object
-redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password )
-redfish_obj.login( auth = "session" )
+redfish_obj = None
+try:
+    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password , timeout=5, max_retry=3)
+    redfish_obj.login( auth = "session" )
+except RedfishPasswordChangeRequiredError as e:
+    redfish_utilities.print_password_change_required_and_logout(redfish_obj, args)
+    sys.exit(1)
+except Exception as e:
+    # other error
+    error_string = str(e)
+    if len(error_string) > 0:
+        print("{}\nLogin Failed\n".format(error_string))
+    else:
+        print("Login Failed\n")
+    redfish_utilities.logout(redfish_obj, print_error = False)
+    sys.exit(1)
 
 start_path = os.getcwd()
 targets = None
@@ -129,7 +161,7 @@ try:
 
     # Display the results
     print( "" )
-    redfish_utilities.print_error_payload( response )
+    print_error_payload( response )
 except Exception as e:
     if args.debug:
         logger.error( "Caught exception:\n\n{}\n".format( traceback.format_exc() ) )
@@ -142,5 +174,7 @@ finally:
         shutil.rmtree( WEB_SERVER_FOLDER )
     except:
         pass
-    redfish_obj.logout()
+    # Log out
+    redfish_utilities.logout(redfish_obj, print_error = True)
+
 sys.exit( exit_code )
