@@ -13,6 +13,7 @@ Brief : This file contains the definitions and functionalities for managing
 """
 
 from .messages import verify_response
+from .messages import RedfishPasswordChangeRequiredError
 
 class RedfishAccountCollectionNotFoundError( Exception ):
     """
@@ -145,7 +146,7 @@ def delete_user( context, user_name ):
     verify_response( response )
     return response
 
-def modify_user( context, user_name, new_name = None, new_password = None, new_role = None, new_locked = None, new_enabled = None ):
+def modify_user( context, user_name, new_name = None, new_password = None, new_role = None, new_locked = None, new_enabled = None , user_uri = None):
     """
     Modifies an existing user account
 
@@ -163,7 +164,7 @@ def modify_user( context, user_name, new_name = None, new_password = None, new_r
     """
 
     # Get the current user info
-    user_uri, user_info = get_user( context, user_name )
+    user_uri, user_info = get_user( context, user_name , user_uri = user_uri)
 
     # Build the payload for the new user
     new_info = {}
@@ -195,7 +196,7 @@ def get_account_collection( context ):
     """
 
     # Get the Service Root to find the Account Service
-    service_root = context.get( "/redfish/v1/" )
+    service_root = context.get( "/redfish/v1" )
     if "AccountService" not in service_root.dict:
         # No Account Service
         raise RedfishAccountCollectionNotFoundError( "Service does not contain an Account Service" )
@@ -208,7 +209,7 @@ def get_account_collection( context ):
 
     return account_service.dict["Accounts"]["@odata.id"]
 
-def get_user( context, user_name ):
+def get_user( context, user_name, user_uri = None ):
     """
     Finds a user within the Redfish service
 
@@ -222,7 +223,14 @@ def get_user( context, user_name ):
     """
 
     avail_users = []
+
+    if user_uri is not None:
+        account = context.get(user_uri)
+        if account.dict["UserName"] == user_name:
+            return user_uri, account
+
     account_col = context.get( get_account_collection( context ) )
+            
     for account_member in account_col.dict["Members"]:
         account = context.get( account_member["@odata.id"] )
 
