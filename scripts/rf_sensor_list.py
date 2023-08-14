@@ -25,6 +25,8 @@ argget = argparse.ArgumentParser( description = "A tool to walk a Redfish servic
 argget.add_argument( "--user", "-u", type = str, required = True, help = "The user name for authentication" )
 argget.add_argument( "--password", "-p",  type = str, required = True, help = "The password for authentication" )
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
+argget.add_argument( "--id", "-i",  action = "store_true", help = "list sensor info using Id" )
+argget.add_argument( "--name", "-n",  action = "store_true", help = "list sensor info using Name" )
 argget.add_argument( "--debug", action = "store_true", help = "Creates debug file showing HTTP traces and exceptions" )
 args = argget.parse_args()
 
@@ -54,8 +56,13 @@ except Exception as e:
 
 exit_code = 0
 try:
+    use_id = False
+    if args.id:
+        use_id = True
+    if args.name:
+        use_id = False
     # Get and print the sensor info
-    sensors = redfish_utilities.get_sensors( redfish_obj )
+    sensors = redfish_utilities.get_sensors( redfish_obj , use_id)
     redfish_utilities.print_sensors( sensors )
 except Exception as e:
     if args.debug:
