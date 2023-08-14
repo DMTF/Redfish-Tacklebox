@@ -25,8 +25,8 @@ argget = argparse.ArgumentParser( description = "A tool to walk a Redfish servic
 argget.add_argument( "--user", "-u", type = str, required = True, help = "The user name for authentication" )
 argget.add_argument( "--password", "-p",  type = str, required = True, help = "The password for authentication" )
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
-argget.add_argument( "--id", "-i",  action = "store_true", help = "list sensor info using Id" )
-argget.add_argument( "--name", "-n",  action = "store_true", help = "list sensor info using Name" )
+argget.add_argument( "--id", "-i",  action = "store_true", help = "Construct sensor names using 'Id' values" )
+argget.add_argument( "--name", "-n",  action = "store_true", help = "Construct sensor names using 'Name' values" )
 argget.add_argument( "--debug", action = "store_true", help = "Creates debug file showing HTTP traces and exceptions" )
 args = argget.parse_args()
 
@@ -39,20 +39,13 @@ if args.debug:
 # Set up the Redfish object
 redfish_obj = None
 try:
-    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password , timeout=5, max_retry=3)
+    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, timeout = 15, max_retry = 3 )
     redfish_obj.login( auth = "session" )
 except RedfishPasswordChangeRequiredError as e:
-    redfish_utilities.print_password_change_required_and_logout(redfish_obj, args)
-    sys.exit(1)
+    redfish_utilities.print_password_change_required_and_logout( redfish_obj, args )
+    sys.exit( 1 )
 except Exception as e:
-    # other error
-    error_string = str(e)
-    if len(error_string) > 0:
-        print("{}\nLogin Failed\n".format(error_string))
-    else:
-        print("Login Failed\n")
-    redfish_utilities.logout(redfish_obj, print_error = False)
-    sys.exit(1)
+    raise
 
 exit_code = 0
 try:
@@ -71,6 +64,5 @@ except Exception as e:
     print( e )
 finally:
     # Log out
-    redfish_utilities.logout(redfish_obj, print_error = True)
-
+    redfish_utilities.logout( redfish_obj )
 sys.exit( exit_code )

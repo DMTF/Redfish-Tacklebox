@@ -46,32 +46,35 @@ if args.debug:
 user_uri = None
 redfish_obj = None
 try:
-    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password , timeout=5, max_retry=3)
+    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, timeout = 15, max_retry = 3 )
     redfish_obj.login( auth = "session" )
 except RedfishPasswordChangeRequiredError as e:
     if args.setpassword is None:
-        redfish_utilities.print_password_change_required_and_logout(redfish_obj, args)
-        sys.exit(1)
+        redfish_utilities.print_password_change_required_and_logout( redfish_obj, args )
+        sys.exit( 1 )
     else:
         user_uri = e.args[1]
         if args.setpassword[0] == args.user:
-            print( "Changing password of user '{}'".format( args.setpassword[0] ) )
-            redfish_utilities.modify_user( redfish_obj, args.setpassword[0], new_password = args.setpassword[1], user_uri = user_uri )
-            redfish_utilities.logout(redfish_obj, print_error = True)
-            sys.exit(0)
+            # The user is requesting to change their own password
+            # Allow the request to go through directly, and log out
+            exit_code = 0
+            try:
+                print( "Changing password of user '{}'".format( args.setpassword[0] ) )
+                redfish_utilities.modify_user( redfish_obj, args.setpassword[0], new_password = args.setpassword[1], user_uri = user_uri )
+            except Exception as e:
+                if args.debug:
+                    logger.error( "Caught exception:\n\n{}\n".format( traceback.format_exc() ) )
+                exit_code = 1
+                print( e )
+            finally:
+                # Log out
+                redfish_utilities.logout( redfish_obj, ignore_error = True )    # Some services do not allow session logout in this condition
+            sys.exit( exit_code )
         else:
-            redfish_utilities.print_password_change_required_and_logout(redfish_obj, args)
-            sys.exit(1)
+            redfish_utilities.print_password_change_required_and_logout( redfish_obj, args )
+            sys.exit( 1 )
 except Exception as e:
-    # other error
-    error_string = str(e)
-    if len(error_string) > 0:
-        print("{}\nLogin Failed\n".format(error_string))
-    else:
-        print("Login Failed\n")
-    
-    redfish_utilities.logout(redfish_obj, print_error = False)
-    sys.exit(1)
+    raise
 
 exit_code = 0
 try:
@@ -90,7 +93,7 @@ try:
         print_accounts = False
     if args.setpassword is not None:
         print( "Changing password of user '{}'".format( args.setpassword[0] ) )
-        redfish_utilities.modify_user( redfish_obj, args.setpassword[0], new_password = args.setpassword[1])
+        redfish_utilities.modify_user( redfish_obj, args.setpassword[0], new_password = args.setpassword[1] )
         print_accounts = False
     if args.setrole is not None:
         print( "Changing role of user '{}' to '{}'".format( args.setrole[0], args.setrole[1] ) )
@@ -118,5 +121,5 @@ except Exception as e:
     print( e )
 finally:
     # Log out
-    redfish_utilities.logout(redfish_obj, print_error = True)
+    redfish_utilities.logout( redfish_obj )
 sys.exit( exit_code )

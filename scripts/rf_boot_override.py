@@ -50,20 +50,13 @@ if args.debug:
 # Set up the Redfish object
 redfish_obj = None
 try:
-    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password , timeout=5, max_retry=3)
+    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, timeout = 15, max_retry = 3 )
     redfish_obj.login( auth = "session" )
 except RedfishPasswordChangeRequiredError as e:
-    redfish_utilities.print_password_change_required_and_logout(redfish_obj, args)
-    sys.exit(1)
+    redfish_utilities.print_password_change_required_and_logout( redfish_obj, args )
+    sys.exit( 1 )
 except Exception as e:
-    # other error
-    error_string = str(e)
-    if len(error_string) > 0:
-        print("{}\nLogin Failed\n".format(error_string))
-    else:
-        print("Login Failed\n")
-    redfish_utilities.logout(redfish_obj, print_error = False)
-    sys.exit(1)
+    raise
 
 exit_code = 0
 try:
@@ -99,5 +92,5 @@ except Exception as e:
     print( e )
 finally:
     # Log out
-    redfish_utilities.logout(redfish_obj, print_error = True)
+    redfish_utilities.logout( redfish_obj )
 sys.exit( exit_code )
