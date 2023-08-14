@@ -67,6 +67,8 @@ required arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  --id, -i              Construct sensor names using 'Id' values
+  --name, -n            Construct sensor names using 'Name' values
   --debug               Creates debug file showing HTTP traces and exceptions
 ```
 

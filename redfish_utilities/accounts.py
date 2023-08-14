@@ -13,7 +13,6 @@ Brief : This file contains the definitions and functionalities for managing
 """
 
 from .messages import verify_response
-from .messages import RedfishPasswordChangeRequiredError
 
 class RedfishAccountCollectionNotFoundError( Exception ):
     """
@@ -146,7 +145,7 @@ def delete_user( context, user_name ):
     verify_response( response )
     return response
 
-def modify_user( context, user_name, new_name = None, new_password = None, new_role = None, new_locked = None, new_enabled = None , user_uri = None):
+def modify_user( context, user_name, new_name = None, new_password = None, new_role = None, new_locked = None, new_enabled = None, user_uri = None ):
     """
     Modifies an existing user account
 
@@ -158,13 +157,14 @@ def modify_user( context, user_name, new_name = None, new_password = None, new_r
         new_role: The new role of the user
         new_locked: The new locked flag of the user
         new_enabled: The new enabled flag of the user
+        user_uri: The URI of the user to modify
 
     Returns:
         The response of the PATCH
     """
 
     # Get the current user info
-    user_uri, user_info = get_user( context, user_name , user_uri = user_uri)
+    user_uri, user_info = get_user( context, user_name , user_uri = user_uri )
 
     # Build the payload for the new user
     new_info = {}
@@ -216,6 +216,7 @@ def get_user( context, user_name, user_uri = None ):
     Args:
         context: The Redfish client object with an open session
         user_name: The name of the user to find
+        user_uri: The URI of the user to get
 
     Returns:
         The URI for the user account
@@ -225,7 +226,7 @@ def get_user( context, user_name, user_uri = None ):
     avail_users = []
 
     if user_uri is not None:
-        account = context.get(user_uri)
+        account = context.get( user_uri )
         if account.dict["UserName"] == user_name:
             return user_uri, account
 

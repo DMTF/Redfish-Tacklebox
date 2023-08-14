@@ -23,19 +23,16 @@ def verify_response( response ):
     """
 
     if response.status >= 400:
-        messages_detail = get_messages_detail(response)
+        messages_detail = get_messages_detail( response )
         exception_string = get_error_messages( messages_detail )
-        message_item = search_message(messages_detail, "Base", "PasswordChangeRequired")
+        message_item = search_message( messages_detail, "Base", "PasswordChangeRequired" )
         if not message_item is None:
-            raise RedfishPasswordChangeRequiredError( "Operation failed: HTTP {}\n{}".format( response.status, exception_string ), message_item["MessageArgs"][0])
+            raise RedfishPasswordChangeRequiredError( "Operation failed: HTTP {}\n{}".format( response.status, exception_string ), message_item["MessageArgs"][0] )
         else:
             raise RedfishOperationFailedError( "Operation failed: HTTP {}\n{}".format( response.status, exception_string ) )
 
     return
 
-"""
-    for backend capability
-"""
 def print_error_payload( response ):
     """
     Prints an error payload, which can also be used for action responses

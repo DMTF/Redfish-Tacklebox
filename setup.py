@@ -77,7 +77,7 @@ setup(
         "scripts/rf_update.py",
         "scripts/rf_virtual_media.py"
     ],
-    install_requires = [ "redfish", "XlsxWriter" ],
+    install_requires = [ "redfish>=3.2.1", "XlsxWriter>=1.2.7" ],
     cmdclass={
         'pyinstaller': Pyinstaller
     }

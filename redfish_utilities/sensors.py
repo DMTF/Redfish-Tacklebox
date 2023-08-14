@@ -12,12 +12,13 @@ Brief : This file contains the definitions and functionalities for scanning a
         Redfish service's Power and Thermal properties for sensor readings
 """
 
-def get_sensors( context , use_id = False):
+def get_sensors( context , use_id = False ):
     """
     Walks a Redfish service for sensor information
 
     Args:
         context: The Redfish client object with an open session
+        use_id: Indicates whether to construct names from 'Id' property values
 
     Returns:
         A list containing all sensor readings
@@ -37,9 +38,8 @@ def get_sensors( context , use_id = False):
         chassis = context.get( chassis_member["@odata.id"] )
 
         chassis_name = "Chassis " + chassis.dict["Id"]
-        if use_id is False:
-            if "Name" in chassis.dict:
-                chassis_name = chassis.dict["Name"]
+        if use_id is False and "Name" in chassis.dict:
+            chassis_name = chassis.dict["Name"]
 
         # Get the chassis status
         chassis_instance = {
@@ -71,9 +71,8 @@ def get_sensors( context , use_id = False):
                     for power_supply_member in power_supplies.dict["Members"]:
                         power_supply = context.get( power_supply_member["@odata.id"] )
                         power_supply_name = "Power Supply " + power_supply.dict["Id"]
-                        if use_id is False:
-                            if "Name" in power_supply.dict:
-                                power_supply_name = power_supply.dict["Name"]
+                        if use_id is False and "Name" in power_supply.dict:
+                            power_supply_name = power_supply.dict["Name"]
                         get_discrete_status( power_supply_name + " State", power_supply.dict, chassis_instance["Readings"] )
                         if "Metrics" in power_supply.dict:
                             metrics = context.get( power_supply.dict["Metrics"]["@odata.id"] )
@@ -95,9 +94,8 @@ def get_sensors( context , use_id = False):
                     for battery_member in batteries.dict["Members"]:
                         battery = context.get( battery_member["@odata.id"] )
                         battery_name = "Battery " + battery.dict["Id"]
-                        if use_id is False:
-                            if "Name" in battery.dict:
-                                battery_name = battery.dict["Name"]
+                        if use_id is False and "Name" in battery.dict:
+                            battery_name = battery.dict["Name"]
                         get_discrete_status( battery_name + " State", battery.dict, chassis_instance["Readings"] )
                         get_excerpt_status( battery_name, "StateOfHealthPercent", "%", battery.dict, chassis_instance["Readings"])
                         if "Metrics" in battery.dict:
@@ -115,7 +113,10 @@ def get_sensors( context , use_id = False):
                 # Add information for each of the redundancy groups reported
                 if "PowerSupplyRedundancy" in power.dict:
                     for i, redundancy in enumerate( power.dict["PowerSupplyRedundancy"] ):
-                        get_discrete_status( "Power Supply Redundancy " + str( i ), redundancy, chassis_instance["Readings"] )
+                        redundancy_name = "Power Supply Redundancy " + str( i )
+                        if use_id is False and "Name" in redundancy:
+                            redundancy_name = redundancy["Name"]
+                        get_discrete_status( redundancy_name, redundancy, chassis_instance["Readings"] )
 
             # Get readings from the ThermalSubsystem resource if available
             if "ThermalSubsystem" in chassis.dict:
@@ -136,16 +137,18 @@ def get_sensors( context , use_id = False):
                     for fan_member in fans.dict["Members"]:
                         fan = context.get( fan_member["@odata.id"] )
                         fan_name = "Fan " + fan.dict["Id"]
-                        if use_id is False:
-                            if "Name" in fan.dict:
-                                fan_name = fan.dict["Name"]
+                        if use_id is False and "Name" in fan.dict:
+                            fan_name = fan.dict["Name"]
                         get_discrete_status( fan_name + " State", fan.dict, chassis_instance["Readings"] )
                         get_excerpt_status( fan_name, "SpeedPercent", "%", fan.dict, chassis_instance["Readings"])
 
                 # Add information for each of the redundancy groups reported
                 if "FanRedundancy" in thermal.dict:
                     for i, redundancy in enumerate( thermal.dict["FanRedundancy"] ):
-                        get_discrete_status( "Fan Redundancy " + str( i ), redundancy, chassis_instance["Readings"] )
+                        redundancy_name = "Fan Redundancy " + str( i )
+                        if use_id is False and "Name" in redundancy:
+                            redundancy_name = redundancy["Name"]
+                        get_discrete_status( redundancy_name, redundancy, chassis_instance["Readings"] )
 
             # Get all sensor readings if available
             if "Sensors" in chassis.dict:
@@ -164,9 +167,8 @@ def get_sensors( context , use_id = False):
                 if "PowerSupplies" in power.dict:
                     for power_supply in power.dict["PowerSupplies"]:
                         power_supply_name = "Power Supply " + power_supply["MemberId"]
-                        if use_id is False:
-                            if "Name" in power_supply:
-                                power_supply_name = power_supply["Name"]
+                        if use_id is False and "Name" in power_supply:
+                            power_supply_name = power_supply["Name"]
                         get_discrete_status( power_supply_name + " State", power_supply, chassis_instance["Readings"] )
                         get_analog_status_small( power_supply_name, "ReadingVolts", "V", power_supply, chassis_instance["Readings"] )
                         get_analog_status_small( power_supply_name, "LineInputVoltage", "V", power_supply, chassis_instance["Readings"] )
@@ -177,15 +179,17 @@ def get_sensors( context , use_id = False):
                 if "Voltages" in power.dict:
                     for voltage in power.dict["Voltages"]:
                         voltage_name = "Voltage " + voltage["MemberId"]
-                        if use_id is False:
-                            if "Name" in voltage:
-                                voltage_name = voltage["Name"]
+                        if use_id is False and "Name" in voltage:
+                            voltage_name = voltage["Name"]
                         get_analog_status_full( voltage_name, voltage, chassis_instance["Readings"] )
 
                 # Add information for each of the redundancy groups reported
                 if "Redundancy" in power.dict:
                     for i, redundancy in enumerate( power.dict["Redundancy"] ):
-                        get_discrete_status( "Power Supply Redundancy " + str( i ), redundancy, chassis_instance["Readings"] )
+                        redundancy_name = "Power Supply Redundancy " + str( i )
+                        if use_id is False and "Name" in redundancy:
+                            redundancy_name = redundancy["Name"]
+                        get_discrete_status( redundancy_name, redundancy, chassis_instance["Readings"] )
 
             # Get readings from the Thermal resource if available
             if "Thermal" in chassis.dict:
@@ -195,24 +199,25 @@ def get_sensors( context , use_id = False):
                 if "Temperatures" in thermal.dict:
                     for temperature in thermal.dict["Temperatures"]:
                         temperature_name = "Temperature " + temperature["MemberId"]
-                        if use_id is False:
-                            if "Name" in temperature:
-                                temperature_name = temperature["Name"]
+                        if use_id is False and "Name" in temperature:
+                            temperature_name = temperature["Name"]
                         get_analog_status_full( temperature_name, temperature, chassis_instance["Readings"] )
 
                 # Add information for each of the fans reported
                 if "Fans" in thermal.dict:
                     for fan in thermal.dict["Fans"]:
                         fan_name = "Fan " + fan["MemberId"]
-                        if use_id is False:
-                            if "Name" in fan:
-                                fan_name = fan["Name"]
+                        if use_id is False and "Name" in fan:
+                            fan_name = fan["Name"]
                         get_analog_status_full( fan_name, fan, chassis_instance["Readings"] )
 
                 # Add information for each of the redundancy groups reported
                 if "Redundancy" in thermal.dict:
                     for i, redundancy in enumerate( thermal.dict["Redundancy"] ):
-                        get_discrete_status( "Fan Redundancy " + str( i ), redundancy, chassis_instance["Readings"] )
+                        redundancy_name = "Fan Redundancy " + str( i )
+                        if use_id is False and "Name" in redundancy:
+                            redundancy_name = redundancy["Name"]
+                        get_discrete_status( redundancy_name, redundancy, chassis_instance["Readings"] )
 
     return sensor_list
 
@@ -375,13 +380,14 @@ def get_excerpt_status( name, field, units, object, readings ):
             }
             readings.append( reading )
 
-def get_sensor_status( sensor, readings , use_id = False):
+def get_sensor_status( sensor, readings , use_id = False ):
     """
     Builds an analog reading from a sensor
 
     Args:
         sensor: The sensor
         readings: The list of readings to update
+        use_id: Indicates whether to construct names from 'Id' property values
     """
 
     state, health = get_status( sensor )
@@ -390,11 +396,10 @@ def get_sensor_status( sensor, readings , use_id = False):
     if reading_val is None:
         reading_val = state
 
-    name = sensor.get( "Name", None )
-
+    sensor_name = sensor.get( "Name", None )
     name = "Sensor " + sensor["Id"]
     if use_id is False and name is not None:
-        name = name
+        name = sensor_name
 
     reading = {
         "Name": name,

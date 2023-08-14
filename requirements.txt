@@ -1,2 +1,2 @@
-redfish>=2.1.0
+redfish>=3.2.1
 XlsxWriter>=1.2.7
