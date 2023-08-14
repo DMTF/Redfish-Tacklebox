@@ -1,5 +1,12 @@
 # Change Log
 
+## [3.1.8] - 2023-08-14
+- Added handling for password change required scenarios
+- Updated 'rf_accounts.py' to directly modify a user's password when handling a password change required scenario
+- Added options for controlling how 'rf_sensor_list.py' constructs sensor names
+- Added timesouts and max retries to all requests
+- Added dynamic scaling of the timeout of a multipart push update
+
 ## [3.1.7] - 2023-08-04
 - Added ETag handling for PATCH and PUT operations in 'rf_raw_request.py'
 
