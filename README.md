@@ -229,6 +229,9 @@ optional arguments:
   --mode MODE, -m MODE  The requested boot mode ('UEFI' or 'Legacy')
   --reset, -reset       Signifies that the system is reset after the boot
                         override is set
+  --workaround, -workaround
+                        Indicates if workarounds should be attempted for non-
+                        conformant services
   --debug               Creates debug file showing HTTP traces and exceptions
 ```
 

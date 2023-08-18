@@ -185,6 +185,25 @@ def set_system_boot( context, system_id = None, ov_target = None, ov_enabled = N
     if etag is not None:
         headers = { "If-Match": etag }
     response = context.patch( system.dict["@odata.id"], body = payload, headers = headers )
+
+    # Attempt workarounds if needed
+    if config.__workarounds__ and response.status >= 400:
+        # Try directing the request to the settings resource
+        settings_uris = [ "Settings", "SD" ]
+        for setting_ext in settings_uris:
+            system_settings = context.get( system.dict["@odata.id"] + "/" + setting_ext )
+            if system_settings.status == 200:
+                headers = None
+                etag = system.getheader( "ETag" )
+                if etag is not None:
+                    headers = { "If-Match": etag }
+                settings_response = context.patch( system.dict["@odata.id"], body = payload, headers = headers )
+                if settings_response.status < 400:
+                    # Workaround successful; swap out the response object to return
+                    warnings.warn( "System '{}' incorrectly required applying the boot override configuration to the settings resource.  Contact your vendor.".format( system_id ) )
+                    response = settings_response
+                    break
+
     verify_response( response )
     return response
 
