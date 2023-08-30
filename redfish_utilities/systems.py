@@ -149,9 +149,8 @@ def get_system_boot( context, system_id = None ):
                                 # Boot override property found; copy it over
                                 boot_ov_found = True
                                 boot_obj[prop] = system_settings.dict["Boot"][prop]
-                                allow_prop = prop + "@Redfish.AllowableValues"
-                                if allow_prop in system_settings.dict["Boot"]:
-                                    boot_obj[allow_prop] = system_settings.dict["Boot"][allow_prop]
+                                if prop + "@Redfish.AllowableValues" in system_settings.dict["Boot"]:
+                                    boot_obj[prop + "@Redfish.AllowableValues"] = system_settings.dict["Boot"][prop + "@Redfish.AllowableValues"]
                         if boot_ov_found:
                             warnings.warn( "System '{}' contains one or more boot override properties in the settings resource.  Contact your vendor.".format( system_id ) )
                 break
