@@ -64,6 +64,7 @@ setup(
         "scripts/rf_accounts.py",
         "scripts/rf_bios_settings.py",
         "scripts/rf_boot_override.py",
+        "scripts/rf_certificates.py",
         "scripts/rf_diagnostic_data.py",
         "scripts/rf_discover.py",
         "scripts/rf_event_service.py",

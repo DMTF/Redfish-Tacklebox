@@ -322,7 +322,7 @@ It will perform the `Reset` action with the specified reset type from the *type*
 ```
 usage: rf_manager_config.py settime [-h] [--datetime DATETIME] [--offset OFFSET]
 
-options:
+optional arguments:
   -h, --help            show this help message and exit
   --datetime DATETIME, -dt DATETIME
                         The date-time value to set
@@ -792,7 +792,7 @@ optional arguments:
 ```
 usage: rf_licenses.py info [-h] [--details]
 
-options:
+optional arguments:
   -h, --help           show this help message and exit
   --details, -details  Indicates if the full details of each license should be
                        shown
@@ -830,8 +830,6 @@ Otherwise, it will install the new license with the `Install` action found on th
 ```
 usage: rf_licenses.py delete [-h] --license LICENSE
 
-options:
-
 required arguments:
   --license LICENSE, -l LICENSE
                         The identifier of the license to delete
@@ -845,6 +843,171 @@ Example: `rf_licenses.py -u root -p root -r https://192.168.1.100 delete --licen
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the license service and find the license requested by the *license* argument.
 If the matching license is found, it will delete the license.
+
+
+### Certificates
+
+```
+usage: rf_certificates.py [-h] --user USER --password PASSWORD --rhost RHOST
+                          [--debug]
+                          {info,csrinfo,csr,install,delete} ...
+
+A tool to manage certificates on a Redfish service
+
+positional arguments:
+  {info,csrinfo,csr,install,delete}
+    info                Displays information about the certificates installed
+                        on the service
+    csrinfo             Displays information about options supported for
+                        generating certificate signing requests
+    csr                 Generates a certificate signing request
+    install             Installs a certificate on the service
+    delete              Deletes a certificate on the service
+
+required arguments:
+  --user USER, -u USER  The user name for authentication
+  --password PASSWORD, -p PASSWORD
+                        The password for authentication
+  --rhost RHOST, -r RHOST
+                        The address of the Redfish service (with scheme)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --debug               Creates debug file showing HTTP traces and exceptions
+```
+
+
+#### Info
+
+```
+usage: rf_certificates.py info [-h] [--details]
+
+optional arguments:
+  -h, --help           show this help message and exit
+  --details, -details  Indicates if the full details of each certificate
+                       should be shown
+```
+
+Example: `rf_certificates.py -u root -p root -r https://192.168.1.100 info`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the certificate service, find its certificate locations, and display the certificates.
+
+
+#### Certificate Signing Request Info
+
+```
+usage: rf_certificates.py csrinfo [-h]
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+Example: `rf_certificates.py -u root -p root -r https://192.168.1.100 csrinfo`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the certificate service, find the `GenerateCSR` action, and display the information obtained from its action info.
+
+
+#### Certificate Signing Request
+
+```
+usage: rf_certificates.py csr [-h] --certificatecollection
+                              CERTIFICATECOLLECTION --commonname COMMONNAME
+                              --organization ORGANIZATION --organizationalunit
+                              ORGANIZATIONALUNIT --city CITY --state STATE
+                              --country COUNTRY [--email EMAIL]
+                              [--keyalg KEYALG] [--keylen KEYLEN]
+                              [--keycurve KEYCURVE] [--out OUT]
+
+required arguments:
+  --certificatecollection CERTIFICATECOLLECTION, -col CERTIFICATECOLLECTION
+                        The URI of the certificate collection where the signed
+                        certificate will be installed
+  --commonname COMMONNAME, -cn COMMONNAME
+                        The common name of the component to secure
+  --organization ORGANIZATION, -o ORGANIZATION
+                        The name of the unit in the organization making the
+                        request
+  --organizationalunit ORGANIZATIONALUNIT, -ou ORGANIZATIONALUNIT
+                        The name of the unit in the organization making the
+                        request
+  --city CITY, -l CITY  The city or locality of the organization making the
+                        request
+  --state STATE, -st STATE
+                        The state, province, or region of the organization
+                        making the request
+  --country COUNTRY, -c COUNTRY
+                        The two-letter country code of the organization making
+                        the request
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --email EMAIL, -email EMAIL
+                        The email address of the contact within the
+                        organization making the request
+  --keyalg KEYALG, -alg KEYALG
+                        The type of key-pair for use with signing algorithms
+  --keylen KEYLEN, -len KEYLEN
+                        The length of the key, in bits, if the key pair
+                        algorithm supports key size
+  --keycurve KEYCURVE, -curve KEYCURVE
+                        The curve ID to use with the key if the key pair
+                        algorithm supports curves
+  --out OUT, -out OUT   The file, with optional path, to save the certificate
+                        signing request
+```
+
+Example: `rf_certificates.py -u root -p root -r https://192.168.1.100 csr -col /redfish/v1/Managers/1/NetworkProtocol/HTTPS/Certificates -cn "manager.contoso.org" -o "Contoso" -ou "Contoso HW Div" -l "Portland" -st "Oregon" -c "US"`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the certificate service, find the `GenerateCSR` action, invoke the `GenerateCSR` action with the provided arguments, and display the certificate signing request produced by the service.
+
+#### Install
+
+```
+usage: rf_certificates.py install [-h] --destination DESTINATION --certificate
+                                  CERTIFICATE [--key KEY]
+
+required arguments:
+  --destination DESTINATION, -dest DESTINATION
+                        The installation URI of the certificate; either a
+                        certificate collection to insert, or an existing
+                        certificate to replace
+  --certificate CERTIFICATE, -cert CERTIFICATE
+                        The file, and optional path, of the certificate to
+                        install
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --key KEY, -key KEY   The file, and optional path, of the private key for
+                        the certificate to install
+``` 
+
+Example: `rf_licenses.py -u root -p root -r https://192.168.1.100 install --destination /redfish/v1/Managers/1/NetworkProtocol/HTTPS/Certificates/1 --cert /home/user/my_new_cert.pem`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then inspect the URI referenced by the *destination* argument.
+If the *destination* is discovered to be a certificate collection, it will install the contents provided by the *certificate* and *key* arguments into the referenced collection.
+Otherwise, it will locate the certificate service, find the `ReplaceCertificate` action, and invoke the action with the contents provided by the *certificate* and *key* arguments to replace the certificate referenced by the *destination* argument.
+
+#### Delete
+
+```
+usage: rf_certificates.py delete [-h] --certificate CERTIFICATE
+
+required arguments:
+  --certificate CERTIFICATE, -cert CERTIFICATE
+                        The URI of the certificate to delete
+
+optional arguments:
+  -h, --help            show this help message and exit
+```
+
+Example: `rf_certificates.py -u root -p root -r https://192.168.1.100 delete --certificate /redfish/v1/Managers/1/NetworkProtocol/HTTPS/Certificates/1`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then delete the certificate referenced by the *certificate* argument.
 
 
 ### Diagnostic Data
