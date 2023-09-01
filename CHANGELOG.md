@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.1.9] - 2023-09-01
+- Added 'rf_certificates.py' tool to manage certificates on a Redfish service
+
 ## [3.1.8] - 2023-08-14
 - Added handling for password change required scenarios
 - Updated 'rf_accounts.py' to directly modify a user's password when handling a password change required scenario
