@@ -252,6 +252,23 @@ def install_certificate( context, destination, cert_file, key_file = None ):
     verify_response( response )
     return response
 
+def delete_certificate( context, certificate ):
+    """
+    Replaces an existing certificate with a new certificate
+
+    Args:
+        context: The Redfish client object with an open session
+        certificate: The URI of the certificate to delete
+
+    Returns:
+        The response of the operation
+    """
+
+    # Delete the certificate
+    response = context.delete( certificate )
+    verify_response( response )
+    return response
+
 def get_certificate_service( context ):
     """
     Collects the certificate service information from a Redfish service

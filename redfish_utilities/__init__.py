@@ -13,6 +13,7 @@ from .certificates import print_certificates
 from .certificates import get_generate_csr_info
 from .certificates import generate_csr
 from .certificates import install_certificate
+from .certificates import delete_certificate
 from .event_service import get_event_service
 from .event_service import print_event_service
 from .event_service import get_event_subscriptions

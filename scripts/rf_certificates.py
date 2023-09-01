@@ -47,6 +47,8 @@ install_argget = subparsers.add_parser( "install", help = "Installs a certificat
 install_argget.add_argument( "--destination", "-dest", type = str, required = True, help = "The installation URI of the certificate; either a certificate collection to insert, or an existing certificate to replace" )
 install_argget.add_argument( "--certificate", "-cert", type = str, required = True, help = "The file, and optional path, of the certificate to install" )
 install_argget.add_argument( "--key", "-key", type = str, help = "The file, and optional path, of the private key for the certificate to install" )
+delete_argget = subparsers.add_parser( "delete", help = "Deletes a certificate on the service" )
+delete_argget.add_argument( "--certificate", "-cert", type = str, required = True, help = "The URI of the certificate to delete" )
 args = argget.parse_args()
 
 if args.debug:
@@ -102,6 +104,10 @@ try:
         print( "Installing {}...".format( args.certificate ) )
         response = redfish_utilities.install_certificate( redfish_obj, args.destination, args.certificate, args.key )
         response = redfish_utilities.poll_task_monitor( redfish_obj, response )
+        redfish_utilities.verify_response( response )
+    elif args.command == "delete":
+        print( "Deleting {}...".format( args.certificate ) )
+        response = redfish_utilities.delete_certificate( redfish_obj, args.certificate )
         redfish_utilities.verify_response( response )
     else:
         certificates = redfish_utilities.get_all_certificates( redfish_obj )
