@@ -127,9 +127,37 @@ def get_system_boot( context, system_id = None ):
     """
 
     system = get_system( context, system_id )
-    if "Boot" not in system.dict:
+    boot_obj = system.dict.get( "Boot" )
+
+    if config.__workarounds__:
+        # Try getting boot information from the settings resource
+        settings_uris = [ "Settings", "SD" ]
+        for setting_ext in settings_uris:
+            system_settings = context.get( system.dict["@odata.id"] + "/" + setting_ext )
+            if system_settings.status == 200:
+                if "Boot" in system_settings.dict:
+                    if boot_obj is None:
+                        # Boot property only exists in settings, which is not expected
+                        warnings.warn( "System '{}' only reports boot information in the settings resource.  Contact your vendor.".format( system_id ) )
+                        boot_obj = system_settings.dict["Boot"]
+                    else:
+                        # Check the boot override properties; these are expected to only be in the active resource
+                        boot_override_props = [ "BootSourceOverrideTarget", "BootSourceOverrideEnabled", "BootSourceOverrideMode", "UefiTargetBootSourceOverride", "BootNext" ]
+                        boot_ov_found = False
+                        for prop in boot_override_props:
+                            if prop in system_settings.dict["Boot"]:
+                                # Boot override property found; copy it over
+                                boot_ov_found = True
+                                boot_obj[prop] = system_settings.dict["Boot"][prop]
+                                if prop + "@Redfish.AllowableValues" in system_settings.dict["Boot"]:
+                                    boot_obj[prop + "@Redfish.AllowableValues"] = system_settings.dict["Boot"][prop + "@Redfish.AllowableValues"]
+                        if boot_ov_found:
+                            warnings.warn( "System '{}' contains one or more boot override properties in the settings resource.  Contact your vendor.".format( system_id ) )
+                break
+
+    if boot_obj is None:
         raise RedfishSystemBootNotFoundError( "System '{}' does not contain the boot object".format( system.dict["Id"] ) )
-    return system.dict["Boot"]
+    return boot_obj
 
 def set_system_boot( context, system_id = None, ov_target = None, ov_enabled = None, ov_mode = None, ov_uefi_target = None, ov_boot_next = None ):
     """
@@ -185,6 +213,25 @@ def set_system_boot( context, system_id = None, ov_target = None, ov_enabled = N
     if etag is not None:
         headers = { "If-Match": etag }
     response = context.patch( system.dict["@odata.id"], body = payload, headers = headers )
+
+    # Attempt workarounds if needed
+    if config.__workarounds__ and response.status >= 400:
+        # Try directing the request to the settings resource
+        settings_uris = [ "Settings", "SD" ]
+        for setting_ext in settings_uris:
+            system_settings = context.get( system.dict["@odata.id"] + "/" + setting_ext )
+            if system_settings.status == 200:
+                headers = None
+                etag = system_settings.getheader( "ETag" )
+                if etag is not None:
+                    headers = { "If-Match": etag }
+                settings_response = context.patch( system.dict["@odata.id"] + "/" + setting_ext, body = payload, headers = headers )
+                if settings_response.status < 400:
+                    # Workaround successful; swap out the response object to return
+                    warnings.warn( "System '{}' incorrectly required applying the boot override configuration to the settings resource.  Contact your vendor.".format( system_id ) )
+                    response = settings_response
+                    break
+
     verify_response( response )
     return response
 

@@ -32,6 +32,7 @@ argget.add_argument( "--target", "-t", type = str, help = "The target boot devic
 argget.add_argument( "--uefi", "-uefi", type = str, help = "If target is 'UefiTarget', the UEFI Device Path of the device to boot.  If target is 'UefiBootNext', the UEFI Boot Option string of the device to boot." )
 argget.add_argument( "--mode", "-m", type = str, help = "The requested boot mode ('UEFI' or 'Legacy')" )
 argget.add_argument( "--reset", "-reset", action = "store_true", help = "Signifies that the system is reset after the boot override is set" )
+argget.add_argument( "--workaround", "-workaround", action = "store_true", help = "Indicates if workarounds should be attempted for non-conformant services", default = False )
 argget.add_argument( "--debug", action = "store_true", help = "Creates debug file showing HTTP traces and exceptions" )
 args = argget.parse_args()
 
@@ -40,6 +41,9 @@ if args.target is None:
     args.info = True
     if args.uefi or args.mode or args.reset:
         argget.error( "Cannot use '--uefi', '--mode', or '--reset' without '--target'" )
+
+if args.workaround:
+    redfish_utilities.config.__workarounds__ = True
 
 if args.debug:
     log_file = "rf_boot_override-{}.log".format( datetime.datetime.now().strftime( "%Y-%m-%d-%H%M%S" ) )
