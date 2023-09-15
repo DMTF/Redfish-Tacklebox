@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.2.0] - 2023-09-15
+- Added workaround flag to attempt to set boot override properties on settings resources for non-conformant implementations
+
 ## [3.1.9] - 2023-09-01
 - Added 'rf_certificates.py' tool to manage certificates on a Redfish service
 
