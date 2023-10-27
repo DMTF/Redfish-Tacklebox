@@ -69,11 +69,6 @@ jobs:
         git add CHANGELOG.md setup.py
         git commit -s -m "${{github.event.inputs.version}} versioning"
         git push origin main
-    - name: Make the release
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      run: |
-        gh release create ${{github.event.inputs.version}} -t ${{github.event.inputs.version}} -n "Changes since last release:"$'\n\n'"$CHANGES"
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -90,21 +85,8 @@ jobs:
         python setup.py sdist bdist_wheel bdist_rpm
         mv dist/*.rpm .
         twine upload dist/*
-    - name: Upload the source RPM
-      uses: actions/upload-release-asset@v1
+    - name: Make the release
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      with:
-        upload_url: ${{steps.create_release.outputs.upload_url}}
-        asset_path: redfish_utilities-${{github.event.inputs.version}}-1.src.rpm
-        asset_name: redfish_utilities-${{github.event.inputs.version}}-1.src.rpm
-        asset_content_type: application/octet-stream
-    - name: Upload the no-arch RPM
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      with:
-        upload_url: ${{steps.create_release.outputs.upload_url}}
-        asset_path: redfish_utilities-${{github.event.inputs.version}}-1.noarch.rpm
-        asset_name: redfish_utilities-${{github.event.inputs.version}}-1.noarch.rpm
-        asset_content_type: application/octet-stream
+      run: |
+        gh release create ${{github.event.inputs.version}} -t ${{github.event.inputs.version}} -n "Changes since last release:"$'\n\n'"$CHANGES" *.rpm 
