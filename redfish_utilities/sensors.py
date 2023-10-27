@@ -248,6 +248,7 @@ def get_discrete_status( name, object, readings ):
         "UpperCaution": None,
         "UpperCritical": None,
         "UpperFatal": None,
+        "PhysicalContext": None,
     }
 
     readings.append( reading )
@@ -296,6 +297,7 @@ def get_analog_status_full( name, object, readings ):
         "UpperCaution": object.get( "UpperThresholdNonCritical", None ),
         "UpperCritical": object.get( "UpperThresholdCritical", None ),
         "UpperFatal": object.get( "UpperThresholdFatal", None ),
+        "PhysicalContext": object.get( "PhysicalContext", None ),
     }
 
     readings.append( reading )
@@ -327,6 +329,7 @@ def get_analog_status_small( name, field, units, object, readings ):
         "UpperCaution": None,
         "UpperCritical": None,
         "UpperFatal": None,
+        "PhysicalContext": None,
     }
 
     readings.append( reading )
@@ -361,6 +364,7 @@ def get_excerpt_status( name, field, units, object, readings ):
                     "UpperCaution": None,
                     "UpperCritical": None,
                     "UpperFatal": None,
+                    "PhysicalContext": None,
                 }
                 readings.append( reading )
     else:
@@ -377,6 +381,7 @@ def get_excerpt_status( name, field, units, object, readings ):
                 "UpperCaution": None,
                 "UpperCritical": None,
                 "UpperFatal": None,
+                "PhysicalContext": None,
             }
             readings.append( reading )
 
@@ -413,6 +418,7 @@ def get_sensor_status( sensor, readings , use_id = False ):
         "UpperCaution": sensor.get( "Thresholds", {} ).get( "UpperCaution", {} ).get( "Reading", None ),
         "UpperCritical": sensor.get( "Thresholds", {} ).get( "UpperCritical", {} ).get( "Reading", None ),
         "UpperFatal": sensor.get( "Thresholds", {} ).get( "UpperFatal", {} ).get( "Reading", None ),
+        "PhysicalContext": sensor.get( "PhysicalContext", None),
     }
 
     readings.append( reading )
@@ -446,13 +452,13 @@ def print_sensors( sensor_list ):
         sensor_list: The sensor list to print
     """
 
-    sensor_line_format = "  {:25s} | {:10s} | {:8s} | {:8s} | {:8s} | {:8s} | {:8s} | {:8s} | {:8s}"
+    sensor_line_format = "  {:25s} | {:10s} | {:8s} | {:8s} | {:8s} | {:8s} | {:8s} | {:8s} | {:8s} | {:32s}"
 
     # Go through each chassis object in the list
     for chassis in sensor_list:
 
         print( "Chassis '" + chassis["ChassisName"] + "' Status" )
-        print( sensor_line_format.format( "Sensor", "Reading", "Health", "LF", "LC", "LNC", "UNC", "UC", "UF" ) )
+        print( sensor_line_format.format( "Sensor", "Reading", "Health", "LF", "LC", "LNC", "UNC", "UC", "UF", "PhysicalContext" ) )
 
         # Go through each reading in the chassis
         for reading in chassis["Readings"]:
@@ -482,5 +488,5 @@ def print_sensors( sensor_list ):
             # Print it
             print( sensor_line_format.format( reading_pr["Name"], reading_pr["Reading"], reading_pr["Health"],
                 reading_pr["LowerFatal"], reading_pr["LowerCritical"], reading_pr["LowerCaution"],
-                reading_pr["UpperCaution"], reading_pr["UpperCritical"], reading_pr["UpperFatal"] ) )
+                reading_pr["UpperCaution"], reading_pr["UpperCritical"], reading_pr["UpperFatal"], reading_pr["PhysicalContext"] ) )
         print( "" )
