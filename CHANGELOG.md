@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.2.1] - 2023-10-27
+- Added PhysicalContext to rf_sensor_list.py
+
 ## [3.2.0] - 2023-09-15
 - Added workaround flag to attempt to set boot override properties on settings resources for non-conformant implementations
 
