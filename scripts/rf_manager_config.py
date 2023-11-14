@@ -52,6 +52,12 @@ reset_to_defaults_argget.add_argument( "--info", "-info", action = "store_true",
 set_time_argget = subparsers.add_parser( "settime", help = "Sets the date-time on a manager" )
 set_time_argget.add_argument( "--datetime", "-dt", type = str, help = "The date-time value to set" )
 set_time_argget.add_argument( "--offset", "-o", type = str, help = "The date-time offset value to set" )
+getprotocol_argget = subparsers.add_parser( "getprotocol", help = "Displays network protocol information about a manager" )
+setprotocol_argget = subparsers.add_parser( "setprotocol", help = "Configures network protocol settings on a manager" )
+setprotocol_argget.add_argument( "--protocol", "-prot", type = str, required = True, help = "The protocol to set" )
+setprotocol_argget.add_argument( "--enable", "-en", action = "store_true", help = "Enable the selected protocol" )
+setprotocol_argget.add_argument( "--disable", "-dis", action = "store_true", help = "Disable the selected protocol" )
+setprotocol_argget.add_argument( "--port", "-port", type = int, help = "The port number to assign the protocol" )
 args = argget.parse_args()
 
 if args.debug:
@@ -158,6 +164,21 @@ try:
         if args.dhcpv6 is not None:
             dhcpv6 = { "OperatingMode": args.dhcpv6 }
         redfish_utilities.set_manager_ethernet_interface( redfish_obj, args.manager, args.id, vlan, ipv4_addresses, dhcpv4, ipv6_addresses, ipv6_gateways, dhcpv6 )
+    elif args.command == "getprotocol":
+        network_protocol = redfish_utilities.get_manager_network_protocol( redfish_obj, args.manager )
+        redfish_utilities.print_manager_network_protocol( network_protocol )
+    elif args.command == "setprotocol":
+        network_protocol_setting = {
+            args.protocol: {}
+        }
+        if args.enable:
+            network_protocol_setting[args.protocol]["ProtocolEnabled"] = True
+        elif args.disable:
+            network_protocol_setting[args.protocol]["ProtocolEnabled"] = False
+        if args.port:
+            network_protocol_setting[args.protocol]["Port"] = args.port
+        print( "Configuring {}...".format( args.protocol ) )
+        redfish_utilities.set_manager_network_protocol( redfish_obj, args.manager, network_protocol_setting )
     else:
         manager = redfish_utilities.get_manager( redfish_obj, args.manager )
         redfish_utilities.print_manager( manager )

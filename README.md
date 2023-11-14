@@ -11,14 +11,12 @@ The utilities can be used as part of larger management applications, or be used 
 
 `pip install redfish_utilities`
 
-
 ### Building from Source
 
 ```
 python setup.py sdist
 pip install dist/redfish_utilities-x.x.x.tar.gz
 ```
-
 
 ## Requirements
 
@@ -30,9 +28,7 @@ You may install the external modules by running:
 
 `pip install -r requirements.txt`
 
-
 ## Utilities
-
 
 ### Discover
 
@@ -49,7 +45,6 @@ Example: `rf_discover.py`
 
 The tool will perform an SSDP request to find all available Redfish services.
 Once all the responses are collected, it will print each service with its UUID and service root.
-
 
 ### Sensor List
 
@@ -77,7 +72,6 @@ Example: `rf_sensor_list.py -u root -p root -r https://192.168.1.100`
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It then traverses the chassis collection for the service, and reads their respective power and thermal resources.
 Using the information from those resources, it will build a sensor table and print the information collected.
-
 
 ### System Inventory
 
@@ -115,7 +109,6 @@ The tool will log into the service specified by the *rhost* argument using the c
 It then traverses the chassis collection for the service, and collects component information for processors, memory, drives, PCIe devices, network adapters, and storage controllers.
 Using the information collected, it will build an inventory table and print the information.
 
-
 ### Logs
 
 ```
@@ -150,6 +143,7 @@ Example: `rf_logs.py -u root -p root -r https://192.168.1.100 -m BMC`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then attempt to locate the appropriate log service via the following logic:
+
 * If the *manager* argument is provided, it will traverse the manager collection for the matching manager.
 * If the *system* argument is provided, it will traverse the system collection for the matching system.
 * If the *chassis* argument is provided, it will traverse the chassis collection for the matching chassis.
@@ -159,7 +153,6 @@ It will then attempt to locate the appropriate log service via the following log
     * If *log* is not specified, and there is exactly one log service in the member, then the tool will use that one log service.
 
 Once the desired log service is found, the tool will either perform the `ClearLog` action if *clear* is provided, or read and display the log entries.
-
 
 ### Power/Reset
 
@@ -194,9 +187,9 @@ Example: `rf_power_reset.py -u root -p root -r https://192.168.1.100 -t Graceful
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It then traverses the system collection for the service to find the matching system specified by the *system* argument.
 It will perform the `Reset` action with the specified reset type from the *type* argument.
+
 * If *system* is not specified, and if the service has exactly one system, it will perform the operation on the one system.
 * If *type* is not specified, it will attempt a `GracefulRestart`.
-
 
 ### Boot Override
 
@@ -239,13 +232,14 @@ Example: `rf_boot_override.py -u root -p root -r https://192.168.1.100 -t Pxe -r
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It then traverses the system collection for the service to find the matching system specified by the *system* argument.
+
 * If *system* is not specified, and if the service has exactly one system, it will perform the operation on the one system.
 
 The tool will then perform an operation on the `Boot` object within the matching system.
+
 * If *target* is specified, it will update the `Boot` object to set the boot override to be *target*.
     * If *reset* is provided, it will reset the system after updating the `Boot` object.
 * If *target* is not specified, it will display the current boot override settings for the system.
-
 
 ### Manager Configuration
 
@@ -265,6 +259,8 @@ positional arguments:
     setnet              Configures an Ethernet interface
     resettodefaults     Resets a manager to default settings
     settime             Sets the date-time on a manager
+    getprotocol         Displays network protocol information about a manager
+    setprotocol         Configures network protocol settings on a manager
 
 required arguments:
   --user USER, -u USER  The user name for authentication
@@ -280,7 +276,6 @@ optional arguments:
   --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
-
 #### Info
 
 ```
@@ -294,8 +289,8 @@ Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 info`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the manager specified by the *manager* argument, and displays the manager instance.
-* If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
 
+* If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
 
 #### Reset
 
@@ -316,9 +311,9 @@ Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 reset -t
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It then traverses the manager collection for the service to find the matching manager specified by the *manager* argument.
 It will perform the `Reset` action with the specified reset type from the *type* argument.
+
 * If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
 * If *type* is not specified, it will attempt a `GracefulRestart`.
-
 
 #### Set Time
 
@@ -339,8 +334,8 @@ Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 settime 
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the manager specified by the *manager* argument, and applies the *datetime* and *offset* values to the manager instance.
-* If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
 
+* If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
 
 #### Get Network Interface
 
@@ -356,9 +351,9 @@ Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 getnet -
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the manager specified by the *manager* argument, locate the Ethernet interface specified by the *id* argument, and displays the interface instance.
+
 * If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
 * If *id* is not specified, and if the manager has exactly one Ethernet interface, it will perform the operation on the one interface.
-
 
 #### Set Network Interface
 
@@ -403,9 +398,9 @@ Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 setnet -
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the manager specified by the *manager* argument, locate the Ethernet interface specified by the *id* argument, and apply the requested settings to the interface.
+
 * If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
 * If *id* is not specified, and if the manager has exactly one Ethernet interface, it will perform the operation on the one interface.
-
 
 #### Reset to Defaults
 
@@ -425,11 +420,52 @@ optional arguments:
 Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 resettodefaults -t ResetAll`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
-It then traverses the manager collection for the service to find the matching system specified by the *manager* argument.
+It then traverses the manager collection for the service to find the matching manager specified by the *manager* argument.
 It will perform the `ResetToDefaults` action with the specified reset type from the *type* argument.
+
 * If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
 * If *type* is not specified, it will attempt to perform the action with `PreserveNetworkAndUsers`.
 
+#### Get Network Protocol Information
+
+```
+usage: rf_manager_config.py getprotocol [-h]
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 getprotocol`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It then traverses the manager collection for the service to find the matching manager specified by the *manager* argument and displays its network protocol information.
+
+* If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
+
+#### Set Network Protocol Information
+
+```
+usage: rf_manager_config.py setprotocol [-h] --protocol PROTOCOL [--enable]
+                                        [--disable] [--port PORT]
+
+required arguments:
+  --protocol PROTOCOL, -prot PROTOCOL
+                        The protocol to set
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --enable, -en         Enable the selected protocol
+  --disable, -dis       Disable the selected protocol
+  --port PORT, -port PORT
+                        The port number to assign the protocol
+```
+
+Example: `rf_manager_config.py -u root -p root -r https://192.168.1.100 getprotocol`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It then traverses the manager collection for the service to find the matching manager specified by the *manager* argument and apply the configuration specified by the *enable*, *disable*, and *port* arguments to the protocol specified by the *protocol* argument.
+
+* If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
 
 ### BIOS Settings
 
@@ -463,12 +499,13 @@ Example: `rf_bios_settings.py -u root -p root -r https://192.168.1.100 -a BiosMo
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It then traverses the system collection for the service to find the matching system specified by the *system* argument.
+
 * If *system* is not specified, and if the service has exactly one system, it will perform the operation on the one system.
 
 The tool will then get the BIOS resource for the matching system.
+
 * If *attribute* is specified, it will update the BIOS resource with the new attribute value.
 * If *attribute* is not specified, it will display the BIOS settings.
-
 
 ### Accounts
 
@@ -512,6 +549,7 @@ optional arguments:
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 Based on the parameters, it will display, add, delete, or modify user accounts.
+
 * The *add* argument is used to create a new user account
     * Example: `rf_accounts.py -u root -p root -r https://192.168.1.100 -add new_name new_password new_role`
 * The *delete* argument is used to delete a user account based on the given user name
@@ -530,7 +568,6 @@ Based on the parameters, it will display, add, delete, or modify user accounts.
     * Example: `rf_accounts.py -u root -p root -r https://192.168.1.100 -unlock user_to_change`
 * If none of the above arguments are given, a table of the user accounts is provided
     * Example: `rf_accounts.py -u root -p root -r https://192.168.1.100`
-
 
 ### Update
 
@@ -563,7 +600,6 @@ It then builds a request payload to perform a `SimpleUpdate` action against the 
 The optional *target* argument is used in the request if attempting to update a particular system, device, manager, or other resource.
 Once the `SimpleUpdate` is requested, it monitors the progress of the update, and displays response messages reported by the service about the update once complete.
 
-
 ### Event Service
 
 ```
@@ -591,7 +627,6 @@ optional arguments:
   --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
-
 #### Info
 
 ```
@@ -605,7 +640,6 @@ Example: `rf_event_service.py -u root -p root -r https://192.168.1.100 info`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the event service and event subscriptions and display their information.
-
 
 #### Subscribe
 
@@ -645,7 +679,6 @@ The tool will log into the service specified by the *rhost* argument using the c
 It will then locate the event service and perform a POST operation on the event destination collection to create a new subscription.
 The subscription will specify the destination to be the *destination* argument, and other optional arguments are provided as additional settings on the subscription.
 
-
 #### Unsubscribe
 
 ```
@@ -663,7 +696,6 @@ Example: `rf_event_service.py -u root -p root -r https://192.168.1.100 unsubscri
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the event service and traverse the members of the event destination collection to find a member with the `Id` property matching the *id* argument.
 If a match is found, it will perform a DELETE on the member.
-
 
 ### Virtual Media
 
@@ -695,7 +727,6 @@ optional arguments:
   --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
-
 #### Info
 
 ```
@@ -709,7 +740,6 @@ Example: `rf_virtual_media.py -u root -p root -r https://192.168.1.100 info`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the system specified by the *system* argument, find its virtual media collection, and display the virtual media instances.
-
 
 #### Insert
 
@@ -741,7 +771,6 @@ The tool will log into the service specified by the *rhost* argument using the c
 It will then locate the system specified by the *system* argument, find its virtual media collection.
 It will then iterate through the virtual media collection, and insert the virtual media specified by the *image* argument in an appropriate slot.
 
-
 #### Eject
 
 ```
@@ -759,7 +788,6 @@ Example: `rf_virtual_media.py -u root -p root -r https://192.168.1.100 eject --i
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the system specified by the *system* argument, find its virtual media collection.
 It will then locate the virtual media instance with matching `Id` property with the *id* argument, and then eject the media.
-
 
 ### Licenses
 
@@ -789,7 +817,6 @@ optional arguments:
   --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
-
 #### Info
 
 ```
@@ -805,7 +832,6 @@ Example: `rf_licenses.py -u root -p root -r https://192.168.1.100 info`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the license service, find its license collection, and display the licenses.
-
 
 #### Install
 
@@ -827,7 +853,6 @@ It will then locate the license service.
 If the license referenced by the *license* argument is local file, it will insert the contents of the license file in the license collection.
 Otherwise, it will install the new license with the `Install` action found on the license service.
 
-
 #### Delete
 
 ```
@@ -846,7 +871,6 @@ Example: `rf_licenses.py -u root -p root -r https://192.168.1.100 delete --licen
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the license service and find the license requested by the *license* argument.
 If the matching license is found, it will delete the license.
-
 
 ### Certificates
 
@@ -879,7 +903,6 @@ optional arguments:
   --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
-
 #### Info
 
 ```
@@ -896,7 +919,6 @@ Example: `rf_certificates.py -u root -p root -r https://192.168.1.100 info`
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the certificate service, find its certificate locations, and display the certificates.
 
-
 #### Certificate Signing Request Info
 
 ```
@@ -910,7 +932,6 @@ Example: `rf_certificates.py -u root -p root -r https://192.168.1.100 csrinfo`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then locate the certificate service, find the `GenerateCSR` action, and display the information obtained from its action info.
-
 
 #### Certificate Signing Request
 
@@ -1012,7 +1033,6 @@ Example: `rf_certificates.py -u root -p root -r https://192.168.1.100 delete --c
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then delete the certificate referenced by the *certificate* argument.
 
-
 ### Diagnostic Data
 
 ```
@@ -1057,6 +1077,7 @@ Example: `rf_diagnostic_data.py -u root -p root -r https://192.168.1.100 -m BMC`
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then attempt to locate the appropriate log service via the following logic:
+
 * If the *manager* argument is provided, it will traverse the manager collection for the matching manager.
 * If the *system* argument is provided, it will traverse the system collection for the matching system.
 * If the *chassis* argument is provided, it will traverse the chassis collection for the matching chassis.
@@ -1066,7 +1087,6 @@ It will then attempt to locate the appropriate log service via the following log
     * If *log* is not specified, and there is exactly one log service in the member, then the tool will use that one log service.
 
 Once the desired log service is found, the tool perform the `GetDiagnosticData` action and specify the type of diagnostic data to collect based on the *type* and *oemtype* arguments.  Once the action is complete, it will download the diagnostic data from the service and save it on the local system.
-
 
 ### Raw Request
 
@@ -1103,7 +1123,6 @@ Example: `rf_raw_request.py -u root -p root -r https://192.168.1.100 -req /redfi
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then perform the requested method on the specified URI with an optional body, specified by the *method*, *request*, and *body* arguments.
 It will then display the response of the operation from the service.
-
 
 ## Release Process
 

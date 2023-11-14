@@ -24,6 +24,12 @@ class RedfishManagerNotFoundError( Exception ):
     """
     pass
 
+class RedfishManagerNetworkProtocolNotFoundError( Exception ):
+    """
+    Raised when a matching manager does not contain network protocol information
+    """
+    pass
+
 class RedfishManagerEthIntNotFoundError( Exception ):
     """
     Raised when a matching Ethernet interface cannot be found
@@ -357,6 +363,99 @@ def manager_reset_to_defaults( context, manager_id = None, reset_type = None ):
         raise type( e )( str( e ) + additional_message ).with_traceback( sys.exc_info()[2] )
     return response
 
+def get_manager_network_protocol( context, manager_id = None ):
+    """
+    Finds the network protocol information for a manager and returns its resource
+
+    Args:
+        context: The Redfish client object with an open session
+        manager_id: The manager to locate; if None, perform on the only manager
+
+    Returns:
+        The ManagerNetworkProtocol resource
+    """
+    # Get the manager to find its network protocol information
+    manager = get_manager( context, manager_id )
+    if "NetworkProtocol" not in manager.dict:
+        # No network protocol information
+        raise RedfishManagerNetworkProtocolNotFoundError( "Manager {} does not contain network protocol information".format( manager.dict["Id"] ) )
+
+    # Get the network protocol information
+    response = context.get( manager.dict["NetworkProtocol"]["@odata.id"] )
+    verify_response( response )
+    return response
+
+def set_manager_network_protocol( context, manager_id = None, network_protocol = None ):
+    """
+    Sets network protocol settings for a manager
+
+    Args:
+        context: The Redfish client object with an open session
+        manager_id: The manager to locate; if None, perform on the only manager
+        network_protocol: The network protocol settings to apply
+
+    Returns:
+        The response of the PATCH
+    """
+    # Get the manager to find its network protocol information
+    manager = get_manager( context, manager_id )
+    if "NetworkProtocol" not in manager.dict:
+        # No network protocol information
+        raise RedfishManagerNetworkProtocolNotFoundError( "Manager {} does not contain network protocol information".format( manager.dict["Id"] ) )
+
+    # Get the current network protocol information
+    response = context.get( manager.dict["NetworkProtocol"]["@odata.id"] )
+    verify_response( response )
+    headers = None
+    etag = response.getheader( "ETag" )
+    if etag is not None:
+        headers = { "If-Match": etag }
+
+    # Set the network protocol information
+    if network_protocol is None:
+        network_protocol = {}
+    response = context.patch( manager.dict["NetworkProtocol"]["@odata.id"], body = network_protocol, headers = headers )
+    verify_response( response )
+    return response
+
+def print_manager_network_protocol( network_protocol ):
+    """
+    Prints the manager network protocol information
+
+    Args:
+        network_protocol: The manager network protocol information to print
+    """
+
+    network_protocol_properties = [ "HTTP", "HTTPS", "SSDP", "SSH", "Telnet", "KVMIP", "NTP", "RDP", "RFB",
+                                    "VirtualMedia", "IPMI", "SNMP", "DHCP", "DHCPv6" ]
+    network_protocol_line_format = "  {:16s} | {:8s} | {:6s} | {}"
+    print( "Manager Network Protocol Info" )
+    print( "" )
+    print( network_protocol_line_format.format( "Protocol", "Enabled", "Port", "Other Settings" ) )
+
+    for property in network_protocol_properties:
+        if property in network_protocol.dict:
+            other_str = ""
+            if property == "SSDP":
+                # For SSDP, extract the NOTIFY settings
+                other_str = []
+                if "NotifyIPv6Scope" in network_protocol.dict[property]:
+                    other_str.append( "NOTIFY IPv6 Scope: {}".format( network_protocol.dict[property]["NotifyIPv6Scope"] ) )
+                if "NotifyTTL" in network_protocol.dict[property]:
+                    other_str.append( "NOTIFY TTL: {}".format( network_protocol.dict[property]["NotifyTTL"] ) )
+                if "NotifyMulticastIntervalSeconds" in network_protocol.dict[property]:
+                    other_str.append( "NOTIFY ALIVE Interval: {}".format( network_protocol.dict[property]["NotifyMulticastIntervalSeconds"] ) )
+                other_str = ", ".join( other_str )
+            if property == "NTP":
+                # For NTP, extract the servers; need to skip "empty" slots potentially
+                if "NTPServers" in network_protocol.dict[property]:
+                    other_str = []
+                    for server in network_protocol.dict[property]["NTPServers"]:
+                        if isinstance( server, str ):
+                            other_str.append( server )
+                    other_str = "NTP Servers: " + ", ".join( other_str )
+            print( network_protocol_line_format.format( property, str( network_protocol.dict[property].get( "ProtocolEnabled", "" ) ), str( network_protocol.dict[property].get( "Port", "" ) ), other_str ) )
+
 def get_manager_ethernet_interface_ids( context, manager_id = None ):
     """
     Finds the Ethernet interface collection for a manager and returns all of the member's identifiers
@@ -388,7 +487,7 @@ def get_manager_ethernet_interface( context, manager_id = None, interface_id = N
         interface_id: The Ethernet interface to locate; if None, perform on the only Ethernet interface
 
     Returns:
-        The manager resource
+        The EthernetInterface resource for the manager
     """
 
     interface_uri_pattern = "/redfish/v1/Managers/{}/EthernetInterfaces/{}"
