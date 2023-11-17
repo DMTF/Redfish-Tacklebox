@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.2.2] - 2023-11-17
+- Added new subcommands to 'rf_manager_config.py' to display and configure network protocol settings
+
 ## [3.2.1] - 2023-10-27
 - Added PhysicalContext to rf_sensor_list.py
 
