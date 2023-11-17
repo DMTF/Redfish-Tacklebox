@@ -42,6 +42,9 @@ from .managers import get_manager_reset_info
 from .managers import manager_reset
 from .managers import get_manager_reset_to_defaults_info
 from .managers import manager_reset_to_defaults
+from .managers import get_manager_network_protocol
+from .managers import set_manager_network_protocol
+from .managers import print_manager_network_protocol
 from .managers import get_manager_ethernet_interface_ids
 from .managers import get_manager_ethernet_interface
 from .managers import set_manager_ethernet_interface
