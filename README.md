@@ -18,6 +18,24 @@ python setup.py sdist
 pip install dist/redfish_utilities-x.x.x.tar.gz
 ```
 
+### Building Docker
+
+* Pull the container from Docker Hub:
+
+    ```bash
+    docker pull dmtf/redfish-utilities:latest
+    ```
+* Build a container from local source:
+
+    ```bash
+    docker build -t dmtf/redfish-utilities:latest .
+    ```
+* Build a container from GitHub:
+
+    ```bash
+    docker build -t dmtf/redfish-utilities:latest https://github.com/DMTF/Redfish-Tacklebox.git
+    ```
+
 ## Requirements
 
 External modules:
