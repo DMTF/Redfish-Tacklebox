@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.2.3] - 2024-01-19
+- Minor changes to fix Python 3.12 warnings with usage of raw strings
+
 ## [3.2.2] - 2023-11-17
 - Added new subcommands to 'rf_manager_config.py' to display and configure network protocol settings
 
