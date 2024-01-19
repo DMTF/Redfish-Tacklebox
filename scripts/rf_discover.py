@@ -35,7 +35,7 @@ for service in services:
     # If not, just print the UUID and service root pointer
     try:
         # Need to strip off /redfish/v1 from the SSDP response to use the URL with the library
-        groups = re.search( "^(.+)\/redfish\/v1\/?$", services[service] )
+        groups = re.search( r"^(.+)\/redfish\/v1\/?$", services[service] )
         url = groups.group( 1 )
         redfish_obj = redfish.redfish_client( base_url = url, timeout = 15, max_retry = 3 )
         print( "{}: {} ({})".format( service, services[service], redfish_obj.root["Product"] ) )
