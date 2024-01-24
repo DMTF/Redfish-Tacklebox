@@ -155,6 +155,19 @@ plug_type_strings = {
     "NEMA_L6_30P": "NEMA L6-30P (Single-phase 250V; 30A; 2P3W)"
 }
 
+line_measurement_strings = {
+    "Line1ToLine2": "L1-L2",
+    "Line1ToNeutral": "L1-N",
+    "Line2ToLine3": "L2-L3",
+    "Line2ToNeutral": "L2-N",
+    "Line3ToLine1": "L3-L1",
+    "Line3ToNeutral": "L3-N",
+    "Line1": "L1",
+    "Line2": "L2",
+    "Line3": "L3",
+    "Neutral": "N"
+}
+
 def get_power_equipment_ids( context ):
     """
     Finds the power equipment and returns all power equipment identifiers
@@ -397,8 +410,7 @@ def print_power_equipment_electrical( electrical ):
     """
 
     electrical_line_format = "  {}: {}"
-    poly_phase_line_format = "    {:14s}: {}"
-    poly_phase_current_line_format = "    {:7s}: {}"
+    poly_phase_line_format = "    {:5s}: {}"
     if "#Outlet." in electrical.dict["@odata.type"]:
         print( "Outlet {} Info".format( electrical.dict["Id"] ) )
     else:
@@ -446,11 +458,8 @@ def print_power_equipment_electrical( electrical ):
                 if electrical.dict[poly_phase_name][poly_phase]["Reading"] is None:
                     prop_val = "Unavailable"
                 else:
-                    prop_val = str( electrical.dict["PolyPhase" + property[0]][poly_phase]["Reading"] ) + " " + property[2]
-                if property[0] == "CurrentAmps":
-                    print( poly_phase_current_line_format.format( poly_phase, prop_val ) )
-                else:
-                    print( poly_phase_line_format.format( poly_phase, prop_val ) )
+                    prop_val = "{:7.2f}".format( electrical.dict["PolyPhase" + property[0]][poly_phase]["Reading"] ) + " " + property[2]
+                print( poly_phase_line_format.format( line_measurement_strings.get( poly_phase, poly_phase ), prop_val ) )
     print( "" )
 
 def print_power_equipment_electrical_summary( power_equipment, electrical_type, print_heading ):
