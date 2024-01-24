@@ -71,6 +71,7 @@ setup(
         "scripts/rf_licenses.py",
         "scripts/rf_logs.py",
         "scripts/rf_manager_config.py",
+        "scripts/rf_power_equipment.py",
         "scripts/rf_power_reset.py",
         "scripts/rf_raw_request.py",
         "scripts/rf_sensor_list.py",
