@@ -79,7 +79,8 @@ jobs:
         pip install setuptools wheel twine
     - name: Build the distribution
       run: |
-        python setup.py sdist bdist_wheel
+        python setup.py sdist bdist_wheel bdist_rpm
+        mv dist/*.rpm .
     - name: Upload to pypi
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
@@ -88,4 +89,4 @@ jobs:
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       run: |
-        gh release create ${{github.event.inputs.version}} -t ${{github.event.inputs.version}} -n "Changes since last release:"$'\n\n'"$CHANGES" 
+        gh release create ${{github.event.inputs.version}} -t ${{github.event.inputs.version}} -n "Changes since last release:"$'\n\n'"$CHANGES" *.rpm
