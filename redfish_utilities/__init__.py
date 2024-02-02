@@ -51,6 +51,16 @@ from .managers import set_manager_ethernet_interface
 from .managers import print_manager_ethernet_interface
 from .messages import print_error_payload
 from .messages import verify_response
+from .power_equipment import power_equipment_types
+from .power_equipment import power_equipment_electrical_types
+from .power_equipment import get_power_equipment_ids
+from .power_equipment import get_power_equipment
+from .power_equipment import print_power_equipment
+from .power_equipment import get_power_equipment_summary
+from .power_equipment import print_power_equipment_summary
+from .power_equipment import get_power_equipment_electrical
+from .power_equipment import print_power_equipment_electrical
+from .power_equipment import print_power_equipment_electrical_summary
 from .resets import reset_types
 from .resets import reset_to_defaults_types
 from .sensors import get_sensors

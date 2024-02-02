@@ -263,14 +263,14 @@ The tool will then perform an operation on the `Boot` object within the matching
 
 ```
 usage: rf_manager_config.py [-h] --user USER --password PASSWORD --rhost RHOST
-                            [--manager MANAGER]
-                            {info,reset,getnet,setnet,resettodefaults,settime}
+                            [--manager MANAGER] [--debug]
+                            {info,reset,getnet,setnet,resettodefaults,settime,getprotocol,setprotocol}
                             ...
 
 A tool to manage managers in a service
 
 positional arguments:
-  {info,reset,getnet,setnet,resettodefaults,settime}
+  {info,reset,getnet,setnet,resettodefaults,settime,getprotocol,setprotocol}
     info                Displays information about a manager
     reset               Resets a manager
     getnet              Displays information about an Ethernet interface
@@ -1105,6 +1105,190 @@ It will then attempt to locate the appropriate log service via the following log
     * If *log* is not specified, and there is exactly one log service in the member, then the tool will use that one log service.
 
 Once the desired log service is found, the tool perform the `GetDiagnosticData` action and specify the type of diagnostic data to collect based on the *type* and *oemtype* arguments.  Once the action is complete, it will download the diagnostic data from the service and save it on the local system.
+
+### Power Equipment
+
+```
+usage: rf_power_equipment.py [-h] --user USER --password PASSWORD --rhost
+                             RHOST [--debug]
+                             {list,status,outlets,outletinfo,mainsinfo,branchinfo}
+                             ...
+
+A tool to manage power equipment
+
+positional arguments:
+  {list,status,outlets,outletinfo,mainsinfo,branchinfo}
+    list                Displays a list of the available power equipment
+    status              Displays the status of an instance of power equipment
+    outlets             Displays the outlet summary of an instance of power
+                        equipment
+    outletinfo          Displays the status of an outlet for an instance of
+                        power equipment
+    mainsinfo           Displays the status of a mains circuit for an instance
+                        of power equipment
+    branchinfo          Displays the status of a branch circuit for an
+                        instance of power equipment
+
+required arguments:
+  --user USER, -u USER  The user name for authentication
+  --password PASSWORD, -p PASSWORD
+                        The password for authentication
+  --rhost RHOST, -r RHOST
+                        The address of the Redfish service (with scheme)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --debug               Creates debug file showing HTTP traces and exceptions
+```
+
+#### List
+
+```
+usage: rf_power_equipment.py list [-h]
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+Example: `rf_power_equipment.py -u root -p root -r https://192.168.1.100 list`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the power equipment monitored by the service and construct a table of the available equipment categorized by the equipment type.
+
+#### Status
+
+```
+usage: rf_power_equipment.py status [-h] --type
+                                    {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}
+                                    [--equipment EQUIPMENT]
+
+required arguments:
+  --type {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}, -t {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}
+                        The type of power equipment to get
+
+optional arguments:
+  -h, --help  show this help message and exit
+  --equipment EQUIPMENT, -pe EQUIPMENT
+                        The identifier of the power equipment to get
+```
+
+Example: `rf_power_equipment.py -u root -p root -r https://192.168.1.100 status -t RackPDU -pe 1`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the equipment specified by the *equipment* argument for the type specified by the *type* argument, and displays the equipment instance with summary information about any mains and branch circuits found.
+
+* If *equipment* is not specified, and if the service has exactly one equipment of the desired type, it will perform the operation on the one equipment.
+
+#### Outlets
+
+```
+usage: rf_power_equipment.py outlets [-h] --type
+                                     {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}
+                                     [--equipment EQUIPMENT]
+
+required arguments:
+  --type {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}, -t {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}
+                        The type of power equipment to get
+
+optional arguments:
+  -h, --help  show this help message and exit
+  --equipment EQUIPMENT, -pe EQUIPMENT
+                        The identifier of the power equipment to get
+```
+
+Example: `rf_power_equipment.py -u root -p root -r https://192.168.1.100 outlets -t RackPDU -pe 1`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the equipment specified by the *equipment* argument for the type specified by the *type* argument, and displays the outlet summary for the equipment.
+
+* If *equipment* is not specified, and if the service has exactly one equipment of the desired type, it will perform the operation on the one equipment.
+
+#### Outlet Info
+
+```
+rf_power_equipment.py outletinfo --help
+usage: rf_power_equipment.py outletinfo [-h] --type
+                                        {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}
+                                        [--equipment EQUIPMENT]
+                                        [--outlet OUTLET]
+
+required arguments:
+  --type {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}, -t {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}
+                        The type of power equipment to get
+                        
+optional arguments:
+  -h, --help            show this help message and exit
+  --equipment EQUIPMENT, -pe EQUIPMENT
+                        The identifier of the power equipment to get
+  --outlet OUTLET, -o OUTLET
+                        The identifier of the outlet to get
+```
+
+Example: `rf_power_equipment.py -u root -p root -r https://192.168.1.100 outletinfo -t RackPDU -pe 1 -o A1`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the equipment specified by the *equipment* argument for the type specified by the *type* argument.
+It will then locate the outlet specified by the *outlet* argument, and displays the outlet info.
+
+* If *equipment* is not specified, and if the service has exactly one equipment of the desired type, it will perform the operation on the one equipment.
+* If *outlet* is not specified, and if the equipment has exactly one outlet, it will perform the operation on the one outlet.
+
+#### Mains Info
+
+```
+usage: rf_power_equipment.py mainsinfo [-h] --type
+                                       {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}
+                                       [--equipment EQUIPMENT] [--mains MAINS]
+
+required arguments:
+  --type {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}, -t {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}
+                        The type of power equipment to get
+                        
+optional arguments:
+  -h, --help            show this help message and exit
+  --equipment EQUIPMENT, -pe EQUIPMENT
+                        The identifier of the power equipment to get
+  --mains MAINS, -m MAINS
+                        The identifier of the mains circuit to get
+```
+
+Example: `rf_power_equipment.py -u root -p root -r https://192.168.1.100 mainsinfo -t RackPDU -pe 1 -m Input1`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the equipment specified by the *equipment* argument for the type specified by the *type* argument.
+It will then locate the mains circuit specified by the *mains* argument, and displays the mains circuit info.
+
+* If *equipment* is not specified, and if the service has exactly one equipment of the desired type, it will perform the operation on the one equipment.
+* If *mains* is not specified, and if the equipment has exactly one mains circuit, it will perform the operation on the one mains circuit.
+
+#### Branch Info
+
+```
+usage: rf_power_equipment.py branchinfo [-h] --type
+                                        {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}
+                                        [--equipment EQUIPMENT]
+                                        [--branch BRANCH]
+
+required arguments:
+  --type {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}, -t {FloorPDU,RackPDU,Switchgear,TransferSwitch,PowerShelf,ElectricalBus}
+                        The type of power equipment to get
+                        
+optional arguments:
+  -h, --help            show this help message and exit
+  --equipment EQUIPMENT, -pe EQUIPMENT
+                        The identifier of the power equipment to get
+  --branch BRANCH, -b BRANCH
+                        The identifier of the branch circuit to get
+```
+
+Example: `rf_power_equipment.py -u root -p root -r https://192.168.1.100 branchinfo -t RackPDU -pe 1 -b 4`
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the equipment specified by the *equipment* argument for the type specified by the *type* argument.
+It will then locate the branch circuit specified by the *branch* argument, and displays the branch circuit info.
+
+* If *equipment* is not specified, and if the service has exactly one equipment of the desired type, it will perform the operation on the one equipment.
+* If *branch* is not specified, and if the equipment has exactly one branch circuit, it will perform the operation on the one branch circuit.
 
 ### Raw Request
 
