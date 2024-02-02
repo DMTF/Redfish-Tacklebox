@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.2.4] - 2024-02-02
+- Added 'rf_power_equipment.py' to collect data from rack PDUs and other power equipment
+
 ## [3.2.3] - 2024-01-19
 - Minor changes to fix Python 3.12 warnings with usage of raw strings
 
