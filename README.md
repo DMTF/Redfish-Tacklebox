@@ -608,6 +608,8 @@ optional arguments:
   -h, --help            show this help message and exit
   --target TARGET, -t TARGET
                         The target resource to apply the image
+  --applytime {Immediate,OnReset,AtMaintenanceWindowStart,InMaintenanceWindowOnReset,OnStartUpdateRequest}, -at {Immediate,OnReset,AtMaintenanceWindowStart,InMaintenanceWindowOnReset,OnStartUpdateRequest}
+                        The apply time for the update
   --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
