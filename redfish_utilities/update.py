@@ -17,12 +17,26 @@ import os
 import errno
 import math
 from .messages import verify_response
+from enum import Enum
 
 class RedfishUpdateServiceNotFoundError( Exception ):
     """
     Raised when the update service or an update action cannot be found
     """
     pass
+
+class operation_apply_times( Enum ):
+    """
+    Values for operation apply time settings
+    """
+    IMMEDIATE = "Immediate"
+    ON_RESET = "OnReset"
+    AT_MAINTENANCE_WINDOW_START = "AtMaintenanceWindowStart"
+    AT_MAINTENANCE_WINDOW_ON_RESET = "InMaintenanceWindowOnReset"
+    ON_START_UPDATE_REQUEST = "OnStartUpdateRequest"
+
+    def __str__( self ):
+        return self.value
 
 def get_simple_update_info( context ):
     """
@@ -93,7 +107,7 @@ def get_simple_update_info( context ):
 
     return simple_update_uri, simple_update_parameters
 
-def simple_update( context, image_uri, protocol = None, targets = None, username = None, password = None ):
+def simple_update( context, image_uri, protocol = None, targets = None, username = None, password = None, apply_time = None ):
     """
     Performs a SimpleUpdate request
 
@@ -104,6 +118,7 @@ def simple_update( context, image_uri, protocol = None, targets = None, username
         targets: The targets receiving the update
         username: The username for retrieving the update for the given URI
         password: The password for retrieving the update for the given URI
+        apply_time: The apply time for the update
 
     Returns:
         The response from the request
@@ -124,6 +139,8 @@ def simple_update( context, image_uri, protocol = None, targets = None, username
         body["Username"] = username
     if password is not None:
         body["Password"] = password
+    if apply_time is not None:
+        body["@Redfish.OperationApplyTime"] = apply_time.value
 
     response = context.post( uri, body = body )
     verify_response( response )
@@ -149,7 +166,7 @@ def get_size( file_path, unit = 'bytes' ):
         size = file_size / 1024 ** exponents_map[unit]
         return round( size, 3 )
     
-def multipart_push_update( context, image_path, targets = None, timeout = None ):
+def multipart_push_update( context, image_path, targets = None, timeout = None, apply_time = None ):
     """
     Performs an HTTP Multipart push update request
 
@@ -158,6 +175,7 @@ def multipart_push_update( context, image_path, targets = None, timeout = None )
         image_path: The filepath to the image for the update
         targets: The targets receiving the update
         timeout: The timeout to apply to the update
+        apply_time: The apply time for the update
 
     Returns:
         The response from the request
@@ -191,6 +209,8 @@ def multipart_push_update( context, image_path, targets = None, timeout = None )
     update_parameters = {}
     if targets is not None:
         update_parameters["Targets"] = targets
+    if apply_time is not None:
+        update_parameters["@Redfish.OperationApplyTime"] = apply_time.value
     body = {
         "UpdateParameters": ( None, json.dumps( update_parameters ), "application/json" ),
         "UpdateFile": ( image_path.split( os.path.sep )[-1], open( image_path, "rb" ), "application/octet-stream" )

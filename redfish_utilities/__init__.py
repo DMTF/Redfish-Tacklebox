@@ -80,6 +80,7 @@ from .systems import get_system_bios
 from .systems import set_system_bios
 from .systems import print_system_bios
 from .tasks import poll_task_monitor
+from .update import operation_apply_times
 from .update import get_update_service
 from .update import get_simple_update_info
 from .update import simple_update

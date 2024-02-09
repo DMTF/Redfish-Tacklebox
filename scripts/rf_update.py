@@ -87,6 +87,7 @@ argget.add_argument( "--password", "-p",  type = str, required = True, help = "T
 argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
 argget.add_argument( "--image", "-i", type = str, required = True, help = "The URI or filepath of the image" )
 argget.add_argument( "--target", "-t", type = str, help = "The target resource to apply the image" )
+argget.add_argument( "--applytime", "-at", type = redfish_utilities.operation_apply_times, help = "The apply time for the update", choices = redfish_utilities.operation_apply_times )
 argget.add_argument( "--debug", action = "store_true", help = "Creates debug file showing HTTP traces and exceptions" )
 args = argget.parse_args()
 
@@ -120,7 +121,7 @@ try:
         if "MultipartHttpPushUri" in update_service.dict:
             # Perform a multipart push update
             print( "Pushing the image to the service directly; depending on the size of the image, this can take a few minutes..." )
-            response = redfish_utilities.multipart_push_update( redfish_obj, args.image, targets = targets )
+            response = redfish_utilities.multipart_push_update( redfish_obj, args.image, targets = targets, apply_time = args.applytime )
         else:
             # Host a local web server and perform a SimpleUpdate for the local image
             web_server_thread = threading.Thread( target = local_web_server, args=( args.image, ) )
@@ -143,10 +144,10 @@ try:
             s.connect( ( groups.group(2), int( remote_port ) ) )
             image_uri = "http://{}:{}/{}".format( s.getsockname()[0], WEB_SERVER_PORT, args.image.rsplit( os.path.sep, 1 )[-1] )
             s.close()
-            response = redfish_utilities.simple_update( redfish_obj, image_uri, targets = targets )
+            response = redfish_utilities.simple_update( redfish_obj, image_uri, targets = targets, apply_time = args.applytime )
     else:
         # Remote image; always use SimpleUpdate
-        response = redfish_utilities.simple_update( redfish_obj, args.image, targets = targets )
+        response = redfish_utilities.simple_update( redfish_obj, args.image, targets = targets, apply_time = args.applytime )
 
     # Monitor the response
     print( "Update initiated..." )
