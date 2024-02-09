@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.2.5] - 2024-02-09
+- Added optional 'applytime' parameter to 'rf_update.py' to specify when to apply an update
+
 ## [3.2.4] - 2024-02-02
 - Added 'rf_power_equipment.py' to collect data from rack PDUs and other power equipment
 
