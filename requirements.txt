@@ -1,2 +1,3 @@
 redfish>=3.2.1
 XlsxWriter>=1.2.7
+requests
