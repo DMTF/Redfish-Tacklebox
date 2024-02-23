@@ -76,10 +76,11 @@ setup(
         "scripts/rf_raw_request.py",
         "scripts/rf_sensor_list.py",
         "scripts/rf_sys_inventory.py",
+        "scripts/rf_test_event_listener.py",
         "scripts/rf_update.py",
         "scripts/rf_virtual_media.py"
     ],
-    install_requires = [ "redfish>=3.2.1", "XlsxWriter>=1.2.7" ],
+    install_requires = [ "redfish>=3.2.1", "XlsxWriter>=1.2.7", "requests" ],
     cmdclass={
         'pyinstaller': Pyinstaller
     }
