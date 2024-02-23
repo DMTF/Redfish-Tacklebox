@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.2.6] - 2024-02-23
+- Added 'rf_test_event_listener.py' tool to manually build event payloads
+
 ## [3.2.5] - 2024-02-09
 - Added optional 'applytime' parameter to 'rf_update.py' to specify when to apply an update
 
