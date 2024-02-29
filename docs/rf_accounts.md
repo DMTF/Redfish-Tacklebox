@@ -79,7 +79,7 @@ Adding new user 'new_name'
 Example; delete an account:
 
 ```
-$rf_accounts.py -u root -p root -r https://192.168.1.100 -delete user_to_delete
+$ rf_accounts.py -u root -p root -r https://192.168.1.100 -delete user_to_delete
 Deleting user 'user_to_delete'
 ```
 
