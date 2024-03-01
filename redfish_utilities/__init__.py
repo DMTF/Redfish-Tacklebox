@@ -1,6 +1,6 @@
 #! /usr/bin/python
 # Copyright Notice:
-# Copyright 2019-2023 DMTF. All rights reserved.
+# Copyright 2019-2024 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/main/LICENSE.md
 
 from .accounts import get_users
@@ -8,6 +8,10 @@ from .accounts import print_users
 from .accounts import add_user
 from .accounts import delete_user
 from .accounts import modify_user
+from .assembly import get_assembly
+from .assembly import print_assembly
+from .assembly import download_assembly
+from .assembly import upload_assembly
 from .certificates import get_all_certificates
 from .certificates import print_certificates
 from .certificates import get_generate_csr_info
