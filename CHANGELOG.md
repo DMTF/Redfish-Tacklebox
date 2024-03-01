@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.2.7] - 2024-03-01
+- Added 'rf_assembly.py' to manage Assembly resources on a service
+
 ## [3.2.6] - 2024-02-23
 - Added 'rf_test_event_listener.py' tool to manually build event payloads
 
