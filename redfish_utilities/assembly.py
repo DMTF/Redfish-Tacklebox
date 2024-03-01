@@ -54,7 +54,8 @@ def print_assembly( assemblies, index = None ):
 
     assembly_format_header = " {:5s} | {} {}"
     assembly_format = " {:5s} | {}: {}"
-    assembly_properties = [ "Model", "PartNumber", "SerialNumber", "Producer", "Vendor", "ProductionDate" ]
+    assembly_properties = [ "Model", "PartNumber", "SparePartNumber", "SKU", "SerialNumber", "Producer", "Vendor",
+                            "ProductionDate", "Version", "EngineeringChangeLevel" ]
 
     # If an index is specified, isolate to the one index
     if index is not None:
