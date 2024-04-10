@@ -50,7 +50,7 @@ def get_sensors( context , use_id = False ):
         get_discrete_status( "State", chassis.dict, chassis_instance["Readings"] )
 
         # If the chassis contains any of the newer power/thermal models, scan based on the common sensor model
-        if "EnvironmentMetrics" in chassis.dict or "PowerSubsystem" in chassis.dict or "ThermalSubsystem" in chassis.dict:
+        if "EnvironmentMetrics" in chassis.dict or "PowerSubsystem" in chassis.dict or "ThermalSubsystem" in chassis.dict or "Sensors" in chassis.dict:
             # Get readings from the EnvironmentMetrics resource if available
             if "EnvironmentMetrics" in chassis.dict:
                 environment = context.get( chassis.dict["EnvironmentMetrics"]["@odata.id"] )
