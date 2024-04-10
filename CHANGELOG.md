@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.2.8] - 2024-04-10
+- Added missing check for presence of 'Sensors' when deciding which model to follow for collecting sensor info
+
 ## [3.2.7] - 2024-03-01
 - Added 'rf_assembly.py' to manage Assembly resources on a service
 
