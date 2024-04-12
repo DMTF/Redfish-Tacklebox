@@ -2,6 +2,12 @@
 
 Copyright 2019-2024 DMTF.  All rights reserved.
 
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/DMTF/Redfish-Tacklebox/blob/main/LICENSE.md)
+[![PyPI](https://img.shields.io/pypi/v/redfish-utilities)](https://pypi.org/project/redfish-utilities/)
+[![Pulls](https://img.shields.io/docker/pulls/dmtf/redfish-tacklebox?style=flat&logo=docker&label=Pulls)](https://hub.docker.com/r/dmtf/redfish-tacklebox)
+[![GitHub stars](https://img.shields.io/github/stars/DMTF/Redfish-Tacklebox.svg?style=flat-square&label=github%20stars)](https://github.com/DMTF/Redfish-Tacklebox)
+[![GitHub Contributors](https://img.shields.io/github/contributors/DMTF/Redfish-Tacklebox.svg?style=flat-square)](https://github.com/DMTF/Redfish-Tacklebox/graphs/contributors)
+
 ## About
 
 Redfish Tacklebox contains a set of Python3 utilities to perform common management operations with a Redfish service.
@@ -23,17 +29,17 @@ pip install dist/redfish_utilities-x.x.x.tar.gz
 * Pull the container from Docker Hub:
 
     ```bash
-    docker pull dmtf/redfish-utilities:latest
+    docker pull dmtf/redfish-tacklebox:latest
     ```
 * Build a container from local source:
 
     ```bash
-    docker build -t dmtf/redfish-utilities:latest .
+    docker build -t dmtf/redfish-tacklebox:latest .
     ```
 * Build a container from GitHub:
 
     ```bash
-    docker build -t dmtf/redfish-utilities:latest https://github.com/DMTF/Redfish-Tacklebox.git
+    docker build -t dmtf/redfish-tacklebox:latest https://github.com/DMTF/Redfish-Tacklebox.git
     ```
 
 ## Requirements
