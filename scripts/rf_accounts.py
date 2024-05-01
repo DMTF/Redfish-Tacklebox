@@ -73,7 +73,7 @@ except RedfishPasswordChangeRequiredError as e:
         else:
             redfish_utilities.print_password_change_required_and_logout( redfish_obj, args )
             sys.exit( 1 )
-except Exception as e:
+except Exception:
     raise
 
 exit_code = 0

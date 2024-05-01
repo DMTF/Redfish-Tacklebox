@@ -41,7 +41,7 @@ def poll_task_monitor( context, response ):
         try:
             task_state = task_monitor.dict.get( "TaskState", None )
             task_percent = task_monitor.dict.get( "PercentComplete", None )
-        except:
+        except Exception:
             # 202 responses are allowed to not have a response body
             pass
         if task_state is None:

@@ -57,7 +57,7 @@ def get_users( context ):
         }
 
         # Some implementations always expose "slots" for users; ignore empty slots
-        if account_info["UserName"] == "" and account_info["Enabled"] == False:
+        if account_info["UserName"] == "" and account_info["Enabled"] is False:
             continue
 
         user_list.append( account_info )

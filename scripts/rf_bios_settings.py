@@ -45,10 +45,10 @@ redfish_obj = None
 try:
     redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, timeout = 15, max_retry = 3 )
     redfish_obj.login( auth = "session" )
-except RedfishPasswordChangeRequiredError as e:
+except RedfishPasswordChangeRequiredError:
     redfish_utilities.print_password_change_required_and_logout( redfish_obj, args )
     sys.exit( 1 )
-except Exception as e:
+except Exception:
     raise
 
 exit_code = 0
@@ -72,7 +72,7 @@ try:
                     # Integer or float; go by the user input to determine how to convert since the current value may be truncated
                     try:
                         new_value = int( new_value )
-                    except:
+                    except Exception:
                         new_value = float( new_value )
 
             # Set the specified attribute to the new value

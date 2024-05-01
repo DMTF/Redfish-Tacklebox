@@ -6,7 +6,6 @@
 from setuptools import setup
 from setuptools import Command as _Command
 from codecs import open
-import sys
 import os
 
 class Pyinstaller(_Command):

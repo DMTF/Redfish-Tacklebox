@@ -12,7 +12,6 @@ Brief : This file contains the definitions and functionalities for managing
         certificates on a Redfish service
 """
 
-import os
 from .messages import verify_response
 
 class RedfishCertificateServiceNotFoundError( Exception ):

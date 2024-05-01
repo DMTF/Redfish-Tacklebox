@@ -46,7 +46,7 @@ def local_web_server( filepath ):
     # Create a temporary folder and move the file to the folder
     try:
         shutil.rmtree( WEB_SERVER_FOLDER )
-    except:
+    except Exception:
         pass
     os.mkdir( WEB_SERVER_FOLDER )
     shutil.copy( filepath, WEB_SERVER_FOLDER )
@@ -73,7 +73,7 @@ def print_error_payload( response ):
 
     try:
         print(redfish_utilities.get_error_messages( response ) )
-    except:
+    except Exception:
         # No response body
         if response.status >= 400:
             print( "Failed" )
@@ -102,10 +102,10 @@ redfish_obj = None
 try:
     redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, timeout = 15, max_retry = 3 )
     redfish_obj.login( auth = "session" )
-except RedfishPasswordChangeRequiredError as e:
+except RedfishPasswordChangeRequiredError:
     redfish_utilities.print_password_change_required_and_logout( redfish_obj, args )
     sys.exit( 1 )
-except Exception as e:
+except Exception:
     raise
 
 start_path = os.getcwd()
@@ -166,7 +166,7 @@ finally:
     os.chdir( start_path )
     try:
         shutil.rmtree( WEB_SERVER_FOLDER )
-    except:
+    except Exception:
         pass
     # Log out
     redfish_utilities.logout( redfish_obj )

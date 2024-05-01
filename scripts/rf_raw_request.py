@@ -17,7 +17,6 @@ import os
 import redfish
 import redfish_utilities
 import sys
-import re
 from redfish.messages import RedfishPasswordChangeRequiredError
 
 def ifmatch_header( redfish_obj, path, headers = None ):
@@ -60,10 +59,10 @@ redfish_obj = None
 try:
     redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, timeout = 15, max_retry = 3 )
     redfish_obj.login( auth = "session" )
-except RedfishPasswordChangeRequiredError as e:
+except RedfishPasswordChangeRequiredError:
     redfish_utilities.print_password_change_required_and_logout( redfish_obj, args )
     sys.exit( 1 )
-except Exception as e:
+except Exception:
     raise
 
 # Encode the body
@@ -75,7 +74,7 @@ else:
     # Not a file; either JSON or a raw string
     try:
         body = json.loads( args.body )
-    except:
+    except Exception:
         body = args.body
 if body is None:
     # Default case if nothing resolves (empty JSON object)
@@ -109,7 +108,7 @@ if args.verbose:
 if resp.status != 204:
     try:
         print( json.dumps( resp.dict, sort_keys = True, indent = 4, separators = ( ",", ": " ) ) )
-    except:
+    except Exception:
         # The response is either malformed JSON or not JSON at all
         print( resp.text )
 else:

@@ -40,13 +40,13 @@ args = argget.parse_args()
 # Effectively if the user gives multiple targets, some will be ignored
 container_type = redfish_utilities.log_container.MANAGER
 container_id = None
-if args.manager != False:
+if args.manager is not False:
     container_type = redfish_utilities.log_container.MANAGER
     container_id = args.manager
-elif args.system != False:
+elif args.system is not False:
     container_type = redfish_utilities.log_container.SYSTEM
     container_id = args.system
-elif args.chassis != False:
+elif args.chassis is not False:
     container_type = redfish_utilities.log_container.CHASSIS
     container_id = args.chassis
 
@@ -61,10 +61,10 @@ redfish_obj = None
 try:
     redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, timeout = 15, max_retry = 3 )
     redfish_obj.login( auth = "session" )
-except RedfishPasswordChangeRequiredError as e:
+except RedfishPasswordChangeRequiredError:
     redfish_utilities.print_password_change_required_and_logout( redfish_obj, args )
     sys.exit( 1 )
-except Exception as e:
+except Exception:
     raise
 
 exit_code = 0

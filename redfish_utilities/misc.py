@@ -11,7 +11,6 @@ File : misc.py
 Brief : Miscellaneous functions with common script logic
 """
 
-import sys
 
 def logout( context, ignore_error = False ):
     """
@@ -25,7 +24,7 @@ def logout( context, ignore_error = False ):
     if context is not None:
         try:
             context.logout()
-        except Exception as e:
+        except Exception:
             if ignore_error:
                 pass
             else:
