@@ -469,7 +469,7 @@ def insert_virtual_media( context, image, system_id = None, media_id = None, med
             try:
                 # Preference for using the InsertMedia action
                 response = context.post( media.dict["Actions"]["#VirtualMedia.InsertMedia"]["target"], body = payload )
-            except:
+            except Exception:
                 # Fallback to PATCH method
                 if "Inserted" not in payload:
                     payload["Inserted"] = True
@@ -514,7 +514,7 @@ def eject_virtual_media( context, media_id, system_id = None ):
             try:
                 # Preference for using the EjectMedia action
                 response = context.post( media.dict["Actions"]["#VirtualMedia.EjectMedia"]["target"], body = {} )
-            except:
+            except Exception:
                 # Fallback to PATCH method
                 payload = {
                     "Image": None,
@@ -593,7 +593,7 @@ def get_system_bios( context, system_id = None ):
         try:
             bios_settings = get_system_bios_settings( context, bios, system.dict["Id"] )
             future_settings = bios_settings.dict["Attributes"]
-        except:
+        except Exception:
             if config.__workarounds__:
                 warnings.warn( "System '{}' BIOS resource contains the settings term, but no 'SettingsObject'.  Contact your vendor.  Workarounds exhausted for reading the settings data and falling back on using the active attributes.".format( system_id ) )
             else:
@@ -662,7 +662,7 @@ def get_system_bios_settings( context, bios, system_id ):
                     break
             try:
                 verify_response( bios_settings )
-            except:
+            except Exception:
                 raise RedfishSystemBiosInvalidSettingsError( "System '{}' BIOS resource contains the settings term, but no 'SettingsObject'.  Workarounds exhausted.  Contact your vendor.".format( system_id ) ) from None
         else:
             raise RedfishSystemBiosInvalidSettingsError( "System '{}' BIOS resource contains the settings term, but no 'SettingsObject'.  Contact your vendor, or retry with the '__workarounds__' flag.".format( system_id ) )

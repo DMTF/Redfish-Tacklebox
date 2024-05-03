@@ -39,7 +39,7 @@ for service in services:
         url = groups.group( 1 )
         redfish_obj = redfish.redfish_client( base_url = url, timeout = 15, max_retry = 3 )
         print( "{}: {} ({})".format( service, services[service], redfish_obj.root["Product"] ) )
-    except:
+    except Exception:
         print( "{}: {}".format( service, services[service] ) )
 
 sys.exit( 0 )

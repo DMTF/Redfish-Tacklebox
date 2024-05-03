@@ -42,7 +42,7 @@ def get_system_inventory( context ):
     # Get the set of chassis instances to initialize the structure
     try:
         chassis_ids = get_chassis_ids( context )
-    except:
+    except Exception:
         # No chassis instances
         return inventory_list
 
@@ -68,7 +68,7 @@ def get_system_inventory( context ):
         chassis = context.get( chassis_uri )
         try:
             verify_response( chassis )
-        except:
+        except Exception:
             if config.__workarounds__:
                 warnings.warn( "Could not access '{}'.  Contact your vendor.  Skipping...".format( chassis_uri ) )
                 continue
@@ -95,7 +95,7 @@ def catalog_array( context, resource, name, inventory, chassis_id ):
             member_res = context.get( member["@odata.id"] )
             try:
                 verify_response( member_res )
-            except:
+            except Exception:
                 if config.__workarounds__:
                     warnings.warn( "Could not access '{}'.  Contact your vendor.  Skipping...".format( member["@odata.id"] ) )
                     continue
@@ -119,7 +119,7 @@ def catalog_collection( context, resource, name, inventory, chassis_id ):
         collection = context.get( resource[name]["@odata.id"] )
         try:
             verify_response( collection )
-        except:
+        except Exception:
             if config.__workarounds__:
                 warnings.warn( "Could not access '{}'.  Contact your vendor.  Skipping...".format( resource[name]["@odata.id"] ) )
                 return
@@ -213,11 +213,11 @@ def catalog_resource( context, resource, inventory, chassis_id ):
     # For nested properties, need to protect against malformed payloads to avoid exceptions
     try:
         catalog["Label"] = resource.get( location_prop, {} ).get( "PartLocation", {} ).get( "ServiceLabel", None )
-    except:
+    except Exception:
         pass
     try:
         catalog["State"] = resource.get( "Status", {} ).get( "State", None )
-    except:
+    except Exception:
         pass
     # Ensure all fields are strings
     for item in catalog:

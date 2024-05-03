@@ -15,7 +15,6 @@ Brief : This file contains the definitions and functionalities for interacting
 import json
 import os
 import errno
-import math
 from .messages import verify_response
 from enum import Enum
 

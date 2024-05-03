@@ -56,10 +56,10 @@ redfish_obj = None
 try:
     redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, timeout = 15, max_retry = 3 )
     redfish_obj.login( auth = "session" )
-except RedfishPasswordChangeRequiredError as e:
+except RedfishPasswordChangeRequiredError:
     redfish_utilities.print_password_change_required_and_logout( redfish_obj, args )
     sys.exit( 1 )
-except Exception as e:
+except Exception:
     raise
 
 exit_code = 0
