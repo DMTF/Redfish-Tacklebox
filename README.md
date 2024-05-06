@@ -21,10 +21,7 @@ The utilities can be used as part of larger management applications, or be used 
 
 ### Building from Source
 
-```
-python setup.py sdist
-pip install dist/redfish_utilities-x.x.x.tar.gz
-```
+`pip install .`
 
 ### Building Docker
 
@@ -75,6 +72,10 @@ You may install the external modules by running:
 * [Power Equipment (rf_power_equipment.py)](https://github.com/DMTF/Redfish-Tacklebox/blob/main/docs/rf_power_equipment.md)
 * [Raw Request (rf_raw_request.py)](https://github.com/DMTF/Redfish-Tacklebox/blob/main/docs/rf_raw_request.md)
 * [Test Event Listener (rf_test_event_listener.py)](https://github.com/DMTF/Redfish-Tacklebox/blob/main/docs/rf_test_event_listener.md)
+
+## Packaging
+
+This project uses [poetry](https://python-poetry.org/) to manage dependencies, build, etc.
 
 ## Release Process
 

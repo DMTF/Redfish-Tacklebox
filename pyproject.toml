@@ -1,0 +1,58 @@
+[tool.poetry]
+name = "redfish_utilities"
+version = "3.2.8"
+description = "Redfish Utilities"
+license = "BSD 3-clause \"New\" or \"Revised License\""
+keywords = ["Redfish"]
+homepage = "https://github.com/DMTF/Redfish-Tacklebox"
+authors = ["DMTF, https://www.dmtf.org/standards/feedback"]
+readme = "README.md"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Communications"
+]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = ">=3.8.1,<4.0"
+redfish = ">=3.2.1"
+requests = "*"
+xlsxwriter = ">=1.2.7"
+
+[tool.poetry.scripts]
+rf_accounts = "scripts/rf_accounts.py"
+rf_assembly = "scripts/rf_assembly.py"
+rf_bios_settings = "scripts/rf_bios_settings.py"
+rf_boot_override = "scripts/rf_boot_override.py"
+rf_certificates = "scripts/rf_certificates.py"
+rf_diagnostic_data = "scripts/rf_diagnostic_data.py"
+rf_discover = "scripts/rf_discover.py"
+rf_event_service = "scripts/rf_event_service.py"
+rf_licenses = "scripts/rf_licenses.py"
+rf_logs = "scripts/rf_logs.py"
+rf_manager_config = "scripts/rf_manager_config.py"
+rf_power_equipment = "scripts/rf_power_equipment.py"
+rf_power_reset = "scripts/rf_power_reset.py"
+rf_raw_request = "scripts/rf_raw_request.py"
+rf_sensor_list = "scripts/rf_sensor_list.py"
+rf_sys_inventory = "scripts/rf_sys_inventory.py"
+rf_test_event_listener = "scripts/rf_test_event_listener.py"
+rf_update = "scripts/rf_update.py"
+rf_virtual_media = "scripts/rf_virtual_media.py"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.0"
+pytest-cov = "^4.0.0"
+bump2version = "^1.0.1"
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.4.2"
+mkdocs-material = "^9.1.9"
+
+[tool.pytest.ini_options]
+addopts = "--cov=otel_cli"
