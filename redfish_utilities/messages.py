@@ -12,9 +12,16 @@ Brief : This file contains the definitions and functionalities for interacting
         with Messages for a given Redfish service
 """
 
-from redfish.messages import get_messages_detail, get_error_messages, search_message, RedfishPasswordChangeRequiredError, RedfishOperationFailedError
+from redfish.messages import (
+    get_messages_detail,
+    get_error_messages,
+    search_message,
+    RedfishPasswordChangeRequiredError,
+    RedfishOperationFailedError,
+)
 
-def verify_response( response ):
+
+def verify_response(response):
     """
     Verifies a response and raises an exception if there was a failure
 
@@ -23,17 +30,21 @@ def verify_response( response ):
     """
 
     if response.status >= 400:
-        messages_detail = get_messages_detail( response )
-        exception_string = get_error_messages( messages_detail )
-        message_item = search_message( messages_detail, "Base", "PasswordChangeRequired" )
+        messages_detail = get_messages_detail(response)
+        exception_string = get_error_messages(messages_detail)
+        message_item = search_message(messages_detail, "Base", "PasswordChangeRequired")
         if message_item is not None:
-            raise RedfishPasswordChangeRequiredError( "Operation failed: HTTP {}\n{}".format( response.status, exception_string ), message_item["MessageArgs"][0] )
+            raise RedfishPasswordChangeRequiredError(
+                "Operation failed: HTTP {}\n{}".format(response.status, exception_string),
+                message_item["MessageArgs"][0],
+            )
         else:
-            raise RedfishOperationFailedError( "Operation failed: HTTP {}\n{}".format( response.status, exception_string ) )
+            raise RedfishOperationFailedError("Operation failed: HTTP {}\n{}".format(response.status, exception_string))
 
     return
 
-def print_error_payload( response ):
+
+def print_error_payload(response):
     """
     Prints an error payload, which can also be used for action responses
 
@@ -42,10 +53,10 @@ def print_error_payload( response ):
     """
 
     try:
-        print( get_error_messages( response ) )
+        print(get_error_messages(response))
     except Exception:
         # No response body
         if response.status >= 400:
-            print( "Failed" )
+            print("Failed")
         else:
-            print( "Success" )
+            print("Success")

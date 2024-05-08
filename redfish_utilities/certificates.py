@@ -14,31 +14,40 @@ Brief : This file contains the definitions and functionalities for managing
 
 from .messages import verify_response
 
-class RedfishCertificateServiceNotFoundError( Exception ):
+
+class RedfishCertificateServiceNotFoundError(Exception):
     """
     Raised when the certificate service cannot be found
     """
+
     pass
 
-class RedfishCertificateLocationsNotFoundError( Exception ):
+
+class RedfishCertificateLocationsNotFoundError(Exception):
     """
     Raised when the certificate locations cannot be found
     """
+
     pass
 
-class RedfishGenerateCSRActionNotFoundError( Exception ):
+
+class RedfishGenerateCSRActionNotFoundError(Exception):
     """
     Raised when the GenerateCSR action cannot be found
     """
+
     pass
 
-class RedfishReplaceCertificateActionNotFoundError( Exception ):
+
+class RedfishReplaceCertificateActionNotFoundError(Exception):
     """
     Raised when the ReplaceCertificate action cannot be found
     """
+
     pass
 
-def get_all_certificates( context ):
+
+def get_all_certificates(context):
     """
     Collects certificate information from a Redfish service
 
@@ -52,36 +61,37 @@ def get_all_certificates( context ):
     certificate_list = []
 
     # Get the certificate locations
-    certificate_service = get_certificate_service( context )
+    certificate_service = get_certificate_service(context)
     if "CertificateLocations" not in certificate_service:
-        raise RedfishCertificateLocationsNotFoundError( "Service does not contain certificate locations" )
-    certificate_locations = context.get( certificate_service["CertificateLocations"]["@odata.id"] )
-    verify_response( certificate_locations )
+        raise RedfishCertificateLocationsNotFoundError("Service does not contain certificate locations")
+    certificate_locations = context.get(certificate_service["CertificateLocations"]["@odata.id"])
+    verify_response(certificate_locations)
 
     # Get each member and add it to the response list
-    locations = certificate_locations.dict.get( "Links", {} ).get( "Certificates", [] )
+    locations = certificate_locations.dict.get("Links", {}).get("Certificates", [])
     for certificate_ref in locations:
-        certificate = context.get( certificate_ref["@odata.id"] )
-        verify_response( certificate )
+        certificate = context.get(certificate_ref["@odata.id"])
+        verify_response(certificate)
         certificate_info = {
             "URI": certificate.dict["@odata.id"],
             "Id": certificate.dict["Id"],
-            "Subject": certificate.dict.get( "Subject", {} ),
-            "Issuer": certificate.dict.get( "Issuer", {} ),
-            "ValidNotBefore": certificate.dict.get( "ValidNotBefore" ),
-            "ValidNotAfter": certificate.dict.get( "ValidNotAfter" ),
-            "KeyUsage": certificate.dict.get( "KeyUsage" ),
-            "SerialNumber": certificate.dict.get( "SerialNumber" ),
-            "Fingerprint": certificate.dict.get( "Fingerprint" ),
-            "FingerprintHashAlgorithm": certificate.dict.get( "FingerprintHashAlgorithm" ),
-            "SignatureAlgorithm": certificate.dict.get( "SignatureAlgorithm" ),
-            "CertificateUsageTypes": certificate.dict.get( "CertificateUsageTypes" )
+            "Subject": certificate.dict.get("Subject", {}),
+            "Issuer": certificate.dict.get("Issuer", {}),
+            "ValidNotBefore": certificate.dict.get("ValidNotBefore"),
+            "ValidNotAfter": certificate.dict.get("ValidNotAfter"),
+            "KeyUsage": certificate.dict.get("KeyUsage"),
+            "SerialNumber": certificate.dict.get("SerialNumber"),
+            "Fingerprint": certificate.dict.get("Fingerprint"),
+            "FingerprintHashAlgorithm": certificate.dict.get("FingerprintHashAlgorithm"),
+            "SignatureAlgorithm": certificate.dict.get("SignatureAlgorithm"),
+            "CertificateUsageTypes": certificate.dict.get("CertificateUsageTypes"),
         }
-        certificate_list.append( certificate_info )
+        certificate_list.append(certificate_info)
 
     return certificate_list
 
-def print_certificates( certificate_list, details = False ):
+
+def print_certificates(certificate_list, details=False):
     """
     Prints the certificate list into a table
 
@@ -92,26 +102,31 @@ def print_certificates( certificate_list, details = False ):
 
     # Go through each certificate
     for certificate in certificate_list:
-        print( "Certificate: {}".format( certificate["URI"] ) )
-        print( "  Subject: {}".format( build_identifier_string( certificate["Subject"] ) ) )
-        print( "  Issuer: {}".format( build_identifier_string( certificate["Issuer"] ) ) )
-        print( "  Valid Not Before: {}, Valid Not After: {}".format( certificate["ValidNotBefore"], certificate["ValidNotAfter"] ) )
+        print("Certificate: {}".format(certificate["URI"]))
+        print("  Subject: {}".format(build_identifier_string(certificate["Subject"])))
+        print("  Issuer: {}".format(build_identifier_string(certificate["Issuer"])))
+        print(
+            "  Valid Not Before: {}, Valid Not After: {}".format(
+                certificate["ValidNotBefore"], certificate["ValidNotAfter"]
+            )
+        )
         if details:
             if certificate["KeyUsage"] is not None:
-                print( "  Key Usage: {}".format( ", ".join( certificate["KeyUsage"] ) ) )
+                print("  Key Usage: {}".format(", ".join(certificate["KeyUsage"])))
             if certificate["CertificateUsageTypes"] is not None:
-                print( "  Certificate Usage: {}".format( ", ".join( certificate["CertificateUsageTypes"] ) ) )
+                print("  Certificate Usage: {}".format(", ".join(certificate["CertificateUsageTypes"])))
             if certificate["SerialNumber"] is not None:
-                print( "  Serial Number: {}".format( certificate["SerialNumber"] ) )
+                print("  Serial Number: {}".format(certificate["SerialNumber"]))
             if certificate["Fingerprint"] is not None:
-                print( "  Fingerprint: {}".format( certificate["Fingerprint"] ) )
+                print("  Fingerprint: {}".format(certificate["Fingerprint"]))
             if certificate["FingerprintHashAlgorithm"] is not None:
-                print( "  Fingerprint Hash Algorithm: {}".format( certificate["FingerprintHashAlgorithm"] ) )
+                print("  Fingerprint Hash Algorithm: {}".format(certificate["FingerprintHashAlgorithm"]))
             if certificate["SignatureAlgorithm"] is not None:
-                print( "  Signature Algorithm: {}".format( certificate["SignatureAlgorithm"] ) )
-        print( "" )
+                print("  Signature Algorithm: {}".format(certificate["SignatureAlgorithm"]))
+        print("")
 
-def get_generate_csr_info( context ):
+
+def get_generate_csr_info(context):
     """
     Finds information about the support for generating CSRs
 
@@ -124,11 +139,11 @@ def get_generate_csr_info( context ):
     """
 
     # Check that there is a GenerateCSR action
-    certificate_service = get_certificate_service( context )
+    certificate_service = get_certificate_service(context)
     if "Actions" not in certificate_service:
-        raise RedfishGenerateCSRActionNotFoundError( "Service does not support the GenerateCSR action" )
+        raise RedfishGenerateCSRActionNotFoundError("Service does not support the GenerateCSR action")
     if "#CertificateService.GenerateCSR" not in certificate_service["Actions"]:
-        raise RedfishGenerateCSRActionNotFoundError( "Service does not support the GenerateCSR action" )
+        raise RedfishGenerateCSRActionNotFoundError("Service does not support the GenerateCSR action")
 
     # Extract the info about the GenerateCSR action
     generate_csr_action = certificate_service["Actions"]["#CertificateService.GenerateCSR"]
@@ -139,12 +154,26 @@ def get_generate_csr_info( context ):
         generate_csr_parameters = None
     else:
         # Get the action info and its parameter listing
-        action_info = context.get( generate_csr_action["@Redfish.ActionInfo"] )
+        action_info = context.get(generate_csr_action["@Redfish.ActionInfo"])
         generate_csr_parameters = action_info.dict["Parameters"]
 
     return generate_csr_uri, generate_csr_parameters
 
-def generate_csr( context, common_name, organization, organizational_unit, city, state, country, cert_col, email = None, key_pair_alg = None, key_bit_len = None, key_curve_id = None ):
+
+def generate_csr(
+    context,
+    common_name,
+    organization,
+    organizational_unit,
+    city,
+    state,
+    country,
+    cert_col,
+    email=None,
+    key_pair_alg=None,
+    key_bit_len=None,
+    key_curve_id=None,
+):
     """
     Generates a certificate signing request
 
@@ -167,17 +196,17 @@ def generate_csr( context, common_name, organization, organizational_unit, city,
     """
 
     # Locate the GenerateCSR action
-    generate_csr_uri, generate_csr_parameters = get_generate_csr_info( context )
+    generate_csr_uri, generate_csr_parameters = get_generate_csr_info(context)
 
     # Build the payload
     payload = {
-        "CertificateCollection": { "@odata.id": cert_col },
+        "CertificateCollection": {"@odata.id": cert_col},
         "CommonName": common_name,
         "Organization": organization,
         "OrganizationalUnit": organizational_unit,
         "City": city,
         "State": state,
-        "Country": country
+        "Country": country,
     }
     if email is not None:
         payload["Email"] = email
@@ -189,11 +218,12 @@ def generate_csr( context, common_name, organization, organizational_unit, city,
         payload["KeyCurveId"] = key_curve_id
 
     # Generate a CSR
-    response = context.post( generate_csr_uri, body = payload )
-    verify_response( response )
+    response = context.post(generate_csr_uri, body=payload)
+    verify_response(response)
     return response
 
-def install_certificate( context, destination, cert_file, key_file = None ):
+
+def install_certificate(context, destination, cert_file, key_file=None):
     """
     Replaces an existing certificate with a new certificate
 
@@ -208,50 +238,51 @@ def install_certificate( context, destination, cert_file, key_file = None ):
     """
 
     # Read the certificate and determine its type
-    with open( cert_file, "r" ):
-         cert_string = cert_file.read()
+    with open(cert_file, "r"):
+        cert_string = cert_file.read()
     cert_type = "PEM"
     if "BEGIN PKCS7" in cert_string:
         cert_type = "PKCS7"
-    elif cert_string.count( "BEGIN CERTIFICATE" ) > 1:
+    elif cert_string.count("BEGIN CERTIFICATE") > 1:
         cert_type = "PEMchain"
 
     # Read the key if needed, and prepend it to the certificate
     if key_file is not None:
-        with open( cert_file, "r" ):
+        with open(cert_file, "r"):
             key_string = key_file.read()
         cert_string = key_string + cert_string
 
     # Build the payload
     payload = {
-        "CertificateUri": { "@odata.id": destination },
+        "CertificateUri": {"@odata.id": destination},
         "CertificateString": cert_string,
-        "CertificateType": cert_type
+        "CertificateType": cert_type,
     }
 
     # Check if the referenced destination is a certificate collection or individual certificate
-    dest_response = context.get( destination )
-    verify_response( dest_response )
+    dest_response = context.get(destination)
+    verify_response(dest_response)
     if dest_response.dict["@odata.type"] == "#CertificateCollection.CertificateCollection":
         # Certificate collection; just perform a POST operation on the collection
-        payload.pop( "CertificateUri" )
+        payload.pop("CertificateUri")
     else:
         # Individual certificate; perform a replacement operation from the certificate service
 
         # Locate the ReplaceCertificate action
-        certificate_service = get_certificate_service( context )
+        certificate_service = get_certificate_service(context)
         if "Actions" not in certificate_service:
-            raise RedfishReplaceCertificateActionNotFoundError( "Service does not support the ReplaceCertificate action" )
+            raise RedfishReplaceCertificateActionNotFoundError("Service does not support the ReplaceCertificate action")
         if "#CertificateService.ReplaceCertificate" not in certificate_service["Actions"]:
-            raise RedfishReplaceCertificateActionNotFoundError( "Service does not support the ReplaceCertificate action" )
+            raise RedfishReplaceCertificateActionNotFoundError("Service does not support the ReplaceCertificate action")
         destination = certificate_service["Actions"]["#CertificateService.ReplaceCertificate"]["target"]
 
     # Install the certificate
-    response = context.post( destination, body = payload )
-    verify_response( response )
+    response = context.post(destination, body=payload)
+    verify_response(response)
     return response
 
-def delete_certificate( context, certificate ):
+
+def delete_certificate(context, certificate):
     """
     Replaces an existing certificate with a new certificate
 
@@ -264,11 +295,12 @@ def delete_certificate( context, certificate ):
     """
 
     # Delete the certificate
-    response = context.delete( certificate )
-    verify_response( response )
+    response = context.delete(certificate)
+    verify_response(response)
     return response
 
-def get_certificate_service( context ):
+
+def get_certificate_service(context):
     """
     Collects the certificate service information from a Redfish service
 
@@ -280,17 +312,18 @@ def get_certificate_service( context ):
     """
 
     # Get the service root to find the certificate service
-    service_root = context.get( "/redfish/v1/" )
+    service_root = context.get("/redfish/v1/")
     if "CertificateService" not in service_root.dict:
         # No event service
-        raise RedfishCertificateServiceNotFoundError( "Service does not contain a certificate service" )
+        raise RedfishCertificateServiceNotFoundError("Service does not contain a certificate service")
 
     # Get the certificate service
-    certificate_service = context.get( service_root.dict["CertificateService"]["@odata.id"] )
-    verify_response( certificate_service )
+    certificate_service = context.get(service_root.dict["CertificateService"]["@odata.id"])
+    verify_response(certificate_service)
     return certificate_service.dict
 
-def build_identifier_string( identifier ):
+
+def build_identifier_string(identifier):
     """
     Creates an identifier string for a subject or issuer object
 
@@ -308,11 +341,11 @@ def build_identifier_string( identifier ):
         "Country": "C",
         "State": "ST",
         "City": "L",
-        "Email": "emailAddress"
+        "Email": "emailAddress",
     }
 
     strings = []
     for map in field_map:
         if map in identifier and identifier[map] is not None:
-            strings.append( "{}={}".format( field_map[map], identifier[map] ) )
-    return ", ".join( strings )
+            strings.append("{}={}".format(field_map[map], identifier[map]))
+    return ", ".join(strings)

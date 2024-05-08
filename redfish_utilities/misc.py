@@ -12,7 +12,7 @@ Brief : Miscellaneous functions with common script logic
 """
 
 
-def logout( context, ignore_error = False ):
+def logout(context, ignore_error=False):
     """
     Performs a logout of the service and allows for exceptions to be ignored
 
@@ -31,7 +31,8 @@ def logout( context, ignore_error = False ):
                 raise
     return
 
-def print_password_change_required_and_logout( context, args ):
+
+def print_password_change_required_and_logout(context, args):
     """
     Common help text when handling password change required conditions
 
@@ -40,7 +41,11 @@ def print_password_change_required_and_logout( context, args ):
         args: The argparse object from the calling script
     """
 
-    print( "Password change required.  To set a new password, run the following:" )
-    print( "rf_accounts.py -r {} -u {} -p <old password> --setpassword {} <new password>".format( args.rhost, args.user, args.user ) )
-    logout( context, ignore_error = True )  # Some services do not allow session logout in this condition
+    print("Password change required.  To set a new password, run the following:")
+    print(
+        "rf_accounts.py -r {} -u {} -p <old password> --setpassword {} <new password>".format(
+            args.rhost, args.user, args.user
+        )
+    )
+    logout(context, ignore_error=True)  # Some services do not allow session logout in this condition
     return
