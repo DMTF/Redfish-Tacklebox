@@ -22,51 +22,71 @@ import sys
 from redfish.messages import RedfishPasswordChangeRequiredError
 
 # Get the input arguments
-argget = argparse.ArgumentParser( description = "A tool to perform a one time boot override of a system" )
-argget.add_argument( "--user", "-u", type = str, required = True, help = "The user name for authentication" )
-argget.add_argument( "--password", "-p",  type = str, required = True, help = "The password for authentication" )
-argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
-argget.add_argument( "--system", "-s", type = str, help = "The ID of the system to set" )
-argget.add_argument( "--info", "-info", action = "store_true", help = "Indicates if boot information should be reported" )
-argget.add_argument( "--target", "-t", type = str, help = "The target boot device; if this argument is omitted the tool will display the current boot settings" )
-argget.add_argument( "--uefi", "-uefi", type = str, help = "If target is 'UefiTarget', the UEFI Device Path of the device to boot.  If target is 'UefiBootNext', the UEFI Boot Option string of the device to boot." )
-argget.add_argument( "--mode", "-m", type = str, help = "The requested boot mode ('UEFI' or 'Legacy')" )
-argget.add_argument( "--reset", "-reset", action = "store_true", help = "Signifies that the system is reset after the boot override is set" )
-argget.add_argument( "--workaround", "-workaround", action = "store_true", help = "Indicates if workarounds should be attempted for non-conformant services", default = False )
-argget.add_argument( "--debug", action = "store_true", help = "Creates debug file showing HTTP traces and exceptions" )
+argget = argparse.ArgumentParser(description="A tool to perform a one time boot override of a system")
+argget.add_argument("--user", "-u", type=str, required=True, help="The user name for authentication")
+argget.add_argument("--password", "-p", type=str, required=True, help="The password for authentication")
+argget.add_argument("--rhost", "-r", type=str, required=True, help="The address of the Redfish service (with scheme)")
+argget.add_argument("--system", "-s", type=str, help="The ID of the system to set")
+argget.add_argument("--info", "-info", action="store_true", help="Indicates if boot information should be reported")
+argget.add_argument(
+    "--target",
+    "-t",
+    type=str,
+    help="The target boot device; if this argument is omitted the tool will display the current boot settings",
+)
+argget.add_argument(
+    "--uefi",
+    "-uefi",
+    type=str,
+    help="If target is 'UefiTarget', the UEFI Device Path of the device to boot.  If target is 'UefiBootNext', the UEFI Boot Option string of the device to boot.",
+)
+argget.add_argument("--mode", "-m", type=str, help="The requested boot mode ('UEFI' or 'Legacy')")
+argget.add_argument(
+    "--reset", "-reset", action="store_true", help="Signifies that the system is reset after the boot override is set"
+)
+argget.add_argument(
+    "--workaround",
+    "-workaround",
+    action="store_true",
+    help="Indicates if workarounds should be attempted for non-conformant services",
+    default=False,
+)
+argget.add_argument("--debug", action="store_true", help="Creates debug file showing HTTP traces and exceptions")
 args = argget.parse_args()
 
 # Verify the combination of arguments is correct
 if args.target is None:
     args.info = True
     if args.uefi or args.mode or args.reset:
-        argget.error( "Cannot use '--uefi', '--mode', or '--reset' without '--target'" )
+        argget.error("Cannot use '--uefi', '--mode', or '--reset' without '--target'")
 
 if args.workaround:
     redfish_utilities.config.__workarounds__ = True
 
 if args.debug:
-    log_file = "rf_boot_override-{}.log".format( datetime.datetime.now().strftime( "%Y-%m-%d-%H%M%S" ) )
+    log_file = "rf_boot_override-{}.log".format(datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S"))
     log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    logger = redfish.redfish_logger( log_file, log_format, logging.DEBUG )
-    logger.info( "rf_boot_override Trace" )
+    logger = redfish.redfish_logger(log_file, log_format, logging.DEBUG)
+    logger.info("rf_boot_override Trace")
 
 # Set up the Redfish object
 redfish_obj = None
 try:
-    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, timeout = 15, max_retry = 3 )
-    redfish_obj.login( auth = "session" )
+    redfish_obj = redfish.redfish_client(
+        base_url=args.rhost, username=args.user, password=args.password, timeout=15, max_retry=3
+    )
+    redfish_obj.login(auth="session")
 except RedfishPasswordChangeRequiredError:
-    redfish_utilities.print_password_change_required_and_logout( redfish_obj, args )
-    sys.exit( 1 )
+    redfish_utilities.print_password_change_required_and_logout(redfish_obj, args)
+    sys.exit(1)
 except Exception:
     raise
 
 exit_code = 0
 try:
     if args.info:
-        boot = redfish_utilities.get_system_boot( redfish_obj, args.system )
-        redfish_utilities.print_system_boot( boot )
+        boot = redfish_utilities.get_system_boot(redfish_obj, args.system)
+        redfish_utilities.print_system_boot(boot)
     else:
         # Build and send the boot request based on the arguments given
         uefi_target = None
@@ -77,24 +97,26 @@ try:
         if args.target == "UefiBootNext":
             boot_next = args.uefi
         if args.target == "None":
-            print( "Disabling one time boot..." )
+            print("Disabling one time boot...")
             boot_enable = "Disabled"
         else:
-            print( "Setting a one time boot for {}...".format( args.target ) )
-        redfish_utilities.set_system_boot( redfish_obj, args.system, args.target, boot_enable, args.mode, uefi_target, boot_next )
+            print("Setting a one time boot for {}...".format(args.target))
+        redfish_utilities.set_system_boot(
+            redfish_obj, args.system, args.target, boot_enable, args.mode, uefi_target, boot_next
+        )
 
         # Reset the system if requested
         if args.reset:
-            print( "Resetting the system..." )
-            response = redfish_utilities.system_reset( redfish_obj, args.system )
-            response = redfish_utilities.poll_task_monitor( redfish_obj, response )
-            redfish_utilities.verify_response( response )
+            print("Resetting the system...")
+            response = redfish_utilities.system_reset(redfish_obj, args.system)
+            response = redfish_utilities.poll_task_monitor(redfish_obj, response)
+            redfish_utilities.verify_response(response)
 except Exception as e:
     if args.debug:
-        logger.error( "Caught exception:\n\n{}\n".format( traceback.format_exc() ) )
+        logger.error("Caught exception:\n\n{}\n".format(traceback.format_exc()))
     exit_code = 1
-    print( e )
+    print(e)
 finally:
     # Log out
-    redfish_utilities.logout( redfish_obj )
-sys.exit( exit_code )
+    redfish_utilities.logout(redfish_obj)
+sys.exit(exit_code)

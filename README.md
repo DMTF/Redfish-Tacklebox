@@ -5,6 +5,7 @@ Copyright 2019-2024 DMTF.  All rights reserved.
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/DMTF/Redfish-Tacklebox/blob/main/LICENSE.md)
 [![PyPI](https://img.shields.io/pypi/v/redfish-utilities)](https://pypi.org/project/redfish-utilities/)
 [![Pulls](https://img.shields.io/docker/pulls/dmtf/redfish-tacklebox?style=flat&logo=docker&label=Pulls)](https://hub.docker.com/r/dmtf/redfish-tacklebox)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat)](https://github.com/psf/black)
 [![Linters](https://github.com/DMTF/Redfish-Tacklebox/actions/workflows/linters.yml/badge.svg)](https://github.com/DMTF/Redfish-Tacklebox/actions/workflows/linters.yml)
 [![Docker](https://github.com/DMTF/Redfish-Tacklebox/actions/workflows/docker.yml/badge.svg)](https://github.com/DMTF/Redfish-Tacklebox/actions/workflows/docker.yml)
 [![GitHub stars](https://img.shields.io/github/stars/DMTF/Redfish-Tacklebox.svg?style=flat-square&label=github%20stars)](https://github.com/DMTF/Redfish-Tacklebox)

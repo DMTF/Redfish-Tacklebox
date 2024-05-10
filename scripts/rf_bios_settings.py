@@ -21,40 +21,56 @@ import sys
 from redfish.messages import RedfishPasswordChangeRequiredError
 
 # Get the input arguments
-argget = argparse.ArgumentParser( description = "A tool to manager BIOS settings for a system" )
-argget.add_argument( "--user", "-u", type = str, required = True, help = "The user name for authentication" )
-argget.add_argument( "--password", "-p",  type = str, required = True, help = "The password for authentication" )
-argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
-argget.add_argument( "--system", "-s", type = str, help = "The ID of the system to manage" )
-argget.add_argument( "--attribute", "-a", type = str, nargs = 2, metavar = ( "name", "value" ), action = "append", help = "Sets a BIOS attribute to a new value; can be supplied multiple times to set multiple attributes" )
-argget.add_argument( "--workaround", "-workaround", action = "store_true", help = "Indicates if workarounds should be attempted for non-conformant services", default = False )
-argget.add_argument( "--debug", action = "store_true", help = "Creates debug file showing HTTP traces and exceptions" )
+argget = argparse.ArgumentParser(description="A tool to manager BIOS settings for a system")
+argget.add_argument("--user", "-u", type=str, required=True, help="The user name for authentication")
+argget.add_argument("--password", "-p", type=str, required=True, help="The password for authentication")
+argget.add_argument("--rhost", "-r", type=str, required=True, help="The address of the Redfish service (with scheme)")
+argget.add_argument("--system", "-s", type=str, help="The ID of the system to manage")
+argget.add_argument(
+    "--attribute",
+    "-a",
+    type=str,
+    nargs=2,
+    metavar=("name", "value"),
+    action="append",
+    help="Sets a BIOS attribute to a new value; can be supplied multiple times to set multiple attributes",
+)
+argget.add_argument(
+    "--workaround",
+    "-workaround",
+    action="store_true",
+    help="Indicates if workarounds should be attempted for non-conformant services",
+    default=False,
+)
+argget.add_argument("--debug", action="store_true", help="Creates debug file showing HTTP traces and exceptions")
 args = argget.parse_args()
 
 if args.workaround:
     redfish_utilities.config.__workarounds__ = True
 
 if args.debug:
-    log_file = "rf_bios_settings-{}.log".format( datetime.datetime.now().strftime( "%Y-%m-%d-%H%M%S" ) )
+    log_file = "rf_bios_settings-{}.log".format(datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S"))
     log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    logger = redfish.redfish_logger( log_file, log_format, logging.DEBUG )
-    logger.info( "rf_bios_settings Trace" )
+    logger = redfish.redfish_logger(log_file, log_format, logging.DEBUG)
+    logger.info("rf_bios_settings Trace")
 
 # Set up the Redfish object
 redfish_obj = None
 try:
-    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, timeout = 15, max_retry = 3 )
-    redfish_obj.login( auth = "session" )
+    redfish_obj = redfish.redfish_client(
+        base_url=args.rhost, username=args.user, password=args.password, timeout=15, max_retry=3
+    )
+    redfish_obj.login(auth="session")
 except RedfishPasswordChangeRequiredError:
-    redfish_utilities.print_password_change_required_and_logout( redfish_obj, args )
-    sys.exit( 1 )
+    redfish_utilities.print_password_change_required_and_logout(redfish_obj, args)
+    sys.exit(1)
 except Exception:
     raise
 
 exit_code = 0
 try:
     # Get the BIOS settings
-    current_settings, future_settings = redfish_utilities.get_system_bios( redfish_obj, args.system )
+    current_settings, future_settings = redfish_utilities.get_system_bios(redfish_obj, args.system)
 
     if args.attribute is not None:
         new_settings = {}
@@ -62,32 +78,32 @@ try:
             # Based on the current settings, determine the appropriate data type for the new setting
             new_value = attribute[1]
             if attribute[0] in current_settings:
-                if isinstance( current_settings[attribute[0]], bool ):
+                if isinstance(current_settings[attribute[0]], bool):
                     # Boolean; convert from a string
                     if new_value.lower() == "true":
                         new_value = True
                     else:
                         new_value = False
-                elif isinstance( current_settings[attribute[0]], ( int, float ) ):
+                elif isinstance(current_settings[attribute[0]], (int, float)):
                     # Integer or float; go by the user input to determine how to convert since the current value may be truncated
                     try:
-                        new_value = int( new_value )
+                        new_value = int(new_value)
                     except Exception:
-                        new_value = float( new_value )
+                        new_value = float(new_value)
 
             # Set the specified attribute to the new value
             new_settings[attribute[0]] = new_value
-            print( "Setting {} to {}...".format( attribute[0], attribute[1] ) )
-        redfish_utilities.set_system_bios( redfish_obj, new_settings, args.system )
+            print("Setting {} to {}...".format(attribute[0], attribute[1]))
+        redfish_utilities.set_system_bios(redfish_obj, new_settings, args.system)
     else:
         # Print the BIOS settings
-        redfish_utilities.print_system_bios( current_settings, future_settings )
+        redfish_utilities.print_system_bios(current_settings, future_settings)
 except Exception as e:
     if args.debug:
-        logger.error( "Caught exception:\n\n{}\n".format( traceback.format_exc() ) )
+        logger.error("Caught exception:\n\n{}\n".format(traceback.format_exc()))
     exit_code = 1
-    print( e )
+    print(e)
 finally:
     # Log out
-    redfish_utilities.logout( redfish_obj )
-sys.exit( exit_code )
+    redfish_utilities.logout(redfish_obj)
+sys.exit(exit_code)

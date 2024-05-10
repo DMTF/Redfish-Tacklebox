@@ -14,19 +14,24 @@ Brief : This file contains the definitions and functionalities for performing
 
 from .messages import verify_response
 
-class RedfishCollectionNotFoundError( Exception ):
+
+class RedfishCollectionNotFoundError(Exception):
     """
     Raised when the specified collection is not found (HTTP Status = 404)
     """
+
     pass
 
-class RedfishCollectionMemberNotFoundError( Exception ):
+
+class RedfishCollectionMemberNotFoundError(Exception):
     """
     Raised when the specified member is not found (HTTP Status = 404)
     """
+
     pass
 
-def get_collection_ids( context, collection_uri ):
+
+def get_collection_ids(context, collection_uri):
     """
     Iterates over a collection and returns the identifiers of all members
 
@@ -40,16 +45,16 @@ def get_collection_ids( context, collection_uri ):
 
     # Get the collection and iterate through its collection
     avail_members = []
-    collection = context.get( collection_uri )
+    collection = context.get(collection_uri)
     if collection.status == 404:
-        raise RedfishCollectionNotFoundError( "Service does not contain a collection at URI {}".format( collection_uri ) )
-    verify_response( collection )
+        raise RedfishCollectionNotFoundError("Service does not contain a collection at URI {}".format(collection_uri))
+    verify_response(collection)
     while True:
         for member in collection.dict["Members"]:
-            avail_members.append( member["@odata.id"].strip( "/" ).split( "/" )[-1] )
+            avail_members.append(member["@odata.id"].strip("/").split("/")[-1])
         if "Members@odata.nextLink" not in collection.dict:
             break
-        collection = context.get( collection.dict["Members@odata.nextLink"] )
-        verify_response( collection )
+        collection = context.get(collection.dict["Members@odata.nextLink"])
+        verify_response(collection)
 
     return avail_members

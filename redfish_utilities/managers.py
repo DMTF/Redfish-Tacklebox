@@ -18,37 +18,48 @@ from .messages import verify_response
 from .resets import reset_types
 from .resets import reset_to_defaults_types
 
-class RedfishManagerNotFoundError( Exception ):
+
+class RedfishManagerNotFoundError(Exception):
     """
     Raised when a matching manager cannot be found
     """
+
     pass
 
-class RedfishManagerNetworkProtocolNotFoundError( Exception ):
+
+class RedfishManagerNetworkProtocolNotFoundError(Exception):
     """
     Raised when a matching manager does not contain network protocol information
     """
+
     pass
 
-class RedfishManagerEthIntNotFoundError( Exception ):
+
+class RedfishManagerEthIntNotFoundError(Exception):
     """
     Raised when a matching Ethernet interface cannot be found
     """
+
     pass
 
-class RedfishManagerResetNotFoundError( Exception ):
+
+class RedfishManagerResetNotFoundError(Exception):
     """
     Raised when the Reset action cannot be found
     """
+
     pass
 
-class RedfishManagerResetToDefaultsNotFoundError( Exception ):
+
+class RedfishManagerResetToDefaultsNotFoundError(Exception):
     """
     Raised when the ResetToDefaults action cannot be found
     """
+
     pass
 
-def get_manager_ids( context ):
+
+def get_manager_ids(context):
     """
     Finds the manager collection and returns all of the member's identifiers
 
@@ -60,15 +71,16 @@ def get_manager_ids( context ):
     """
 
     # Get the service root to find the manager collection
-    service_root = context.get( "/redfish/v1/" )
+    service_root = context.get("/redfish/v1/")
     if "Managers" not in service_root.dict:
         # No manager collection
-        raise RedfishManagerNotFoundError( "The service does not contain a manager collection" )
+        raise RedfishManagerNotFoundError("The service does not contain a manager collection")
 
     # Get the manager collection and iterate through its collection
-    return get_collection_ids( context, service_root.dict["Managers"]["@odata.id"] )
+    return get_collection_ids(context, service_root.dict["Managers"]["@odata.id"])
 
-def get_manager( context, manager_id = None ):
+
+def get_manager(context, manager_id=None):
     """
     Finds a manager matching the given identifier and returns its resource
 
@@ -85,24 +97,33 @@ def get_manager( context, manager_id = None ):
 
     # If given an identifier, get the manager directly
     if manager_id is not None:
-        manager = context.get( manager_uri_pattern.format( manager_id ) )
+        manager = context.get(manager_uri_pattern.format(manager_id))
     # No identifier given; see if there's exactly one member
     else:
-        avail_managers = get_manager_ids( context )
-        if len( avail_managers ) == 1:
-            manager = context.get( manager_uri_pattern.format( avail_managers[0] ) )
+        avail_managers = get_manager_ids(context)
+        if len(avail_managers) == 1:
+            manager = context.get(manager_uri_pattern.format(avail_managers[0]))
         else:
-            raise RedfishManagerNotFoundError( "The service does not contain exactly one manager; a target manager needs to be specified: {}".format( ", ".join( avail_managers ) ) )
+            raise RedfishManagerNotFoundError(
+                "The service does not contain exactly one manager; a target manager needs to be specified: {}".format(
+                    ", ".join(avail_managers)
+                )
+            )
 
     # Check the response and return the manager if the response is good
     if manager.status == 404:
         if avail_managers is None:
-            avail_managers = get_manager_ids( context )
-        raise RedfishManagerNotFoundError( "The service does not contain a manager called {}; valid managers: {}".format( manager_id, ", ".join( avail_managers ) ) )
-    verify_response( manager )
+            avail_managers = get_manager_ids(context)
+        raise RedfishManagerNotFoundError(
+            "The service does not contain a manager called {}; valid managers: {}".format(
+                manager_id, ", ".join(avail_managers)
+            )
+        )
+    verify_response(manager)
     return manager
 
-def set_manager( context, manager_id = None, date_time = None, date_time_offset = None ):
+
+def set_manager(context, manager_id=None, date_time=None, date_time_offset=None):
     """
     Finds a manager matching the given identifier and sets one or more properties
 
@@ -117,7 +138,7 @@ def set_manager( context, manager_id = None, date_time = None, date_time_offset 
     """
 
     # Locate the manager
-    manager = get_manager( context, manager_id )
+    manager = get_manager(context, manager_id)
 
     # Build the payload
     payload = {}
@@ -128,14 +149,15 @@ def set_manager( context, manager_id = None, date_time = None, date_time_offset 
 
     # Update the manager
     headers = None
-    etag = manager.getheader( "ETag" )
+    etag = manager.getheader("ETag")
     if etag is not None:
-        headers = { "If-Match": etag }
-    response = context.patch( manager.dict["@odata.id"], body = payload, headers = headers )
-    verify_response( response )
+        headers = {"If-Match": etag}
+    response = context.patch(manager.dict["@odata.id"], body=payload, headers=headers)
+    verify_response(response)
     return response
 
-def print_manager( manager ):
+
+def print_manager(manager):
     """
     Prints the manager info
 
@@ -144,20 +166,35 @@ def print_manager( manager ):
     """
 
     manager_line_format = "  {}: {}"
-    manager_properties = [ "Status", "ManagerType", "PowerState", "FirmwareVersion", "DateTime", "DateTimeLocalOffset", "LastResetTime",
-        "UUID", "ServiceEntryPointUUID", "Manufacturer", "Model", "PartNumber", "SparePartNumber", "SerialNumber" ]
-    print( "Manager {} Info".format( manager.dict["Id"] ) )
+    manager_properties = [
+        "Status",
+        "ManagerType",
+        "PowerState",
+        "FirmwareVersion",
+        "DateTime",
+        "DateTimeLocalOffset",
+        "LastResetTime",
+        "UUID",
+        "ServiceEntryPointUUID",
+        "Manufacturer",
+        "Model",
+        "PartNumber",
+        "SparePartNumber",
+        "SerialNumber",
+    ]
+    print("Manager {} Info".format(manager.dict["Id"]))
     for property in manager_properties:
         if property in manager.dict:
             prop_val = manager.dict[property]
-            if isinstance( prop_val, list ):
-                prop_val = ", ".join( prop_val )
+            if isinstance(prop_val, list):
+                prop_val = ", ".join(prop_val)
             elif property == "Status":
-                prop_val = "State: {}, Health: {}".format( prop_val.get( "State", "N/A" ), prop_val.get( "Health", "N/A" ) )
-            print( manager_line_format.format( property, prop_val ) )
-    print( "" )
+                prop_val = "State: {}, Health: {}".format(prop_val.get("State", "N/A"), prop_val.get("Health", "N/A"))
+            print(manager_line_format.format(property, prop_val))
+    print("")
 
-def get_manager_reset_info( context, manager_id = None, manager = None ):
+
+def get_manager_reset_info(context, manager_id=None, manager=None):
     """
     Finds a manager matching the given ID and returns its reset info
 
@@ -172,13 +209,17 @@ def get_manager_reset_info( context, manager_id = None, manager = None ):
     """
 
     if manager is None:
-        manager = get_manager( context, manager_id )
+        manager = get_manager(context, manager_id)
 
     # Check that there is a Reset action
     if "Actions" not in manager.dict:
-        raise RedfishManagerResetNotFoundError( "Manager {} does not support the Reset action".format( manager.dict["Id"] ) )
+        raise RedfishManagerResetNotFoundError(
+            "Manager {} does not support the Reset action".format(manager.dict["Id"])
+        )
     if "#Manager.Reset" not in manager.dict["Actions"]:
-        raise RedfishManagerResetNotFoundError( "Manager {} does not support the Reset action".format( manager.dict["Id"] ) )
+        raise RedfishManagerResetNotFoundError(
+            "Manager {} does not support the Reset action".format(manager.dict["Id"])
+        )
 
     # Extract the info about the Reset action
     reset_action = manager.dict["Actions"]["#Manager.Reset"]
@@ -189,12 +230,7 @@ def get_manager_reset_info( context, manager_id = None, manager = None ):
 
         # Default parameter requirements
         reset_parameters = [
-            {
-                "Name": "ResetType",
-                "Required": False,
-                "DataType": "String",
-                "AllowableValues": reset_types
-            }
+            {"Name": "ResetType", "Required": False, "DataType": "String", "AllowableValues": reset_types}
         ]
 
         # Get the AllowableValues from annotations
@@ -203,12 +239,13 @@ def get_manager_reset_info( context, manager_id = None, manager = None ):
                 param["AllowableValues"] = reset_action[param["Name"] + "@Redfish.AllowableValues"]
     else:
         # Get the action info and its parameter listing
-        action_info = context.get( reset_action["@Redfish.ActionInfo"] )
+        action_info = context.get(reset_action["@Redfish.ActionInfo"])
         reset_parameters = action_info.dict["Parameters"]
 
     return reset_uri, reset_parameters
 
-def manager_reset( context, manager_id = None, reset_type = None ):
+
+def manager_reset(context, manager_id=None, reset_type=None):
     """
     Finds a manager matching the given ID and performs a reset
 
@@ -225,10 +262,10 @@ def manager_reset( context, manager_id = None, reset_type = None ):
     reset_type_values = reset_types
     if reset_type is not None:
         if reset_type not in reset_type_values:
-            raise ValueError( "{} is not an allowable reset type ({})".format( reset_type, ", ".join( reset_type_values ) ) )
+            raise ValueError("{} is not an allowable reset type ({})".format(reset_type, ", ".join(reset_type_values)))
 
     # Locate the reset action
-    reset_uri, reset_parameters = get_manager_reset_info( context, manager_id )
+    reset_uri, reset_parameters = get_manager_reset_info(context, manager_id)
 
     # Build the payload
     if reset_type is None:
@@ -246,9 +283,9 @@ def manager_reset( context, manager_id = None, reset_type = None ):
         payload["ResetType"] = reset_type
 
     # Reset the manager
-    response = context.post( reset_uri, body = payload )
+    response = context.post(reset_uri, body=payload)
     try:
-        verify_response( response )
+        verify_response(response)
     except Exception as e:
         additional_message = ""
         if response.status == 400:
@@ -256,11 +293,12 @@ def manager_reset( context, manager_id = None, reset_type = None ):
             additional_message = "\nNo supported reset types listed"
             for param in reset_parameters:
                 if param["Name"] == "ResetType" and "AllowableValues" in param:
-                    additional_message = "\nSupported reset types: {}".format( ", ".join( param["AllowableValues"] ) )
-        raise type( e )( str( e ) + additional_message ).with_traceback( sys.exc_info()[2] )
+                    additional_message = "\nSupported reset types: {}".format(", ".join(param["AllowableValues"]))
+        raise type(e)(str(e) + additional_message).with_traceback(sys.exc_info()[2])
     return response
 
-def get_manager_reset_to_defaults_info( context, manager_id = None, manager = None ):
+
+def get_manager_reset_to_defaults_info(context, manager_id=None, manager=None):
     """
     Finds a manager matching the given ID and returns its reset-to-defaults info
 
@@ -275,13 +313,17 @@ def get_manager_reset_to_defaults_info( context, manager_id = None, manager = No
     """
 
     if manager is None:
-        manager = get_manager( context, manager_id )
+        manager = get_manager(context, manager_id)
 
     # Check that there is a Reset action
     if "Actions" not in manager.dict:
-        raise RedfishManagerResetToDefaultsNotFoundError( "Manager {} does not support the ResetToDefaults action".format( manager.dict["Id"] ) )
+        raise RedfishManagerResetToDefaultsNotFoundError(
+            "Manager {} does not support the ResetToDefaults action".format(manager.dict["Id"])
+        )
     if "#Manager.ResetToDefaults" not in manager.dict["Actions"]:
-        raise RedfishManagerResetToDefaultsNotFoundError( "Manager {} does not support the ResetToDefaults action".format( manager.dict["Id"] ) )
+        raise RedfishManagerResetToDefaultsNotFoundError(
+            "Manager {} does not support the ResetToDefaults action".format(manager.dict["Id"])
+        )
 
     # Extract the info about the ResetToDefaults action
     reset_action = manager.dict["Actions"]["#Manager.ResetToDefaults"]
@@ -292,12 +334,7 @@ def get_manager_reset_to_defaults_info( context, manager_id = None, manager = No
 
         # Default parameter requirements
         reset_parameters = [
-            {
-                "Name": "ResetType",
-                "Required": True,
-                "DataType": "String",
-                "AllowableValues": reset_to_defaults_types
-            }
+            {"Name": "ResetType", "Required": True, "DataType": "String", "AllowableValues": reset_to_defaults_types}
         ]
 
         # Get the AllowableValues from annotations
@@ -306,12 +343,13 @@ def get_manager_reset_to_defaults_info( context, manager_id = None, manager = No
                 param["AllowableValues"] = reset_action[param["Name"] + "@Redfish.AllowableValues"]
     else:
         # Get the action info and its parameter listing
-        action_info = context.get( reset_action["@Redfish.ActionInfo"] )
+        action_info = context.get(reset_action["@Redfish.ActionInfo"])
         reset_parameters = action_info.dict["Parameters"]
 
     return reset_uri, reset_parameters
 
-def manager_reset_to_defaults( context, manager_id = None, reset_type = None ):
+
+def manager_reset_to_defaults(context, manager_id=None, reset_type=None):
     """
     Finds a manager matching the given ID and performs a reset-to-defaults
 
@@ -328,10 +366,12 @@ def manager_reset_to_defaults( context, manager_id = None, reset_type = None ):
     reset_to_default_type_values = reset_to_defaults_types
     if reset_type is not None:
         if reset_type not in reset_to_default_type_values:
-            raise ValueError( "{} is not an allowable reset type ({})".format( reset_type, ", ".join( reset_to_default_type_values ) ) )
+            raise ValueError(
+                "{} is not an allowable reset type ({})".format(reset_type, ", ".join(reset_to_default_type_values))
+            )
 
     # Locate the reset action
-    reset_uri, reset_parameters = get_manager_reset_to_defaults_info( context, manager_id )
+    reset_uri, reset_parameters = get_manager_reset_to_defaults_info(context, manager_id)
 
     # Build the payload
     if reset_type is None:
@@ -349,9 +389,9 @@ def manager_reset_to_defaults( context, manager_id = None, reset_type = None ):
         payload["ResetType"] = reset_type
 
     # Reset the manager to defaults
-    response = context.post( reset_uri, body = payload )
+    response = context.post(reset_uri, body=payload)
     try:
-        verify_response( response )
+        verify_response(response)
     except Exception as e:
         additional_message = ""
         if response.status == 400:
@@ -359,11 +399,12 @@ def manager_reset_to_defaults( context, manager_id = None, reset_type = None ):
             additional_message = "\nNo supported reset types listed"
             for param in reset_parameters:
                 if param["Name"] == "ResetType" and "AllowableValues" in param:
-                    additional_message = "\nSupported reset types: {}".format( ", ".join( param["AllowableValues"] ) )
-        raise type( e )( str( e ) + additional_message ).with_traceback( sys.exc_info()[2] )
+                    additional_message = "\nSupported reset types: {}".format(", ".join(param["AllowableValues"]))
+        raise type(e)(str(e) + additional_message).with_traceback(sys.exc_info()[2])
     return response
 
-def get_manager_network_protocol( context, manager_id = None ):
+
+def get_manager_network_protocol(context, manager_id=None):
     """
     Finds the network protocol information for a manager and returns its resource
 
@@ -375,17 +416,20 @@ def get_manager_network_protocol( context, manager_id = None ):
         The ManagerNetworkProtocol resource
     """
     # Get the manager to find its network protocol information
-    manager = get_manager( context, manager_id )
+    manager = get_manager(context, manager_id)
     if "NetworkProtocol" not in manager.dict:
         # No network protocol information
-        raise RedfishManagerNetworkProtocolNotFoundError( "Manager {} does not contain network protocol information".format( manager.dict["Id"] ) )
+        raise RedfishManagerNetworkProtocolNotFoundError(
+            "Manager {} does not contain network protocol information".format(manager.dict["Id"])
+        )
 
     # Get the network protocol information
-    response = context.get( manager.dict["NetworkProtocol"]["@odata.id"] )
-    verify_response( response )
+    response = context.get(manager.dict["NetworkProtocol"]["@odata.id"])
+    verify_response(response)
     return response
 
-def set_manager_network_protocol( context, manager_id = None, network_protocol = None ):
+
+def set_manager_network_protocol(context, manager_id=None, network_protocol=None):
     """
     Sets network protocol settings for a manager
 
@@ -398,27 +442,30 @@ def set_manager_network_protocol( context, manager_id = None, network_protocol =
         The response of the PATCH
     """
     # Get the manager to find its network protocol information
-    manager = get_manager( context, manager_id )
+    manager = get_manager(context, manager_id)
     if "NetworkProtocol" not in manager.dict:
         # No network protocol information
-        raise RedfishManagerNetworkProtocolNotFoundError( "Manager {} does not contain network protocol information".format( manager.dict["Id"] ) )
+        raise RedfishManagerNetworkProtocolNotFoundError(
+            "Manager {} does not contain network protocol information".format(manager.dict["Id"])
+        )
 
     # Get the current network protocol information
-    response = context.get( manager.dict["NetworkProtocol"]["@odata.id"] )
-    verify_response( response )
+    response = context.get(manager.dict["NetworkProtocol"]["@odata.id"])
+    verify_response(response)
     headers = None
-    etag = response.getheader( "ETag" )
+    etag = response.getheader("ETag")
     if etag is not None:
-        headers = { "If-Match": etag }
+        headers = {"If-Match": etag}
 
     # Set the network protocol information
     if network_protocol is None:
         network_protocol = {}
-    response = context.patch( manager.dict["NetworkProtocol"]["@odata.id"], body = network_protocol, headers = headers )
-    verify_response( response )
+    response = context.patch(manager.dict["NetworkProtocol"]["@odata.id"], body=network_protocol, headers=headers)
+    verify_response(response)
     return response
 
-def print_manager_network_protocol( network_protocol ):
+
+def print_manager_network_protocol(network_protocol):
     """
     Prints the manager network protocol information
 
@@ -426,12 +473,26 @@ def print_manager_network_protocol( network_protocol ):
         network_protocol: The manager network protocol information to print
     """
 
-    network_protocol_properties = [ "HTTP", "HTTPS", "SSDP", "SSH", "Telnet", "KVMIP", "NTP", "RDP", "RFB",
-                                    "VirtualMedia", "IPMI", "SNMP", "DHCP", "DHCPv6" ]
+    network_protocol_properties = [
+        "HTTP",
+        "HTTPS",
+        "SSDP",
+        "SSH",
+        "Telnet",
+        "KVMIP",
+        "NTP",
+        "RDP",
+        "RFB",
+        "VirtualMedia",
+        "IPMI",
+        "SNMP",
+        "DHCP",
+        "DHCPv6",
+    ]
     network_protocol_line_format = "  {:16s} | {:8s} | {:6s} | {}"
-    print( "Manager Network Protocol Info" )
-    print( "" )
-    print( network_protocol_line_format.format( "Protocol", "Enabled", "Port", "Other Settings" ) )
+    print("Manager Network Protocol Info")
+    print("")
+    print(network_protocol_line_format.format("Protocol", "Enabled", "Port", "Other Settings"))
 
     for property in network_protocol_properties:
         if property in network_protocol.dict:
@@ -440,23 +501,35 @@ def print_manager_network_protocol( network_protocol ):
                 # For SSDP, extract the NOTIFY settings
                 other_str = []
                 if "NotifyIPv6Scope" in network_protocol.dict[property]:
-                    other_str.append( "NOTIFY IPv6 Scope: {}".format( network_protocol.dict[property]["NotifyIPv6Scope"] ) )
+                    other_str.append("NOTIFY IPv6 Scope: {}".format(network_protocol.dict[property]["NotifyIPv6Scope"]))
                 if "NotifyTTL" in network_protocol.dict[property]:
-                    other_str.append( "NOTIFY TTL: {}".format( network_protocol.dict[property]["NotifyTTL"] ) )
+                    other_str.append("NOTIFY TTL: {}".format(network_protocol.dict[property]["NotifyTTL"]))
                 if "NotifyMulticastIntervalSeconds" in network_protocol.dict[property]:
-                    other_str.append( "NOTIFY ALIVE Interval: {}".format( network_protocol.dict[property]["NotifyMulticastIntervalSeconds"] ) )
-                other_str = ", ".join( other_str )
+                    other_str.append(
+                        "NOTIFY ALIVE Interval: {}".format(
+                            network_protocol.dict[property]["NotifyMulticastIntervalSeconds"]
+                        )
+                    )
+                other_str = ", ".join(other_str)
             if property == "NTP":
                 # For NTP, extract the servers; need to skip "empty" slots potentially
                 if "NTPServers" in network_protocol.dict[property]:
                     other_str = []
                     for server in network_protocol.dict[property]["NTPServers"]:
-                        if isinstance( server, str ):
-                            other_str.append( server )
-                    other_str = "NTP Servers: " + ", ".join( other_str )
-            print( network_protocol_line_format.format( property, str( network_protocol.dict[property].get( "ProtocolEnabled", "" ) ), str( network_protocol.dict[property].get( "Port", "" ) ), other_str ) )
+                        if isinstance(server, str):
+                            other_str.append(server)
+                    other_str = "NTP Servers: " + ", ".join(other_str)
+            print(
+                network_protocol_line_format.format(
+                    property,
+                    str(network_protocol.dict[property].get("ProtocolEnabled", "")),
+                    str(network_protocol.dict[property].get("Port", "")),
+                    other_str,
+                )
+            )
 
-def get_manager_ethernet_interface_ids( context, manager_id = None ):
+
+def get_manager_ethernet_interface_ids(context, manager_id=None):
     """
     Finds the Ethernet interface collection for a manager and returns all of the member's identifiers
 
@@ -469,15 +542,18 @@ def get_manager_ethernet_interface_ids( context, manager_id = None ):
     """
 
     # Get the manager to find its Ethernet interface collection
-    manager = get_manager( context, manager_id )
+    manager = get_manager(context, manager_id)
     if "EthernetInterfaces" not in manager.dict:
         # No Ethernet interface collection
-        raise RedfishManagerEthIntNotFoundError( "Manager {} does not contain an Ethernet interface collection".format( manager.dict["Id"] ) )
+        raise RedfishManagerEthIntNotFoundError(
+            "Manager {} does not contain an Ethernet interface collection".format(manager.dict["Id"])
+        )
 
     # Get the Ethernet interface collection and iterate through its collection
-    return get_collection_ids( context, manager.dict["EthernetInterfaces"]["@odata.id"] )
+    return get_collection_ids(context, manager.dict["EthernetInterfaces"]["@odata.id"])
 
-def get_manager_ethernet_interface( context, manager_id = None, interface_id = None ):
+
+def get_manager_ethernet_interface(context, manager_id=None, interface_id=None):
     """
     Finds an Ethernet interface for a manager matching the given identifiers and returns its resource
 
@@ -495,29 +571,48 @@ def get_manager_ethernet_interface( context, manager_id = None, interface_id = N
 
     # Get the manager identifier in order to build the full URI later
     if manager_id is None:
-        manager = get_manager( context, None )
+        manager = get_manager(context, None)
         manager_id = manager.dict["Id"]
 
     # If given an identifier, get the Ethernet interface directly
     if interface_id is not None:
-        interface = context.get( interface_uri_pattern.format( manager_id, interface_id ) )
+        interface = context.get(interface_uri_pattern.format(manager_id, interface_id))
     # No identifier given; see if there's exactly one member
     else:
-        avail_interfaces = get_manager_ethernet_interface_ids( context, manager_id )
-        if len( avail_interfaces ) == 1:
-            interface = context.get( interface_uri_pattern.format( manager_id, avail_interfaces[0] ) )
+        avail_interfaces = get_manager_ethernet_interface_ids(context, manager_id)
+        if len(avail_interfaces) == 1:
+            interface = context.get(interface_uri_pattern.format(manager_id, avail_interfaces[0]))
         else:
-            raise RedfishManagerEthIntNotFoundError( "Manager {} does not contain exactly one Ethernet interface; a target Ethernet interface needs to be specified: {}".format( manager_id, ", ".join( avail_interfaces ) ) )
+            raise RedfishManagerEthIntNotFoundError(
+                "Manager {} does not contain exactly one Ethernet interface; a target Ethernet interface needs to be specified: {}".format(
+                    manager_id, ", ".join(avail_interfaces)
+                )
+            )
 
     # Check the response and return the Ethernet interface if the response is good
     if interface.status == 404:
         if avail_interfaces is None:
-            avail_interfaces = get_manager_ethernet_interface_ids( context, manager_id )
-        raise RedfishManagerEthIntNotFoundError( "Manager {} does not contain an Ethernet interface called {}; valid Ethernet interfaces: {}".format( manager_id, interface_id, ", ".join( avail_interfaces ) ) )
-    verify_response( interface )
+            avail_interfaces = get_manager_ethernet_interface_ids(context, manager_id)
+        raise RedfishManagerEthIntNotFoundError(
+            "Manager {} does not contain an Ethernet interface called {}; valid Ethernet interfaces: {}".format(
+                manager_id, interface_id, ", ".join(avail_interfaces)
+            )
+        )
+    verify_response(interface)
     return interface
 
-def set_manager_ethernet_interface( context, manager_id = None, interface_id = None, vlan = None, ipv4_addresses = None, dhcpv4 = None, ipv6_addresses = None, ipv6_gateways = None, dhcpv6 = None ):
+
+def set_manager_ethernet_interface(
+    context,
+    manager_id=None,
+    interface_id=None,
+    vlan=None,
+    ipv4_addresses=None,
+    dhcpv4=None,
+    ipv6_addresses=None,
+    ipv6_gateways=None,
+    dhcpv6=None,
+):
     """
     Finds an Ethernet interface matching the given ID and updates specified properties
 
@@ -537,7 +632,7 @@ def set_manager_ethernet_interface( context, manager_id = None, interface_id = N
     """
 
     # Locate the interface
-    interface = get_manager_ethernet_interface( context, manager_id, interface_id )
+    interface = get_manager_ethernet_interface(context, manager_id, interface_id)
 
     # Update the interface based on the request parameters
     payload = {}
@@ -558,14 +653,15 @@ def set_manager_ethernet_interface( context, manager_id = None, interface_id = N
     if dhcpv6 is not None:
         payload["DHCPv6"] = dhcpv6
     headers = None
-    etag = interface.getheader( "ETag" )
+    etag = interface.getheader("ETag")
     if etag is not None:
-        headers = { "If-Match": etag }
-    response = context.patch( interface.dict["@odata.id"], body = payload, headers = headers )
-    verify_response( response )
+        headers = {"If-Match": etag}
+    response = context.patch(interface.dict["@odata.id"], body=payload, headers=headers)
+    verify_response(response)
     return response
 
-def print_manager_ethernet_interface( interface ):
+
+def print_manager_ethernet_interface(interface):
     """
     Prints the Ethernet interface info
 
@@ -574,77 +670,118 @@ def print_manager_ethernet_interface( interface ):
     """
 
     interface_line_format = "  {}: {}"
-    interface_properties = [ "Status", "InterfaceEnabled", "LinkStatus", "MACAddress", "PermanentMACAddress", "SpeedMbps", "AutoNeg", "FullDuplex",
-        "MTUSize", "HostName", "FQDN", "NameServers", "StaticNameServers" ]
-    print( "Ethernet Interface {} Info".format( interface.dict["Id"] ) )
+    interface_properties = [
+        "Status",
+        "InterfaceEnabled",
+        "LinkStatus",
+        "MACAddress",
+        "PermanentMACAddress",
+        "SpeedMbps",
+        "AutoNeg",
+        "FullDuplex",
+        "MTUSize",
+        "HostName",
+        "FQDN",
+        "NameServers",
+        "StaticNameServers",
+    ]
+    print("Ethernet Interface {} Info".format(interface.dict["Id"]))
     for property in interface_properties:
         if property in interface.dict:
             prop_val = interface.dict[property]
-            if isinstance( prop_val, list ):
-                prop_val = ", ".join( prop_val )
+            if isinstance(prop_val, list):
+                prop_val = ", ".join(prop_val)
             elif property == "Status":
-                prop_val = "State: {}, Health: {}".format( prop_val.get( "State", "N/A" ), prop_val.get( "Health", "N/A" ) )
-            print( interface_line_format.format( property, prop_val ) )
-    print( "" )
+                prop_val = "State: {}, Health: {}".format(prop_val.get("State", "N/A"), prop_val.get("Health", "N/A"))
+            print(interface_line_format.format(property, prop_val))
+    print("")
 
     if "VLAN" in interface.dict:
-        print( "  VLAN Info" )
-        print( "    Enabled: {}".format( interface.dict["VLAN"].get( "VLANEnable", False ) ) )
-        print( "    ID: {}".format( interface.dict["VLAN"].get( "VLANId", "N/A" ) ) )
-        print( "    Priority: {}".format( interface.dict["VLAN"].get( "VLANPriority", "N/A" ) ) )
-        print( "" )
+        print("  VLAN Info")
+        print("    Enabled: {}".format(interface.dict["VLAN"].get("VLANEnable", False)))
+        print("    ID: {}".format(interface.dict["VLAN"].get("VLANId", "N/A")))
+        print("    Priority: {}".format(interface.dict["VLAN"].get("VLANPriority", "N/A")))
+        print("")
 
-    print( "  IPv4 Info" )
+    print("  IPv4 Info")
     if "DHCPv4" in interface.dict:
-        print( "    DHCP Enabled: {}".format( interface.dict["DHCPv4"]["DHCPEnabled"] ) )
+        print("    DHCP Enabled: {}".format(interface.dict["DHCPv4"]["DHCPEnabled"]))
     if "IPv4Addresses" in interface.dict:
-        print( "    Assigned Addresses" )
-        for i, address in enumerate( interface.dict["IPv4Addresses"] ):
+        print("    Assigned Addresses")
+        for i, address in enumerate(interface.dict["IPv4Addresses"]):
             if address is None:
-                print( "      Empty" )
+                print("      Empty")
             elif i == 0:
-                print( "      {}: {}, {}, {}".format( address.get( "Address", "N/A" ), address.get( "SubnetMask", "N/A" ), address.get( "Gateway", "N/A" ), address.get( "AddressOrigin", "N/A" ) ) )
+                print(
+                    "      {}: {}, {}, {}".format(
+                        address.get("Address", "N/A"),
+                        address.get("SubnetMask", "N/A"),
+                        address.get("Gateway", "N/A"),
+                        address.get("AddressOrigin", "N/A"),
+                    )
+                )
             else:
-                print( "      {}: {}, {}".format( address.get( "Address", "N/A" ), address.get( "SubnetMask", "N/A" ), address.get( "AddressOrigin", "N/A" ) ) )
+                print(
+                    "      {}: {}, {}".format(
+                        address.get("Address", "N/A"),
+                        address.get("SubnetMask", "N/A"),
+                        address.get("AddressOrigin", "N/A"),
+                    )
+                )
     if "IPv4StaticAddresses" in interface.dict:
-        print( "    Static Addresses" )
-        for i, address in enumerate( interface.dict["IPv4StaticAddresses"] ):
+        print("    Static Addresses")
+        for i, address in enumerate(interface.dict["IPv4StaticAddresses"]):
             if address is None:
-                print( "       Empty" )
+                print("       Empty")
             elif i == 0:
-                print( "      {}: {}, {}".format( address.get( "Address", "N/A" ), address.get( "SubnetMask", "N/A" ), address.get( "Gateway", "N/A" ) ) )
+                print(
+                    "      {}: {}, {}".format(
+                        address.get("Address", "N/A"), address.get("SubnetMask", "N/A"), address.get("Gateway", "N/A")
+                    )
+                )
             else:
-                print( "      {}: {}".format( address["Address"], address["SubnetMask"] ) )
-    print( "" )
+                print("      {}: {}".format(address["Address"], address["SubnetMask"]))
+    print("")
 
-    print( "  IPv6 Info" )
+    print("  IPv6 Info")
     if "DHCPv6" in interface.dict:
-        print( "    DHCP Mode: {}".format( interface.dict["DHCPv6"]["OperatingMode"] ) )
+        print("    DHCP Mode: {}".format(interface.dict["DHCPv6"]["OperatingMode"]))
     if "IPv6Addresses" in interface.dict:
-        print( "    Assigned Addresses" )
+        print("    Assigned Addresses")
         for address in interface.dict["IPv6Addresses"]:
-            print( "      {}/{}: {}, {}".format( address.get( "Address", "N/A" ), address.get( "PrefixLength", "N/A" ), address.get( "AddressOrigin", "N/A" ), address.get( "AddressState", "N/A" ) ) )
+            print(
+                "      {}/{}: {}, {}".format(
+                    address.get("Address", "N/A"),
+                    address.get("PrefixLength", "N/A"),
+                    address.get("AddressOrigin", "N/A"),
+                    address.get("AddressState", "N/A"),
+                )
+            )
     if "IPv6StaticAddresses" in interface.dict:
-        print( "    Static Addresses" )
+        print("    Static Addresses")
         for address in interface.dict["IPv6StaticAddresses"]:
             if address is None:
-                print( "      Empty" )
+                print("      Empty")
             else:
-                print( "      {}/{}".format( address.get( "Address", "N/A" ), address.get( "PrefixLength", "N/A" ) ) )
+                print("      {}/{}".format(address.get("Address", "N/A"), address.get("PrefixLength", "N/A")))
     if "IPv6StaticDefaultGateways" in interface.dict:
-        print( "    Static Default Gateways" )
+        print("    Static Default Gateways")
         for address in interface.dict["IPv6StaticDefaultGateways"]:
             if address is None:
-                print( "      Empty" )
+                print("      Empty")
             else:
-                print( "      {}/{}".format( address.get( "Address", "N/A" ), address.get( "PrefixLength", "N/A" ) ) )
+                print("      {}/{}".format(address.get("Address", "N/A"), address.get("PrefixLength", "N/A")))
     if "IPv6DefaultGateway" in interface.dict:
-        print( "    Default Gateway: {}".format( interface.dict["IPv6DefaultGateway"] ) )
+        print("    Default Gateway: {}".format(interface.dict["IPv6DefaultGateway"]))
     if "IPv6AddressPolicyTable" in interface.dict:
-        print( "    Address Policy Table" )
+        print("    Address Policy Table")
         for policy in interface.dict["IPv6AddressPolicyTable"]:
             if policy is None:
-                print( "      Empty" )
+                print("      Empty")
             else:
-                print( "      Prefix: {}, Prec: {}, Label: {}".format( policy.get( "Prefix", "N/A" ), policy.get( "Precedence", "N/A" ), policy.get( "Label", "N/A" ) ) )
-    print( "" )
+                print(
+                    "      Prefix: {}, Prec: {}, Label: {}".format(
+                        policy.get("Prefix", "N/A"), policy.get("Precedence", "N/A"), policy.get("Label", "N/A")
+                    )
+                )
+    print("")

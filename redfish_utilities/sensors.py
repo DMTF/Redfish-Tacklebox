@@ -12,7 +12,8 @@ Brief : This file contains the definitions and functionalities for scanning a
         Redfish service's Power and Thermal properties for sensor readings
 """
 
-def get_sensors( context , use_id = False ):
+
+def get_sensors(context, use_id=False):
     """
     Walks a Redfish service for sensor information
 
@@ -27,141 +28,243 @@ def get_sensors( context , use_id = False ):
     sensor_list = []
 
     # Get the service root to find the chassis collection
-    service_root = context.get( "/redfish/v1/" )
+    service_root = context.get("/redfish/v1/")
     if "Chassis" not in service_root.dict:
         # No chassis collection
         return sensor_list
 
     # Get the chassis collection and iterate through its collection
-    chassis_col = context.get( service_root.dict["Chassis"]["@odata.id"] )
+    chassis_col = context.get(service_root.dict["Chassis"]["@odata.id"])
     for chassis_member in chassis_col.dict["Members"]:
-        chassis = context.get( chassis_member["@odata.id"] )
+        chassis = context.get(chassis_member["@odata.id"])
 
         chassis_name = "Chassis " + chassis.dict["Id"]
         if use_id is False and "Name" in chassis.dict:
             chassis_name = chassis.dict["Name"]
 
         # Get the chassis status
-        chassis_instance = {
-            "ChassisName": chassis_name,
-            "Readings": []
-        }
-        sensor_list.append( chassis_instance )
-        get_discrete_status( "State", chassis.dict, chassis_instance["Readings"] )
+        chassis_instance = {"ChassisName": chassis_name, "Readings": []}
+        sensor_list.append(chassis_instance)
+        get_discrete_status("State", chassis.dict, chassis_instance["Readings"])
 
         # If the chassis contains any of the newer power/thermal models, scan based on the common sensor model
-        if "EnvironmentMetrics" in chassis.dict or "PowerSubsystem" in chassis.dict or "ThermalSubsystem" in chassis.dict or "Sensors" in chassis.dict:
+        if (
+            "EnvironmentMetrics" in chassis.dict
+            or "PowerSubsystem" in chassis.dict
+            or "ThermalSubsystem" in chassis.dict
+            or "Sensors" in chassis.dict
+        ):
             # Get readings from the EnvironmentMetrics resource if available
             if "EnvironmentMetrics" in chassis.dict:
-                environment = context.get( chassis.dict["EnvironmentMetrics"]["@odata.id"] )
-                get_excerpt_status( chassis_instance["ChassisName"], "TemperatureCelsius", "Cel", environment.dict, chassis_instance["Readings"] )
-                get_excerpt_status( chassis_instance["ChassisName"], "HumidityPercent", "%", environment.dict, chassis_instance["Readings"] )
-                get_excerpt_status( chassis_instance["ChassisName"], "PowerWatts", "W", environment.dict, chassis_instance["Readings"] )
-                get_excerpt_status( chassis_instance["ChassisName"], "EnergykWh", "kW.h", environment.dict, chassis_instance["Readings"] )
-                get_excerpt_status( chassis_instance["ChassisName"], "PowerLoadPercent", "%", environment.dict, chassis_instance["Readings"] )
-                get_excerpt_status( chassis_instance["ChassisName"], "DewPointCelsius", "Cel", environment.dict, chassis_instance["Readings"] )
+                environment = context.get(chassis.dict["EnvironmentMetrics"]["@odata.id"])
+                get_excerpt_status(
+                    chassis_instance["ChassisName"],
+                    "TemperatureCelsius",
+                    "Cel",
+                    environment.dict,
+                    chassis_instance["Readings"],
+                )
+                get_excerpt_status(
+                    chassis_instance["ChassisName"],
+                    "HumidityPercent",
+                    "%",
+                    environment.dict,
+                    chassis_instance["Readings"],
+                )
+                get_excerpt_status(
+                    chassis_instance["ChassisName"], "PowerWatts", "W", environment.dict, chassis_instance["Readings"]
+                )
+                get_excerpt_status(
+                    chassis_instance["ChassisName"], "EnergykWh", "kW.h", environment.dict, chassis_instance["Readings"]
+                )
+                get_excerpt_status(
+                    chassis_instance["ChassisName"],
+                    "PowerLoadPercent",
+                    "%",
+                    environment.dict,
+                    chassis_instance["Readings"],
+                )
+                get_excerpt_status(
+                    chassis_instance["ChassisName"],
+                    "DewPointCelsius",
+                    "Cel",
+                    environment.dict,
+                    chassis_instance["Readings"],
+                )
 
             # Get readings from the PowerSubsystem resource if available
             if "PowerSubsystem" in chassis.dict:
-                power = context.get( chassis.dict["PowerSubsystem"]["@odata.id"] )
+                power = context.get(chassis.dict["PowerSubsystem"]["@odata.id"])
 
                 # Add information for each power supply reported
                 if "PowerSupplies" in power.dict:
-                    power_supplies = context.get( power.dict["PowerSupplies"]["@odata.id"] )
+                    power_supplies = context.get(power.dict["PowerSupplies"]["@odata.id"])
                     for power_supply_member in power_supplies.dict["Members"]:
-                        power_supply = context.get( power_supply_member["@odata.id"] )
+                        power_supply = context.get(power_supply_member["@odata.id"])
                         power_supply_name = "Power Supply " + power_supply.dict["Id"]
                         if use_id is False and "Name" in power_supply.dict:
                             power_supply_name = power_supply.dict["Name"]
-                        get_discrete_status( power_supply_name + " State", power_supply.dict, chassis_instance["Readings"] )
+                        get_discrete_status(
+                            power_supply_name + " State", power_supply.dict, chassis_instance["Readings"]
+                        )
                         if "Metrics" in power_supply.dict:
-                            metrics = context.get( power_supply.dict["Metrics"]["@odata.id"] )
-                            get_excerpt_status( power_supply_name, "InputVoltage", "V", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( power_supply_name, "InputCurrentAmps", "A", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( power_supply_name, "InputPowerWatts", "W", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( power_supply_name, "EnergykWh", "kW.h", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( power_supply_name, "FrequencyHz", "Hz", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( power_supply_name, "OutputPowerWatts", "W", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( power_supply_name, "RailVoltage", "V", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( power_supply_name, "RailCurrentAmps", "A", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( power_supply_name, "RailPowerWatts", "W", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( power_supply_name, "TemperatureCelsius", "Cel", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( power_supply_name, "FanSpeedPercent", "%", metrics.dict, chassis_instance["Readings"] )
+                            metrics = context.get(power_supply.dict["Metrics"]["@odata.id"])
+                            get_excerpt_status(
+                                power_supply_name, "InputVoltage", "V", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                power_supply_name, "InputCurrentAmps", "A", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                power_supply_name, "InputPowerWatts", "W", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                power_supply_name, "EnergykWh", "kW.h", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                power_supply_name, "FrequencyHz", "Hz", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                power_supply_name, "OutputPowerWatts", "W", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                power_supply_name, "RailVoltage", "V", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                power_supply_name, "RailCurrentAmps", "A", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                power_supply_name, "RailPowerWatts", "W", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                power_supply_name,
+                                "TemperatureCelsius",
+                                "Cel",
+                                metrics.dict,
+                                chassis_instance["Readings"],
+                            )
+                            get_excerpt_status(
+                                power_supply_name, "FanSpeedPercent", "%", metrics.dict, chassis_instance["Readings"]
+                            )
 
                 # Add information for each battery reported
                 if "Batteries" in power.dict:
-                    batteries = context.get( power.dict["Batteries"]["@odata.id"] )
+                    batteries = context.get(power.dict["Batteries"]["@odata.id"])
                     for battery_member in batteries.dict["Members"]:
-                        battery = context.get( battery_member["@odata.id"] )
+                        battery = context.get(battery_member["@odata.id"])
                         battery_name = "Battery " + battery.dict["Id"]
                         if use_id is False and "Name" in battery.dict:
                             battery_name = battery.dict["Name"]
-                        get_discrete_status( battery_name + " State", battery.dict, chassis_instance["Readings"] )
-                        get_excerpt_status( battery_name, "StateOfHealthPercent", "%", battery.dict, chassis_instance["Readings"])
+                        get_discrete_status(battery_name + " State", battery.dict, chassis_instance["Readings"])
+                        get_excerpt_status(
+                            battery_name, "StateOfHealthPercent", "%", battery.dict, chassis_instance["Readings"]
+                        )
                         if "Metrics" in battery.dict:
-                            metrics = context.get( battery.dict["Metrics"]["@odata.id"] )
-                            get_excerpt_status( battery_name, "InputVoltage", "V", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( battery_name, "InputCurrentAmps", "A", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( battery_name, "OutputVoltages", "V", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( battery_name, "OutputCurrentAmps", "A", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( battery_name, "StoredEnergyWattHours", "W.h", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( battery_name, "StoredChargeAmpHours", "A.h", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( battery_name, "TemperatureCelsius", "Cel", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( battery_name, "ChargePercent", "%", metrics.dict, chassis_instance["Readings"] )
-                            get_excerpt_status( battery_name, "CellVoltages", "V", metrics.dict, chassis_instance["Readings"] )
+                            metrics = context.get(battery.dict["Metrics"]["@odata.id"])
+                            get_excerpt_status(
+                                battery_name, "InputVoltage", "V", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                battery_name, "InputCurrentAmps", "A", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                battery_name, "OutputVoltages", "V", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                battery_name, "OutputCurrentAmps", "A", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                battery_name, "StoredEnergyWattHours", "W.h", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                battery_name, "StoredChargeAmpHours", "A.h", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                battery_name, "TemperatureCelsius", "Cel", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                battery_name, "ChargePercent", "%", metrics.dict, chassis_instance["Readings"]
+                            )
+                            get_excerpt_status(
+                                battery_name, "CellVoltages", "V", metrics.dict, chassis_instance["Readings"]
+                            )
 
                 # Add information for each of the redundancy groups reported
                 if "PowerSupplyRedundancy" in power.dict:
-                    for i, redundancy in enumerate( power.dict["PowerSupplyRedundancy"] ):
-                        redundancy_name = "Power Supply Redundancy " + str( i )
+                    for i, redundancy in enumerate(power.dict["PowerSupplyRedundancy"]):
+                        redundancy_name = "Power Supply Redundancy " + str(i)
                         if use_id is False and "Name" in redundancy:
                             redundancy_name = redundancy["Name"]
-                        get_discrete_status( redundancy_name, redundancy, chassis_instance["Readings"] )
+                        get_discrete_status(redundancy_name, redundancy, chassis_instance["Readings"])
 
             # Get readings from the ThermalSubsystem resource if available
             if "ThermalSubsystem" in chassis.dict:
-                thermal = context.get( chassis.dict["ThermalSubsystem"]["@odata.id"] )
+                thermal = context.get(chassis.dict["ThermalSubsystem"]["@odata.id"])
 
                 # Add overall thermal metrics
                 if "ThermalMetrics" in thermal.dict:
-                    metrics = context.get( thermal.dict["ThermalMetrics"]["@odata.id"] )
+                    metrics = context.get(thermal.dict["ThermalMetrics"]["@odata.id"])
                     if "TemperatureSummaryCelsius" in metrics.dict:
-                        get_excerpt_status( chassis_instance["ChassisName"], "Internal", "Cel", metrics.dict["TemperatureSummaryCelsius"], chassis_instance["Readings"] )
-                        get_excerpt_status( chassis_instance["ChassisName"], "Intake", "Cel", metrics.dict["TemperatureSummaryCelsius"], chassis_instance["Readings"] )
-                        get_excerpt_status( chassis_instance["ChassisName"], "Exhaust", "Cel", metrics.dict["TemperatureSummaryCelsius"], chassis_instance["Readings"] )
-                        get_excerpt_status( chassis_instance["ChassisName"], "Ambient", "Cel", metrics.dict["TemperatureSummaryCelsius"], chassis_instance["Readings"] )
+                        get_excerpt_status(
+                            chassis_instance["ChassisName"],
+                            "Internal",
+                            "Cel",
+                            metrics.dict["TemperatureSummaryCelsius"],
+                            chassis_instance["Readings"],
+                        )
+                        get_excerpt_status(
+                            chassis_instance["ChassisName"],
+                            "Intake",
+                            "Cel",
+                            metrics.dict["TemperatureSummaryCelsius"],
+                            chassis_instance["Readings"],
+                        )
+                        get_excerpt_status(
+                            chassis_instance["ChassisName"],
+                            "Exhaust",
+                            "Cel",
+                            metrics.dict["TemperatureSummaryCelsius"],
+                            chassis_instance["Readings"],
+                        )
+                        get_excerpt_status(
+                            chassis_instance["ChassisName"],
+                            "Ambient",
+                            "Cel",
+                            metrics.dict["TemperatureSummaryCelsius"],
+                            chassis_instance["Readings"],
+                        )
 
                 # Add information for each fan reported
                 if "Fans" in thermal.dict:
-                    fans = context.get( thermal.dict["Fans"]["@odata.id"] )
+                    fans = context.get(thermal.dict["Fans"]["@odata.id"])
                     for fan_member in fans.dict["Members"]:
-                        fan = context.get( fan_member["@odata.id"] )
+                        fan = context.get(fan_member["@odata.id"])
                         fan_name = "Fan " + fan.dict["Id"]
                         if use_id is False and "Name" in fan.dict:
                             fan_name = fan.dict["Name"]
-                        get_discrete_status( fan_name + " State", fan.dict, chassis_instance["Readings"] )
-                        get_excerpt_status( fan_name, "SpeedPercent", "%", fan.dict, chassis_instance["Readings"])
+                        get_discrete_status(fan_name + " State", fan.dict, chassis_instance["Readings"])
+                        get_excerpt_status(fan_name, "SpeedPercent", "%", fan.dict, chassis_instance["Readings"])
 
                 # Add information for each of the redundancy groups reported
                 if "FanRedundancy" in thermal.dict:
-                    for i, redundancy in enumerate( thermal.dict["FanRedundancy"] ):
-                        redundancy_name = "Fan Redundancy " + str( i )
+                    for i, redundancy in enumerate(thermal.dict["FanRedundancy"]):
+                        redundancy_name = "Fan Redundancy " + str(i)
                         if use_id is False and "Name" in redundancy:
                             redundancy_name = redundancy["Name"]
-                        get_discrete_status( redundancy_name, redundancy, chassis_instance["Readings"] )
+                        get_discrete_status(redundancy_name, redundancy, chassis_instance["Readings"])
 
             # Get all sensor readings if available
             if "Sensors" in chassis.dict:
-                sensors = context.get( chassis.dict["Sensors"]["@odata.id"] )
+                sensors = context.get(chassis.dict["Sensors"]["@odata.id"])
                 for sensor_member in sensors.dict["Members"]:
-                    sensor = context.get( sensor_member["@odata.id"] )
-                    get_sensor_status( sensor.dict, chassis_instance["Readings"] , use_id = use_id)
+                    sensor = context.get(sensor_member["@odata.id"])
+                    get_sensor_status(sensor.dict, chassis_instance["Readings"], use_id=use_id)
 
         # Older power/thermal models
         else:
             # Get readings from the Power resource if available
             if "Power" in chassis.dict:
-                power = context.get( chassis.dict["Power"]["@odata.id"] )
+                power = context.get(chassis.dict["Power"]["@odata.id"])
 
                 # Add information for each power supply reported
                 if "PowerSupplies" in power.dict:
@@ -169,11 +272,19 @@ def get_sensors( context , use_id = False ):
                         power_supply_name = "Power Supply " + power_supply["MemberId"]
                         if use_id is False and "Name" in power_supply:
                             power_supply_name = power_supply["Name"]
-                        get_discrete_status( power_supply_name + " State", power_supply, chassis_instance["Readings"] )
-                        get_analog_status_small( power_supply_name, "ReadingVolts", "V", power_supply, chassis_instance["Readings"] )
-                        get_analog_status_small( power_supply_name, "LineInputVoltage", "V", power_supply, chassis_instance["Readings"] )
-                        get_analog_status_small( power_supply_name, "PowerCapacityWatts", "W", power_supply, chassis_instance["Readings"] )
-                        get_analog_status_small( power_supply_name, "LastPowerOutputWatts", "W", power_supply, chassis_instance["Readings"] )
+                        get_discrete_status(power_supply_name + " State", power_supply, chassis_instance["Readings"])
+                        get_analog_status_small(
+                            power_supply_name, "ReadingVolts", "V", power_supply, chassis_instance["Readings"]
+                        )
+                        get_analog_status_small(
+                            power_supply_name, "LineInputVoltage", "V", power_supply, chassis_instance["Readings"]
+                        )
+                        get_analog_status_small(
+                            power_supply_name, "PowerCapacityWatts", "W", power_supply, chassis_instance["Readings"]
+                        )
+                        get_analog_status_small(
+                            power_supply_name, "LastPowerOutputWatts", "W", power_supply, chassis_instance["Readings"]
+                        )
 
                 # Add information for each of the voltages reported
                 if "Voltages" in power.dict:
@@ -181,19 +292,19 @@ def get_sensors( context , use_id = False ):
                         voltage_name = "Voltage " + voltage["MemberId"]
                         if use_id is False and "Name" in voltage:
                             voltage_name = voltage["Name"]
-                        get_analog_status_full( voltage_name, voltage, chassis_instance["Readings"] )
+                        get_analog_status_full(voltage_name, voltage, chassis_instance["Readings"])
 
                 # Add information for each of the redundancy groups reported
                 if "Redundancy" in power.dict:
-                    for i, redundancy in enumerate( power.dict["Redundancy"] ):
-                        redundancy_name = "Power Supply Redundancy " + str( i )
+                    for i, redundancy in enumerate(power.dict["Redundancy"]):
+                        redundancy_name = "Power Supply Redundancy " + str(i)
                         if use_id is False and "Name" in redundancy:
                             redundancy_name = redundancy["Name"]
-                        get_discrete_status( redundancy_name, redundancy, chassis_instance["Readings"] )
+                        get_discrete_status(redundancy_name, redundancy, chassis_instance["Readings"])
 
             # Get readings from the Thermal resource if available
             if "Thermal" in chassis.dict:
-                thermal = context.get( chassis.dict["Thermal"]["@odata.id"] )
+                thermal = context.get(chassis.dict["Thermal"]["@odata.id"])
 
                 # Add information for each of the temperatures reported
                 if "Temperatures" in thermal.dict:
@@ -201,7 +312,7 @@ def get_sensors( context , use_id = False ):
                         temperature_name = "Temperature " + temperature["MemberId"]
                         if use_id is False and "Name" in temperature:
                             temperature_name = temperature["Name"]
-                        get_analog_status_full( temperature_name, temperature, chassis_instance["Readings"] )
+                        get_analog_status_full(temperature_name, temperature, chassis_instance["Readings"])
 
                 # Add information for each of the fans reported
                 if "Fans" in thermal.dict:
@@ -209,19 +320,20 @@ def get_sensors( context , use_id = False ):
                         fan_name = "Fan " + fan["MemberId"]
                         if use_id is False and "Name" in fan:
                             fan_name = fan["Name"]
-                        get_analog_status_full( fan_name, fan, chassis_instance["Readings"] )
+                        get_analog_status_full(fan_name, fan, chassis_instance["Readings"])
 
                 # Add information for each of the redundancy groups reported
                 if "Redundancy" in thermal.dict:
-                    for i, redundancy in enumerate( thermal.dict["Redundancy"] ):
-                        redundancy_name = "Fan Redundancy " + str( i )
+                    for i, redundancy in enumerate(thermal.dict["Redundancy"]):
+                        redundancy_name = "Fan Redundancy " + str(i)
                         if use_id is False and "Name" in redundancy:
                             redundancy_name = redundancy["Name"]
-                        get_discrete_status( redundancy_name, redundancy, chassis_instance["Readings"] )
+                        get_discrete_status(redundancy_name, redundancy, chassis_instance["Readings"])
 
     return sensor_list
 
-def get_discrete_status( name, object, readings ):
+
+def get_discrete_status(name, object, readings):
     """
     Builds the status reading based on the Status property
 
@@ -234,7 +346,7 @@ def get_discrete_status( name, object, readings ):
     if "Status" not in object:
         # Do not produce a dummy reading if Status is not found
         return
-    state, health = get_status( object )
+    state, health = get_status(object)
 
     reading = {
         "Name": name,
@@ -251,9 +363,10 @@ def get_discrete_status( name, object, readings ):
         "PhysicalContext": None,
     }
 
-    readings.append( reading )
+    readings.append(reading)
 
-def get_analog_status_full( name, object, readings ):
+
+def get_analog_status_full(name, object, readings):
     """
     Builds a full analog reading based on the the contents of an object
 
@@ -263,7 +376,7 @@ def get_analog_status_full( name, object, readings ):
         readings: The list of readings to update
     """
 
-    state, health = get_status( object )
+    state, health = get_status(object)
     units = None
 
     if "ReadingCelsius" in object:
@@ -291,18 +404,19 @@ def get_analog_status_full( name, object, readings ):
         "Units": units,
         "State": state,
         "Health": health,
-        "LowerFatal": object.get( "LowerThresholdFatal", None ),
-        "LowerCritical": object.get( "LowerThresholdCritical", None ),
-        "LowerCaution": object.get( "LowerThresholdNonCritical", None ),
-        "UpperCaution": object.get( "UpperThresholdNonCritical", None ),
-        "UpperCritical": object.get( "UpperThresholdCritical", None ),
-        "UpperFatal": object.get( "UpperThresholdFatal", None ),
-        "PhysicalContext": object.get( "PhysicalContext", None ),
+        "LowerFatal": object.get("LowerThresholdFatal", None),
+        "LowerCritical": object.get("LowerThresholdCritical", None),
+        "LowerCaution": object.get("LowerThresholdNonCritical", None),
+        "UpperCaution": object.get("UpperThresholdNonCritical", None),
+        "UpperCritical": object.get("UpperThresholdCritical", None),
+        "UpperFatal": object.get("UpperThresholdFatal", None),
+        "PhysicalContext": object.get("PhysicalContext", None),
     }
 
-    readings.append( reading )
+    readings.append(reading)
 
-def get_analog_status_small( name, field, units, object, readings ):
+
+def get_analog_status_small(name, field, units, object, readings):
     """
     Builds an analog reading without thresholds based on a single field
 
@@ -318,7 +432,7 @@ def get_analog_status_small( name, field, units, object, readings ):
         return
 
     reading = {
-        "Name": "{} {}".format( name, field ),
+        "Name": "{} {}".format(name, field),
         "Reading": object[field],
         "Units": units,
         "State": None,
@@ -332,9 +446,10 @@ def get_analog_status_small( name, field, units, object, readings ):
         "PhysicalContext": None,
     }
 
-    readings.append( reading )
+    readings.append(reading)
 
-def get_excerpt_status( name, field, units, object, readings ):
+
+def get_excerpt_status(name, field, units, object, readings):
     """
     Builds an analog reading based on an excerpt
 
@@ -349,12 +464,12 @@ def get_excerpt_status( name, field, units, object, readings ):
     if field not in object:
         return
 
-    if isinstance( object[field], list ):
-        for i, item in enumerate( object[field] ):
+    if isinstance(object[field], list):
+        for i, item in enumerate(object[field]):
             if "DataSourceUri" not in item:
                 reading = {
-                    "Name": "{} {} {}".format( name, field, i ),
-                    "Reading": item.get( "Reading", None ),
+                    "Name": "{} {} {}".format(name, field, i),
+                    "Reading": item.get("Reading", None),
                     "Units": units,
                     "State": None,
                     "Health": None,
@@ -366,12 +481,12 @@ def get_excerpt_status( name, field, units, object, readings ):
                     "UpperFatal": None,
                     "PhysicalContext": None,
                 }
-                readings.append( reading )
+                readings.append(reading)
     else:
         if "DataSourceUri" not in object[field]:
             reading = {
-                "Name": "{} {}".format( name, field ),
-                "Reading": object[field].get( "Reading", None ),
+                "Name": "{} {}".format(name, field),
+                "Reading": object[field].get("Reading", None),
                 "Units": units,
                 "State": None,
                 "Health": None,
@@ -383,9 +498,10 @@ def get_excerpt_status( name, field, units, object, readings ):
                 "UpperFatal": None,
                 "PhysicalContext": None,
             }
-            readings.append( reading )
+            readings.append(reading)
 
-def get_sensor_status( sensor, readings , use_id = False ):
+
+def get_sensor_status(sensor, readings, use_id=False):
     """
     Builds an analog reading from a sensor
 
@@ -395,13 +511,13 @@ def get_sensor_status( sensor, readings , use_id = False ):
         use_id: Indicates whether to construct names from 'Id' property values
     """
 
-    state, health = get_status( sensor )
-    units = sensor.get( "ReadingUnits", None )
-    reading_val = sensor.get( "Reading", None )
+    state, health = get_status(sensor)
+    units = sensor.get("ReadingUnits", None)
+    reading_val = sensor.get("Reading", None)
     if reading_val is None:
         reading_val = state
 
-    sensor_name = sensor.get( "Name", None )
+    sensor_name = sensor.get("Name", None)
     name = "Sensor " + sensor["Id"]
     if use_id is False and name is not None:
         name = sensor_name
@@ -412,18 +528,19 @@ def get_sensor_status( sensor, readings , use_id = False ):
         "Units": units,
         "State": state,
         "Health": health,
-        "LowerFatal": sensor.get( "Thresholds", {} ).get( "LowerFatal", {} ).get( "Reading", None ),
-        "LowerCritical": sensor.get( "Thresholds", {} ).get( "LowerCritical", {} ).get( "Reading", None ),
-        "LowerCaution": sensor.get( "Thresholds", {} ).get( "LowerCaution", {} ).get( "Reading", None ),
-        "UpperCaution": sensor.get( "Thresholds", {} ).get( "UpperCaution", {} ).get( "Reading", None ),
-        "UpperCritical": sensor.get( "Thresholds", {} ).get( "UpperCritical", {} ).get( "Reading", None ),
-        "UpperFatal": sensor.get( "Thresholds", {} ).get( "UpperFatal", {} ).get( "Reading", None ),
-        "PhysicalContext": sensor.get( "PhysicalContext", None),
+        "LowerFatal": sensor.get("Thresholds", {}).get("LowerFatal", {}).get("Reading", None),
+        "LowerCritical": sensor.get("Thresholds", {}).get("LowerCritical", {}).get("Reading", None),
+        "LowerCaution": sensor.get("Thresholds", {}).get("LowerCaution", {}).get("Reading", None),
+        "UpperCaution": sensor.get("Thresholds", {}).get("UpperCaution", {}).get("Reading", None),
+        "UpperCritical": sensor.get("Thresholds", {}).get("UpperCritical", {}).get("Reading", None),
+        "UpperFatal": sensor.get("Thresholds", {}).get("UpperFatal", {}).get("Reading", None),
+        "PhysicalContext": sensor.get("PhysicalContext", None),
     }
 
-    readings.append( reading )
+    readings.append(reading)
 
-def get_status( object ):
+
+def get_status(object):
     """
     Gets the lower status information
 
@@ -439,12 +556,13 @@ def get_status( object ):
     health = None
 
     if "Status" in object:
-        state = object["Status"].get( "State", None )
-        health = object["Status"].get( "Health", None )
+        state = object["Status"].get("State", None)
+        health = object["Status"].get("Health", None)
 
     return state, health
 
-def print_sensors( sensor_list ):
+
+def print_sensors(sensor_list):
     """
     Prints the sensor list into a table
 
@@ -457,8 +575,12 @@ def print_sensors( sensor_list ):
     # Go through each chassis object in the list
     for chassis in sensor_list:
 
-        print( "Chassis '" + chassis["ChassisName"] + "' Status" )
-        print( sensor_line_format.format( "Sensor", "Reading", "Health", "LF", "LC", "LNC", "UNC", "UC", "UF", "PhysicalContext" ) )
+        print("Chassis '" + chassis["ChassisName"] + "' Status")
+        print(
+            sensor_line_format.format(
+                "Sensor", "Reading", "Health", "LF", "LC", "LNC", "UNC", "UC", "UF", "PhysicalContext"
+            )
+        )
 
         # Go through each reading in the chassis
         for reading in chassis["Readings"]:
@@ -472,7 +594,7 @@ def print_sensors( sensor_list ):
                     if reading["Reading"] is None:
                         reading_pr["Reading"] = "Unknown"
                     else:
-                        reading_pr["Reading"] = str( reading["Reading"] )
+                        reading_pr["Reading"] = str(reading["Reading"])
                         if reading["Units"] is not None:
                             reading_pr["Reading"] = reading_pr["Reading"] + reading["Units"]
                     reading_pr["Reading"] = reading_pr["Reading"][:10]
@@ -483,10 +605,21 @@ def print_sensors( sensor_list ):
                     if reading[item] is None:
                         reading_pr[item] = "N/A"
                     else:
-                        reading_pr[item] = str( reading[item] )
+                        reading_pr[item] = str(reading[item])
 
             # Print it
-            print( sensor_line_format.format( reading_pr["Name"], reading_pr["Reading"], reading_pr["Health"],
-                reading_pr["LowerFatal"], reading_pr["LowerCritical"], reading_pr["LowerCaution"],
-                reading_pr["UpperCaution"], reading_pr["UpperCritical"], reading_pr["UpperFatal"], reading_pr["PhysicalContext"] ) )
-        print( "" )
+            print(
+                sensor_line_format.format(
+                    reading_pr["Name"],
+                    reading_pr["Reading"],
+                    reading_pr["Health"],
+                    reading_pr["LowerFatal"],
+                    reading_pr["LowerCritical"],
+                    reading_pr["LowerCaution"],
+                    reading_pr["UpperCaution"],
+                    reading_pr["UpperCritical"],
+                    reading_pr["UpperFatal"],
+                    reading_pr["PhysicalContext"],
+                )
+            )
+        print("")

@@ -14,25 +14,32 @@ Brief : This file contains the definitions and functionalities for managing
 
 from .messages import verify_response
 
-class RedfishAccountCollectionNotFoundError( Exception ):
+
+class RedfishAccountCollectionNotFoundError(Exception):
     """
     Raised when the Account Service or Account Collection cannot be found
     """
+
     pass
 
-class RedfishAccountNotFoundError( Exception ):
+
+class RedfishAccountNotFoundError(Exception):
     """
     Raised when the Account Service or Account Collection cannot be found
     """
+
     pass
 
-class RedfishAccountNotAddedError( Exception ):
+
+class RedfishAccountNotAddedError(Exception):
     """
     Raised when the requested account was not added
     """
+
     pass
 
-def get_users( context ):
+
+def get_users(context):
     """
     Collects user information from a Redfish service
 
@@ -46,25 +53,26 @@ def get_users( context ):
     user_list = []
 
     # Go through each Account in the Account Collection
-    account_col = context.get( get_account_collection( context ), None )
+    account_col = context.get(get_account_collection(context), None)
     for account_member in account_col.dict["Members"]:
-        account = context.get( account_member["@odata.id"], None )
+        account = context.get(account_member["@odata.id"], None)
         account_info = {
             "UserName": account.dict["UserName"],
             "RoleId": account.dict["RoleId"],
-            "Locked": account.dict.get( "Locked", False ),
-            "Enabled": account.dict.get( "Enabled", True )
+            "Locked": account.dict.get("Locked", False),
+            "Enabled": account.dict.get("Enabled", True),
         }
 
         # Some implementations always expose "slots" for users; ignore empty slots
         if account_info["UserName"] == "" and account_info["Enabled"] is False:
             continue
 
-        user_list.append( account_info )
+        user_list.append(account_info)
 
     return user_list
 
-def print_users( user_list ):
+
+def print_users(user_list):
     """
     Prints the user list into a table
 
@@ -73,13 +81,14 @@ def print_users( user_list ):
     """
 
     user_line_format = "  {:20s} | {:20s} | {:10s} | {:10s}"
-    print( "" )
-    print( user_line_format.format( "Name", "Role", "Locked", "Enabled" ) )
+    print("")
+    print(user_line_format.format("Name", "Role", "Locked", "Enabled"))
     for user in user_list:
-        print( user_line_format.format( user["UserName"], user["RoleId"], str( user["Locked"] ), str( user["Enabled"] ) ) )
-    print( "" )
+        print(user_line_format.format(user["UserName"], user["RoleId"], str(user["Locked"]), str(user["Enabled"])))
+    print("")
 
-def add_user( context, user_name, password, role ):
+
+def add_user(context, user_name, password, role):
     """
     Adds a new user account
 
@@ -94,33 +103,36 @@ def add_user( context, user_name, password, role ):
     """
 
     # Create the new user
-    payload = {
-        "UserName": user_name,
-        "Password": password,
-        "RoleId": role
-    }
-    account_col_uri = get_account_collection( context )
-    response = context.post( account_col_uri, body = payload )
+    payload = {"UserName": user_name, "Password": password, "RoleId": role}
+    account_col_uri = get_account_collection(context)
+    response = context.post(account_col_uri, body=payload)
     if response.status == 405:
         # Some implementations allocate slots for users and don't allow adding in the proper sense
         # Find an empty slot to use
         account_added = False
-        account_col = context.get( account_col_uri )
+        account_col = context.get(account_col_uri)
         for account_member in account_col.dict["Members"]:
-            account = context.get( account_member["@odata.id"] )
-            if account.dict["UserName"] == "" and not account.dict.get( "Enabled", True ):
+            account = context.get(account_member["@odata.id"])
+            if account.dict["UserName"] == "" and not account.dict.get("Enabled", True):
                 # Empty slot found; PATCH it
-                response = context.patch( account_member["@odata.id"], body = payload, headers = { "If-Match": account.getheader( "ETag" ) } )
+                response = context.patch(
+                    account_member["@odata.id"], body=payload, headers={"If-Match": account.getheader("ETag")}
+                )
                 if response.status < 400:
                     # These implementations also might restrict which slots to modify...
                     account_added = True
                     break
         if not account_added:
-            raise RedfishAccountNotAddedError( "Failed to add user '{}'; user may already exist or there is not enough space for the new user".format( user_name ) )
-    verify_response( response )
+            raise RedfishAccountNotAddedError(
+                "Failed to add user '{}'; user may already exist or there is not enough space for the new user".format(
+                    user_name
+                )
+            )
+    verify_response(response)
     return response
 
-def delete_user( context, user_name ):
+
+def delete_user(context, user_name):
     """
     Deletes an existing user account
 
@@ -133,19 +145,29 @@ def delete_user( context, user_name ):
     """
 
     # Find the user to delete
-    user_uri, user_info = get_user( context, user_name )
+    user_uri, user_info = get_user(context, user_name)
 
     # Delete the user
-    response = context.delete( user_uri )
+    response = context.delete(user_uri)
     if response.status == 405:
         # Some implementations keep slots around and don't allow for deleting in the proper sense
         # Some also do not allow for both Enabled and UserName to be modified simultaneously
-        modify_user( context, user_name, new_enabled = False )
-        return modify_user( context, user_name, new_name = "" )
-    verify_response( response )
+        modify_user(context, user_name, new_enabled=False)
+        return modify_user(context, user_name, new_name="")
+    verify_response(response)
     return response
 
-def modify_user( context, user_name, new_name = None, new_password = None, new_role = None, new_locked = None, new_enabled = None, user_uri = None ):
+
+def modify_user(
+    context,
+    user_name,
+    new_name=None,
+    new_password=None,
+    new_role=None,
+    new_locked=None,
+    new_enabled=None,
+    user_uri=None,
+):
     """
     Modifies an existing user account
 
@@ -164,7 +186,7 @@ def modify_user( context, user_name, new_name = None, new_password = None, new_r
     """
 
     # Get the current user info
-    user_uri, user_info = get_user( context, user_name , user_uri = user_uri )
+    user_uri, user_info = get_user(context, user_name, user_uri=user_uri)
 
     # Build the payload for the new user
     new_info = {}
@@ -180,11 +202,12 @@ def modify_user( context, user_name, new_name = None, new_password = None, new_r
         new_info["Enabled"] = new_enabled
 
     # Update the user
-    response = context.patch( user_uri, body = new_info, headers = { "If-Match": user_info.getheader( "ETag" ) } )
-    verify_response( response )
+    response = context.patch(user_uri, body=new_info, headers={"If-Match": user_info.getheader("ETag")})
+    verify_response(response)
     return response
 
-def get_account_collection( context ):
+
+def get_account_collection(context):
     """
     Finds the account collection for the Redfish service
 
@@ -196,20 +219,21 @@ def get_account_collection( context ):
     """
 
     # Get the Service Root to find the Account Service
-    service_root = context.get( "/redfish/v1" )
+    service_root = context.get("/redfish/v1")
     if "AccountService" not in service_root.dict:
         # No Account Service
-        raise RedfishAccountCollectionNotFoundError( "Service does not contain an Account Service" )
+        raise RedfishAccountCollectionNotFoundError("Service does not contain an Account Service")
 
     # Get the Account Service to find the Account Collection
-    account_service = context.get( service_root.dict["AccountService"]["@odata.id"] )
+    account_service = context.get(service_root.dict["AccountService"]["@odata.id"])
     if "Accounts" not in account_service.dict:
         # No Account Collection
-        raise RedfishAccountCollectionNotFoundError( "Service does not contain an Account Collection" )
+        raise RedfishAccountCollectionNotFoundError("Service does not contain an Account Collection")
 
     return account_service.dict["Accounts"]["@odata.id"]
 
-def get_user( context, user_name, user_uri = None ):
+
+def get_user(context, user_name, user_uri=None):
     """
     Finds a user within the Redfish service
 
@@ -226,24 +250,26 @@ def get_user( context, user_name, user_uri = None ):
     avail_users = []
 
     if user_uri is not None:
-        account = context.get( user_uri )
+        account = context.get(user_uri)
         if account.dict["UserName"] == user_name:
             return user_uri, account
 
-    account_col = context.get( get_account_collection( context ) )
-            
+    account_col = context.get(get_account_collection(context))
+
     for account_member in account_col.dict["Members"]:
-        account = context.get( account_member["@odata.id"] )
+        account = context.get(account_member["@odata.id"])
 
         # Some implementations always expose "slots" for users; ignore empty slots
-        if account.dict["UserName"] == "" and not account.dict.get( "Enabled", True ):
+        if account.dict["UserName"] == "" and not account.dict.get("Enabled", True):
             continue
 
-        avail_users.append( account.dict["UserName"] )
+        avail_users.append(account.dict["UserName"])
 
         # Check if the name matches
         if account.dict["UserName"] == user_name:
             return account_member["@odata.id"], account
 
     # No matches found
-    raise RedfishAccountCollectionNotFoundError( "User '{}' is not found; valid users: {}".format( user_name, ", ".join( avail_users ) ) )
+    raise RedfishAccountCollectionNotFoundError(
+        "User '{}' is not found; valid users: {}".format(user_name, ", ".join(avail_users))
+    )

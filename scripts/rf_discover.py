@@ -17,16 +17,16 @@ import redfish
 import sys
 
 # No arguments, but having help text is useful
-argget = argparse.ArgumentParser( description = "A tool to discover Redfish services" )
+argget = argparse.ArgumentParser(description="A tool to discover Redfish services")
 args = argget.parse_args()
 
 # Invoke the discovery routine for SSDP and print the responses
 services = redfish.discover_ssdp()
-if len( services ) == 0:
-    print( "No Redfish services discovered" )
-    sys.exit( 1 )
+if len(services) == 0:
+    print("No Redfish services discovered")
+    sys.exit(1)
 else:
-    print( "Redfish services:" )
+    print("Redfish services:")
 
 # Go through each discovered service and print out basic info
 for service in services:
@@ -35,11 +35,11 @@ for service in services:
     # If not, just print the UUID and service root pointer
     try:
         # Need to strip off /redfish/v1 from the SSDP response to use the URL with the library
-        groups = re.search( r"^(.+)\/redfish\/v1\/?$", services[service] )
-        url = groups.group( 1 )
-        redfish_obj = redfish.redfish_client( base_url = url, timeout = 15, max_retry = 3 )
-        print( "{}: {} ({})".format( service, services[service], redfish_obj.root["Product"] ) )
+        groups = re.search(r"^(.+)\/redfish\/v1\/?$", services[service])
+        url = groups.group(1)
+        redfish_obj = redfish.redfish_client(base_url=url, timeout=15, max_retry=3)
+        print("{}: {} ({})".format(service, services[service], redfish_obj.root["Product"]))
     except Exception:
-        print( "{}: {}".format( service, services[service] ) )
+        print("{}: {}".format(service, services[service]))
 
-sys.exit( 0 )
+sys.exit(0)

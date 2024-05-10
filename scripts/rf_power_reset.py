@@ -21,60 +21,66 @@ import sys
 from redfish.messages import RedfishPasswordChangeRequiredError
 
 # Get the input arguments
-argget = argparse.ArgumentParser( description = "A tool to perform a power/reset operation of a system" )
-argget.add_argument( "--user", "-u", type = str, required = True, help = "The user name for authentication" )
-argget.add_argument( "--password", "-p",  type = str, required = True, help = "The password for authentication" )
-argget.add_argument( "--rhost", "-r", type = str, required = True, help = "The address of the Redfish service (with scheme)" )
-argget.add_argument( "--system", "-s", type = str, help = "The ID of the system to reset" )
-argget.add_argument( "--type", "-t", type = str, help = "The type of power/reset operation to perform", choices = redfish_utilities.reset_types )
-argget.add_argument( "--info", "-info", action = "store_true", help = "Indicates if reset and power information should be reported" )
-argget.add_argument( "--debug", action = "store_true", help = "Creates debug file showing HTTP traces and exceptions" )
+argget = argparse.ArgumentParser(description="A tool to perform a power/reset operation of a system")
+argget.add_argument("--user", "-u", type=str, required=True, help="The user name for authentication")
+argget.add_argument("--password", "-p", type=str, required=True, help="The password for authentication")
+argget.add_argument("--rhost", "-r", type=str, required=True, help="The address of the Redfish service (with scheme)")
+argget.add_argument("--system", "-s", type=str, help="The ID of the system to reset")
+argget.add_argument(
+    "--type", "-t", type=str, help="The type of power/reset operation to perform", choices=redfish_utilities.reset_types
+)
+argget.add_argument(
+    "--info", "-info", action="store_true", help="Indicates if reset and power information should be reported"
+)
+argget.add_argument("--debug", action="store_true", help="Creates debug file showing HTTP traces and exceptions")
 args = argget.parse_args()
 
 if args.debug:
-    log_file = "rf_power_reset-{}.log".format( datetime.datetime.now().strftime( "%Y-%m-%d-%H%M%S" ) )
+    log_file = "rf_power_reset-{}.log".format(datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S"))
     log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    logger = redfish.redfish_logger( log_file, log_format, logging.DEBUG )
-    logger.info( "rf_power_reset Trace" )
+    logger = redfish.redfish_logger(log_file, log_format, logging.DEBUG)
+    logger.info("rf_power_reset Trace")
 
 # Set up the Redfish object
 redfish_obj = None
 try:
-    redfish_obj = redfish.redfish_client( base_url = args.rhost, username = args.user, password = args.password, timeout = 15, max_retry = 3 )
-    redfish_obj.login( auth = "session" )
+    redfish_obj = redfish.redfish_client(
+        base_url=args.rhost, username=args.user, password=args.password, timeout=15, max_retry=3
+    )
+    redfish_obj.login(auth="session")
 except RedfishPasswordChangeRequiredError:
-    redfish_utilities.print_password_change_required_and_logout( redfish_obj, args )
-    sys.exit( 1 )
+    redfish_utilities.print_password_change_required_and_logout(redfish_obj, args)
+    sys.exit(1)
 except Exception:
     raise
 
 exit_code = 0
 try:
     if args.info:
-        system_info = redfish_utilities.get_system( redfish_obj, args.system )
-        reset_uri, reset_parameters = redfish_utilities.get_system_reset_info( redfish_obj, args.system, system_info )
+        system_info = redfish_utilities.get_system(redfish_obj, args.system)
+        reset_uri, reset_parameters = redfish_utilities.get_system_reset_info(redfish_obj, args.system, system_info)
         printed_reset_types = False
         for param in reset_parameters:
             if param["Name"] == "ResetType" and "AllowableValues" in param:
-                print( "Supported reset types: {}".format( ", ".join( param["AllowableValues"] ) ) )
+                print("Supported reset types: {}".format(", ".join(param["AllowableValues"])))
                 printed_reset_types = True
         if not printed_reset_types:
-            print( "No reset information found" )
+            print("No reset information found")
         if "PowerState" in system_info.dict:
-            print( "Current power state: {}".format( system_info.dict["PowerState"] ) )
+            print("Current power state: {}".format(system_info.dict["PowerState"]))
         else:
-            print( "No power state information found" )
+            print("No power state information found")
     else:
-        print( "Resetting the system..." )
-        response = redfish_utilities.system_reset( redfish_obj, args.system, args.type )
-        response = redfish_utilities.poll_task_monitor( redfish_obj, response )
-        redfish_utilities.verify_response( response )
+        print("Resetting the system...")
+        response = redfish_utilities.system_reset(redfish_obj, args.system, args.type)
+        response = redfish_utilities.poll_task_monitor(redfish_obj, response)
+        redfish_utilities.verify_response(response)
 except Exception as e:
     if args.debug:
-        logger.error( "Caught exception:\n\n{}\n".format( traceback.format_exc() ) )
+        logger.error("Caught exception:\n\n{}\n".format(traceback.format_exc()))
     exit_code = 1
-    print( e )
+    print(e)
 finally:
     # Log out
-    redfish_utilities.logout( redfish_obj )
-sys.exit( exit_code )
+    redfish_utilities.logout(redfish_obj)
+sys.exit(exit_code)

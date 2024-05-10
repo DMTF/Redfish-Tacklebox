@@ -8,9 +8,11 @@ from setuptools import Command as _Command
 from codecs import open
 import os
 
+
 class Pyinstaller(_Command):
-    description: 'Pyinstaller'
+    description: "Pyinstaller"
     user_options = []
+
     def __init__(self, dist, **kw):
         super().__init__(dist, **kw)
         self.flags = ""
@@ -20,6 +22,7 @@ class Pyinstaller(_Command):
             os.mkdir("dist")
         if not os.path.exists("./spec"):
             os.mkdir("spec")
+
     def initialize_options(self):
         self.flags = ""
         self.scripts = []
@@ -30,36 +33,38 @@ class Pyinstaller(_Command):
         self.scripts = self.distribution.scripts
         self.packages = self.distribution.packages
         for package in self.packages:
-            self.flags = "{} --collect-all {}".format(self.flags,package)
+            self.flags = "{} --collect-all {}".format(self.flags, package)
 
     def pyinstaller(self, target):
         if os.system("pyinstaller --onefile {} {}".format(target, self.flags)):
             raise Exception("PyInstaller failed!")
+
     def run(self):
         for scripts in self.scripts:
             self.pyinstaller(scripts)
 
-with open( "README.md", "r", "utf-8" ) as f:
+
+with open("README.md", "r", "utf-8") as f:
     long_description = f.read()
 
 setup(
-    name = "redfish_utilities",
-    version = "3.2.8",
-    description = "Redfish Utilities",
-    long_description = long_description,
-    long_description_content_type = "text/markdown",
-    author = "DMTF, https://www.dmtf.org/standards/feedback",
-    license = "BSD 3-clause \"New\" or \"Revised License\"",
-    classifiers = [
+    name="redfish_utilities",
+    version="3.2.8",
+    description="Redfish Utilities",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    author="DMTF, https://www.dmtf.org/standards/feedback",
+    license='BSD 3-clause "New" or "Revised License"',
+    classifiers=[
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: BSD License",
         "Programming Language :: Python :: 3",
-        "Topic :: Communications"
+        "Topic :: Communications",
     ],
-    keywords = "Redfish",
-    url = "https://github.com/DMTF/Redfish-Tacklebox",
-    packages = [ "redfish_utilities" ],
-    scripts = [
+    keywords="Redfish",
+    url="https://github.com/DMTF/Redfish-Tacklebox",
+    packages=["redfish_utilities"],
+    scripts=[
         "scripts/rf_accounts.py",
         "scripts/rf_assembly.py",
         "scripts/rf_bios_settings.py",
@@ -78,10 +83,8 @@ setup(
         "scripts/rf_sys_inventory.py",
         "scripts/rf_test_event_listener.py",
         "scripts/rf_update.py",
-        "scripts/rf_virtual_media.py"
+        "scripts/rf_virtual_media.py",
     ],
-    install_requires = [ "redfish>=3.2.1", "XlsxWriter>=1.2.7", "requests" ],
-    cmdclass={
-        'pyinstaller': Pyinstaller
-    }
+    install_requires=["redfish>=3.2.1", "XlsxWriter>=1.2.7", "requests"],
+    cmdclass={"pyinstaller": Pyinstaller},
 )
