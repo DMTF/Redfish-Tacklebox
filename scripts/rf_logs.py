@@ -18,6 +18,7 @@ import redfish
 import redfish_utilities
 import traceback
 import sys
+from signal import signal, SIGPIPE, SIG_DFL
 from redfish.messages import RedfishPasswordChangeRequiredError
 
 # Get the input arguments
@@ -87,6 +88,7 @@ try:
     else:
         # Print log was requested
         log_entries = redfish_utilities.get_log_entries(redfish_obj, container_type, container_id, args.log)
+        signal(SIGPIPE, SIG_DFL)
         redfish_utilities.print_log_entries(log_entries, args.details)
 except Exception as e:
     if args.debug:
