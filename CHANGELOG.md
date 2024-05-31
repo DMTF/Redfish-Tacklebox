@@ -3,6 +3,9 @@
 ## [3.2.9] - 2024-05-31
 - Added protection from BrokenPipeError exceptions when piping rf_logs.py output
 
+## [3.2.9] - 2024-05-31
+- Added protection from BrokenPipeError exceptions when piping rf_logs.py output
+
 ## [3.2.8] - 2024-04-10
 - Added missing check for presence of 'Sensors' when deciding which model to follow for collecting sensor info
 
