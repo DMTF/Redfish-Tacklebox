@@ -53,7 +53,7 @@ jobs:
         echo 'EOF' >> $GITHUB_ENV
     - name: Update version numbers
       run: |
-        sed -i -E 's/    version = .+,/    version = "'${{github.event.inputs.version}}'",/' setup.py
+        sed -i -E 's/    version=.+,/    version="'${{github.event.inputs.version}}'",/' setup.py
     - name: Update the changelog
       run: |
         ex CHANGELOG.md <<eof
