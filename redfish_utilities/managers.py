@@ -187,7 +187,7 @@ def print_manager(manager):
         if property in manager.dict:
             prop_val = manager.dict[property]
             if isinstance(prop_val, list):
-                prop_val = ", ".join(prop_val)
+                prop_val = ", ".join([i for i in prop_val if i is not None])
             elif property == "Status":
                 prop_val = "State: {}, Health: {}".format(prop_val.get("State", "N/A"), prop_val.get("Health", "N/A"))
             print(manager_line_format.format(property, prop_val))
@@ -514,11 +514,7 @@ def print_manager_network_protocol(network_protocol):
             if property == "NTP":
                 # For NTP, extract the servers; need to skip "empty" slots potentially
                 if "NTPServers" in network_protocol.dict[property]:
-                    other_str = []
-                    for server in network_protocol.dict[property]["NTPServers"]:
-                        if isinstance(server, str):
-                            other_str.append(server)
-                    other_str = "NTP Servers: " + ", ".join(other_str)
+                    other_str = "NTP Servers: " + ", ".join([i for i in network_protocol.dict[property]["NTPServers"] if i is not None])
             print(
                 network_protocol_line_format.format(
                     property,
@@ -690,7 +686,7 @@ def print_manager_ethernet_interface(interface):
         if property in interface.dict:
             prop_val = interface.dict[property]
             if isinstance(prop_val, list):
-                prop_val = ", ".join(prop_val)
+                prop_val = ", ".join([i for i in prop_val if i is not None])
             elif property == "Status":
                 prop_val = "State: {}, Health: {}".format(prop_val.get("State", "N/A"), prop_val.get("Health", "N/A"))
             print(interface_line_format.format(property, prop_val))

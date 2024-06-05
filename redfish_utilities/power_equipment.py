@@ -403,7 +403,7 @@ def print_power_equipment(power_equipment):
         if property in power_equipment["Info"].dict:
             prop_val = power_equipment["Info"].dict[property]
             if isinstance(prop_val, list):
-                prop_val = ", ".join(prop_val)
+                prop_val = ", ".join([i for i in prop_val if i is not None])
             elif property == "Status":
                 prop_val = "State: {}, Health: {}".format(prop_val.get("State", "N/A"), prop_val.get("Health", "N/A"))
             print(power_equipment_line_format.format(property, prop_val))
@@ -534,7 +534,7 @@ def print_power_equipment_electrical(electrical):
         if property in electrical.dict:
             prop_val = electrical.dict[property]
             if isinstance(prop_val, list):
-                prop_val = ", ".join(prop_val)
+                prop_val = ", ".join([i for i in prop_val if i is not None])
             elif property == "PhaseWiringType":
                 prop_val = str(phase_wiring_type_strings.get(prop_val, prop_val))
             elif property == "NominalVoltage":
