@@ -514,7 +514,9 @@ def print_manager_network_protocol(network_protocol):
             if property == "NTP":
                 # For NTP, extract the servers; need to skip "empty" slots potentially
                 if "NTPServers" in network_protocol.dict[property]:
-                    other_str = "NTP Servers: " + ", ".join([i for i in network_protocol.dict[property]["NTPServers"] if i is not None])
+                    other_str = "NTP Servers: " + ", ".join(
+                        [i for i in network_protocol.dict[property]["NTPServers"] if i is not None]
+                    )
             print(
                 network_protocol_line_format.format(
                     property,
