@@ -476,7 +476,7 @@ def print_virtual_media(virtual_media_list):
             if property in virtual_media:
                 prop_val = virtual_media[property]
                 if isinstance(prop_val, list):
-                    prop_val = ", ".join(prop_val)
+                    prop_val = ", ".join([i for i in prop_val if i is not None])
                 print(virtual_media_line_format.format("", property, prop_val))
         print("")
 
