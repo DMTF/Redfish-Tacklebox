@@ -12,8 +12,6 @@ Brief : This file contains the definitions and functionalities for interacting
         with the log service for a given Redfish service
 """
 
-import shutil
-
 from .messages import verify_response
 from enum import Enum
 
@@ -113,8 +111,6 @@ def print_log_entries(log_entries, details=False):
     """
 
     # Set up templates
-    console_size = shutil.get_terminal_size(fallback=(80, 24))
-    message_size = console_size.columns - 38
     entry_line_format = "  {:5s} | {:25s} | {}"
     detail_line_format = "  {:33s} | {}: {}"
     detail_list = [
@@ -144,7 +140,7 @@ def print_log_entries(log_entries, details=False):
             entry_line_format.format(
                 entry["Id"],
                 entry.get(timestamp_property, "Unknown"),
-                entry["Message"].replace("\n", "; ")[:message_size],
+                entry["Message"].replace("\n", "; "),
             )
         )
         if details:
