@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.3.1] - 2024-06-07
+- Fixed change that was added for protecting from BrokenPipeError exceptions to not crash on Windows
+
 ## [3.3.0] - 2024-06-07
 - Added handling for printing array properties with 'null' entries where allowed
 - Removed truncation of log messages to fit the console screen in 'rf_logs.py'
