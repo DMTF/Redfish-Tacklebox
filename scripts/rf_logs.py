@@ -90,7 +90,7 @@ try:
         try:
             from signal import signal, SIGPIPE, SIG_DFL
             signal(SIGPIPE, SIG_DFL)
-        except:
+        except Exception:
             # Windows does not support SIGPIPE; no need to modify the handling
             pass
         redfish_utilities.print_log_entries(log_entries, args.details)
