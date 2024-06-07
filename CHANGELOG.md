@@ -1,5 +1,9 @@
 # Change Log
 
+## [3.3.0] - 2024-06-07
+- Added handling for printing array properties with 'null' entries where allowed
+- Removed truncation of log messages to fit the console screen in 'rf_logs.py'
+
 ## [3.2.9] - 2024-05-31
 - Added protection from BrokenPipeError exceptions when piping rf_logs.py output
 
