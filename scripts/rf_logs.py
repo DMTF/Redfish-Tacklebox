@@ -89,6 +89,7 @@ try:
         log_entries = redfish_utilities.get_log_entries(redfish_obj, container_type, container_id, args.log)
         try:
             from signal import signal, SIGPIPE, SIG_DFL
+
             signal(SIGPIPE, SIG_DFL)
         except Exception:
             # Windows does not support SIGPIPE; no need to modify the handling

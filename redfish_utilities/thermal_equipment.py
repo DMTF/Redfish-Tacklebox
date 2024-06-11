@@ -243,7 +243,10 @@ def get_thermal_equipment(
             avail_equipment = all_equipment[thermal_equipment_type.plural]
         raise RedfishThermalEquipmentNotFoundError(
             "The service does not contain any {} called {}; valid {}: {}".format(
-                thermal_equipment_type.plural, thermal_equipment_id, thermal_equipment_type.plural, ", ".join(avail_equipment)
+                thermal_equipment_type.plural,
+                thermal_equipment_id,
+                thermal_equipment_type.plural,
+                ", ".join(avail_equipment),
             )
         )
     verify_response(thermal_equipment["Info"])
@@ -251,13 +254,28 @@ def get_thermal_equipment(
     # Get each of the subordinate resources requested by the caller
     resource_grabber = [
         {"Property": "EnvironmentMetrics", "Parameter": get_metrics, "Collection": False, "SubResource": "Info"},
-        {"Property": "PrimaryCoolantConnectors", "Parameter": get_primary_connectors, "Collection": True, "SubResource": "Info"},
-        {"Property": "SecondaryCoolantConnectors", "Parameter": get_secondary_connectors, "Collection": True, "SubResource": "Info"},
+        {
+            "Property": "PrimaryCoolantConnectors",
+            "Parameter": get_primary_connectors,
+            "Collection": True,
+            "SubResource": "Info",
+        },
+        {
+            "Property": "SecondaryCoolantConnectors",
+            "Parameter": get_secondary_connectors,
+            "Collection": True,
+            "SubResource": "Info",
+        },
         {"Property": "Pumps", "Parameter": get_pumps, "Collection": True, "SubResource": "Info"},
         {"Property": "Filters", "Parameter": get_filters, "Collection": True, "SubResource": "Info"},
         {"Property": "Reservoirs", "Parameter": get_reservoirs, "Collection": True, "SubResource": "Info"},
         {"Property": "LeakDetection", "Parameter": get_leak_detection, "Collection": False, "SubResource": "Info"},
-        {"Property": "LeakDetectors", "Parameter": get_leak_detectors, "Collection": True, "SubResource": "LeakDetection"},
+        {
+            "Property": "LeakDetectors",
+            "Parameter": get_leak_detectors,
+            "Collection": True,
+            "SubResource": "LeakDetection",
+        },
     ]
     for resource in resource_grabber:
         thermal_equipment[resource["Property"]] = None
@@ -269,7 +287,9 @@ def get_thermal_equipment(
                 )
                 for member_id in collection:
                     member = context.get(
-                        thermal_equipment[resource["SubResource"]].dict[resource["Property"]]["@odata.id"] + "/" + member_id
+                        thermal_equipment[resource["SubResource"]].dict[resource["Property"]]["@odata.id"]
+                        + "/"
+                        + member_id
                     )
                     verify_response(member)
                     thermal_equipment[resource["Property"]].append(member)
@@ -333,7 +353,9 @@ def print_thermal_equipment(thermal_equipment):
                 if thermal_equipment["EnvironmentMetrics"].dict[property[0]]["Reading"] is None:
                     prop_val = "Unavailable"
                 else:
-                    prop_val = str(thermal_equipment["EnvironmentMetrics"].dict[property[0]]["Reading"]) + " " + property[2]
+                    prop_val = (
+                        str(thermal_equipment["EnvironmentMetrics"].dict[property[0]]["Reading"]) + " " + property[2]
+                    )
                 print(thermal_equipment_line_format.format(property[1], prop_val))
     if thermal_equipment["LeakDetection"]:
         if "LeakDetectorGroups" in thermal_equipment["LeakDetection"].dict:
@@ -343,9 +365,12 @@ def print_thermal_equipment(thermal_equipment):
                     group_name = group["GroupName"]
                 prop_val = group.get("Status", {}).get("Health", "OK")
                 if "HumidityPercent" in group:
-                    prop_val = prop_val + ", Humidity: {} %".format(str(group.get("HumidityPercent", {}).get("Reading", "---")))
+                    prop_val = prop_val + ", Humidity: {} %".format(
+                        str(group.get("HumidityPercent", {}).get("Reading", "---"))
+                    )
                 print(thermal_equipment_line_format.format(group_name, prop_val))
     print("")
+
 
 def get_thermal_equipment_component(
     context, thermal_equipment_type, thermal_equipment_component_type, thermal_equipment_id=None, component_id=None
@@ -371,7 +396,9 @@ def get_thermal_equipment_component(
     if thermal_equipment_component_type.plural not in thermal_equipment["Info"].dict:
         raise RedfishThermalEquipmentComponentNotFoundError(
             "{} {} does not contain any {}".format(
-                thermal_equipment_type.plural, thermal_equipment["Info"].dict["Id"], thermal_equipment_component_type.plural
+                thermal_equipment_type.plural,
+                thermal_equipment["Info"].dict["Id"],
+                thermal_equipment_component_type.plural,
             )
         )
 
@@ -418,6 +445,7 @@ def get_thermal_equipment_component(
         )
     verify_response(component)
     return component
+
 
 def print_thermal_equipment_component(component):
     """
@@ -475,7 +503,9 @@ def print_thermal_equipment_component(component):
                 prop_val = prop_val = get_coolant_string(prop_val)
             elif property == "FluidLevelStatus":
                 if "FluidLevelPercent" in component.dict:
-                    prop_val = prop_val + " (" + str(component.dict.get("FluidLevelPercent", {}).get("Reading", "---")) + " %)"
+                    prop_val = (
+                        prop_val + " (" + str(component.dict.get("FluidLevelPercent", {}).get("Reading", "---")) + " %)"
+                    )
             else:
                 prop_val = str(prop_val)
             print(component_line_format.format(property, prop_val))
@@ -505,7 +535,7 @@ def print_thermal_equipment_component(component):
     ]
     for property in component_properties:
         compound_val = []
-        for measurement_point in [ "Supply", "Return", "Delta" ]:
+        for measurement_point in ["Supply", "Return", "Delta"]:
             prop_name = measurement_point + property[0] + property[1]
             if prop_name in component.dict:
                 if component.dict[prop_name]["Reading"] is None:
@@ -565,11 +595,7 @@ def print_thermal_equipment_component_summary(thermal_equipment, component_type,
             state = str(item.dict.get("Status", {}).get("State", "---"))
             health = str(item.dict.get("Status", {}).get("Health", "---"))
             speed = str(item.dict.get("PumpSpeedPercent", {}).get("Reading", "---"))
-            print(
-                component_line_format.format(
-                    item.dict["Id"], type, state, health, speed
-                )
-            )
+            print(component_line_format.format(item.dict["Id"], type, state, health, speed))
     elif component_type == thermal_equipment_component_types.FILTER:
         component_line_format = "  {:16s} | {:12s} | {:12s} | {:25s} | {:12s}"
         print(
@@ -586,11 +612,7 @@ def print_thermal_equipment_component_summary(thermal_equipment, component_type,
             health = str(item.dict.get("Status", {}).get("Health", "---"))
             serviced_date = str(item.dict.get("ServicedDate", "---"))
             service_hours = str(item.dict.get("ServiceHours", "---"))
-            print(
-                component_line_format.format(
-                    item.dict["Id"], state, health, serviced_date, service_hours
-                )
-            )
+            print(component_line_format.format(item.dict["Id"], state, health, serviced_date, service_hours))
     elif component_type == thermal_equipment_component_types.RESERVOIR:
         component_line_format = "  {:16s} | {:12s} | {:12s} | {:12s} | {:20s}"
         print(
@@ -608,12 +630,10 @@ def print_thermal_equipment_component_summary(thermal_equipment, component_type,
             health = str(item.dict.get("Status", {}).get("Health", "---"))
             fluid_status = str(item.dict.get("FluidLevelStatus", "---"))
             if "FluidLevelPercent" in item.dict:
-                fluid_status = fluid_status + " (" + str(item.dict.get("FluidLevelPercent", {}).get("Reading", "---")) + " %)"
-            print(
-                component_line_format.format(
-                    item.dict["Id"], type, state, health, fluid_status
+                fluid_status = (
+                    fluid_status + " (" + str(item.dict.get("FluidLevelPercent", {}).get("Reading", "---")) + " %)"
                 )
-            )
+            print(component_line_format.format(item.dict["Id"], type, state, health, fluid_status))
     else:
         component_line_format = "  {:16s} | {:12s} | {:12s} | {:14s} | {:12s} | {:14s}"
         print(
@@ -680,7 +700,8 @@ def print_thermal_equipment_leak_detector_summary(thermal_equipment, print_headi
             prop_val = group.get("Status", {}).get("Health", "OK")
             if "HumidityPercent" in group:
                 prop_val = prop_val + ", Humidity: {} %".format(
-                    str(group.get("HumidityPercent", {}).get("Reading", "---")))
+                    str(group.get("HumidityPercent", {}).get("Reading", "---"))
+                )
             print("{}: {}".format(group_name, prop_val))
             print(detector_line_format.format("Detector Id", "Name", "State"))
             if "Detectors" in group:
@@ -688,7 +709,11 @@ def print_thermal_equipment_leak_detector_summary(thermal_equipment, print_headi
                     detector_id = detector.get("DataSourceUri", "").split("/")[-1]
                     if "DataSourceUri" in detector:
                         grouped_detectors.append(detector["DataSourceUri"])
-                    print(detector_line_format.format(detector_id, detector.get("DeviceName", ""), detector.get("DetectorState", "N/A")))
+                    print(
+                        detector_line_format.format(
+                            detector_id, detector.get("DeviceName", ""), detector.get("DetectorState", "N/A")
+                        )
+                    )
             print("")
 
     # Find any detectors that do not belong to groups and print their info
@@ -701,7 +726,11 @@ def print_thermal_equipment_leak_detector_summary(thermal_equipment, print_headi
         print("Other Leak Detectors")
         print(detector_line_format.format("Detector Id", "Name", "State"))
         for detector in non_grouped_detectors:
-            print(detector_line_format.format(detector.dict["Id"], detector.dict["Name"], detector.dict.get("DetectorState", "N/A")))
+            print(
+                detector_line_format.format(
+                    detector.dict["Id"], detector.dict["Name"], detector.dict.get("DetectorState", "N/A")
+                )
+            )
         print("")
 
 

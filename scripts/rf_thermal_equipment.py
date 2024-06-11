@@ -50,7 +50,9 @@ primary_info_argget.add_argument(
     choices=redfish_utilities.thermal_equipment_types,
 )
 primary_info_argget.add_argument("--equipment", "-te", type=str, help="The identifier of the thermal equipment to get")
-primary_info_argget.add_argument("--primary", "-pr", type=str, help="The identifier of the primary coolant connector to get")
+primary_info_argget.add_argument(
+    "--primary", "-pr", type=str, help="The identifier of the primary coolant connector to get"
+)
 secondary_info_argget = subparsers.add_parser(
     "secondaryinfo", help="Displays the status of a secondary coolant connector for an instance of thermal equipment"
 )
@@ -62,8 +64,12 @@ secondary_info_argget.add_argument(
     help="The type of thermal equipment to get",
     choices=redfish_utilities.thermal_equipment_types,
 )
-secondary_info_argget.add_argument("--equipment", "-te", type=str, help="The identifier of the thermal equipment to get")
-secondary_info_argget.add_argument("--secondary", "-sec", type=str, help="The identifier of the secondary coolant connector to get")
+secondary_info_argget.add_argument(
+    "--equipment", "-te", type=str, help="The identifier of the thermal equipment to get"
+)
+secondary_info_argget.add_argument(
+    "--secondary", "-sec", type=str, help="The identifier of the secondary coolant connector to get"
+)
 pump_info_argget = subparsers.add_parser(
     "pumpinfo", help="Displays the status of a pump for an instance of thermal equipment"
 )
@@ -101,9 +107,13 @@ reservoir_info_argget.add_argument(
     help="The type of thermal equipment to get",
     choices=redfish_utilities.thermal_equipment_types,
 )
-reservoir_info_argget.add_argument("--equipment", "-te", type=str, help="The identifier of the thermal equipment to get")
+reservoir_info_argget.add_argument(
+    "--equipment", "-te", type=str, help="The identifier of the thermal equipment to get"
+)
 reservoir_info_argget.add_argument("--reservoir", "-res", type=str, help="The identifier of the reservoir to get")
-leak_detectors_argget = subparsers.add_parser("leakdetectors", help="Displays the leak detector summary of an instance of thermal equipment")
+leak_detectors_argget = subparsers.add_parser(
+    "leakdetectors", help="Displays the leak detector summary of an instance of thermal equipment"
+)
 leak_detectors_argget.add_argument(
     "--type",
     "-t",
@@ -112,7 +122,9 @@ leak_detectors_argget.add_argument(
     help="The type of thermal equipment to get",
     choices=redfish_utilities.thermal_equipment_types,
 )
-leak_detectors_argget.add_argument("--equipment", "-te", type=str, help="The identifier of the thermal equipment to get")
+leak_detectors_argget.add_argument(
+    "--equipment", "-te", type=str, help="The identifier of the thermal equipment to get"
+)
 args = argget.parse_args()
 
 if args.debug:
@@ -161,12 +173,20 @@ try:
             redfish_utilities.print_thermal_equipment_component_summary(thermal_equipment, component_type, False)
     elif args.command == "primaryinfo":
         primary = redfish_utilities.get_thermal_equipment_component(
-            redfish_obj, args.type, redfish_utilities.thermal_equipment_component_types.PRIMARY_CONNECTOR, args.equipment, args.primary
+            redfish_obj,
+            args.type,
+            redfish_utilities.thermal_equipment_component_types.PRIMARY_CONNECTOR,
+            args.equipment,
+            args.primary,
         )
         redfish_utilities.print_thermal_equipment_component(primary)
     elif args.command == "secondaryinfo":
         secondary = redfish_utilities.get_thermal_equipment_component(
-            redfish_obj, args.type, redfish_utilities.thermal_equipment_component_types.SECONDARY_CONNECTOR, args.equipment, args.secondary
+            redfish_obj,
+            args.type,
+            redfish_utilities.thermal_equipment_component_types.SECONDARY_CONNECTOR,
+            args.equipment,
+            args.secondary,
         )
         redfish_utilities.print_thermal_equipment_component(secondary)
     elif args.command == "pumpinfo":
@@ -176,12 +196,20 @@ try:
         redfish_utilities.print_thermal_equipment_component(pump)
     elif args.command == "filterinfo":
         filter = redfish_utilities.get_thermal_equipment_component(
-            redfish_obj, args.type, redfish_utilities.thermal_equipment_component_types.FILTER, args.equipment, args.filter
+            redfish_obj,
+            args.type,
+            redfish_utilities.thermal_equipment_component_types.FILTER,
+            args.equipment,
+            args.filter,
         )
         redfish_utilities.print_thermal_equipment_component(filter)
     elif args.command == "reservoirinfo":
         reservoir = redfish_utilities.get_thermal_equipment_component(
-            redfish_obj, args.type, redfish_utilities.thermal_equipment_component_types.RESERVOIR, args.equipment, args.reservoir
+            redfish_obj,
+            args.type,
+            redfish_utilities.thermal_equipment_component_types.RESERVOIR,
+            args.equipment,
+            args.reservoir,
         )
         redfish_utilities.print_thermal_equipment_component(reservoir)
     elif args.command == "leakdetectors":
