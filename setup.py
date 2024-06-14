@@ -1,6 +1,6 @@
 #! /usr/bin/python
 # Copyright Notice:
-# Copyright 2019-2022 DMTF. All rights reserved.
+# Copyright 2019-2024 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/main/LICENSE.md
 
 from setuptools import setup
@@ -49,7 +49,7 @@ with open("README.md", "r", "utf-8") as f:
 
 setup(
     name="redfish_utilities",
-    version="3.3.1",
+    version="3.3.2",
     description="Redfish Utilities",
     long_description=long_description,
     long_description_content_type="text/markdown",

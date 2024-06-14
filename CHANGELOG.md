@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.3.2] - 2024-06-14
+- Added new 'rf_thermal_equipment.py' tool for managing thermal equipment, such as CDUs
+
 ## [3.3.1] - 2024-06-07
 - Fixed change that was added for protecting from BrokenPipeError exceptions to not crash on Windows
 
