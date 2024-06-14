@@ -82,6 +82,7 @@ setup(
         "scripts/rf_sensor_list.py",
         "scripts/rf_sys_inventory.py",
         "scripts/rf_test_event_listener.py",
+        "scripts/rf_thermal_equipment.py",
         "scripts/rf_update.py",
         "scripts/rf_virtual_media.py",
     ],

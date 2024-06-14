@@ -84,6 +84,17 @@ from .systems import get_system_bios
 from .systems import set_system_bios
 from .systems import print_system_bios
 from .tasks import poll_task_monitor
+from .thermal_equipment import thermal_equipment_types
+from .thermal_equipment import thermal_equipment_component_types
+from .thermal_equipment import get_thermal_equipment_ids
+from .thermal_equipment import get_thermal_equipment
+from .thermal_equipment import print_thermal_equipment
+from .thermal_equipment import get_thermal_equipment_summary
+from .thermal_equipment import print_thermal_equipment_summary
+from .thermal_equipment import get_thermal_equipment_component
+from .thermal_equipment import print_thermal_equipment_component
+from .thermal_equipment import print_thermal_equipment_component_summary
+from .thermal_equipment import print_thermal_equipment_leak_detector_summary
 from .update import operation_apply_times
 from .update import get_update_service
 from .update import get_simple_update_info
@@ -175,6 +186,17 @@ __all__ = [
     "set_system_bios",
     "print_system_bios",
     "poll_task_monitor",
+    "thermal_equipment_types",
+    "thermal_equipment_component_types",
+    "get_thermal_equipment_ids",
+    "get_thermal_equipment",
+    "print_thermal_equipment",
+    "get_thermal_equipment_summary",
+    "print_thermal_equipment_summary",
+    "get_thermal_equipment_component",
+    "print_thermal_equipment_component",
+    "print_thermal_equipment_component_summary",
+    "print_thermal_equipment_leak_detector_summary",
     "operation_apply_times",
     "get_update_service",
     "get_simple_update_info",
