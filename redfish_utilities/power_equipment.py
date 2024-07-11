@@ -263,11 +263,11 @@ def print_power_equipment_summary(power_equipment_summary):
             for equipment in power_equipment_summary[equipment_type]:
                 print(
                     summary_line_format.format(
-                        equipment["Id"],
-                        equipment["Model"],
-                        equipment["SerialNumber"],
-                        equipment["State"],
-                        equipment["Health"],
+                        equipment["Id"] if equipment["Id"] else "",
+                        equipment["Model"] if equipment["Model"] else "",
+                        equipment["SerialNumber"] if equipment["SerialNumber"] else "",
+                        equipment["State"] if equipment["State"] else "",
+                        equipment["Health"] if equipment["Health"] else "",
                     )
                 )
             print("")
