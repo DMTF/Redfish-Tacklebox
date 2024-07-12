@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.3.3] - 2024-07-12
+- Fixed 'list' commands for 'rf_power_equipment.py' and 'rf_thermal_equipment.py' to handle cases where properties are not supported or null
+
 ## [3.3.2] - 2024-06-14
 - Added new 'rf_thermal_equipment.py' tool for managing thermal equipment, such as CDUs
 
