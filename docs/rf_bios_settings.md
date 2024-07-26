@@ -48,7 +48,7 @@ The tool will then get the BIOS resource for the matching system.
 Example; display attributes:
 
 ```
-$ rf_bios_settings.py -u root -p root -r https://192.168.1.100 -a BiosMode Legacy
+$ rf_bios_settings.py -u root -p root -r https://192.168.1.100
 
 BIOS Settings:
   Attribute Name                 | Current Setting                | Future Setting                
