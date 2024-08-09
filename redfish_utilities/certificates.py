@@ -238,8 +238,8 @@ def install_certificate(context, destination, cert_file, key_file=None):
     """
 
     # Read the certificate and determine its type
-    with open(cert_file, "r"):
-        cert_string = cert_file.read()
+    with open(cert_file, "r") as file_handle:
+        cert_string = file_handle.read()
     cert_type = "PEM"
     if "BEGIN PKCS7" in cert_string:
         cert_type = "PKCS7"
@@ -248,8 +248,8 @@ def install_certificate(context, destination, cert_file, key_file=None):
 
     # Read the key if needed, and prepend it to the certificate
     if key_file is not None:
-        with open(cert_file, "r"):
-            key_string = key_file.read()
+        with open(key_file, "r") as file_handle:
+            key_string = file_handle.read()
         cert_string = key_string + cert_string
 
     # Build the payload
