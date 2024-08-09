@@ -570,7 +570,7 @@ def print_sensors(sensor_list):
         sensor_list: The sensor list to print
     """
 
-    sensor_line_format = "  {:25s} | {:10s} | {:8s} | {:8s} | {:8s} | {:8s} | {:8s} | {:8s} | {:8s} | {:32s}"
+    sensor_line_format = "  {:25s} | {:12s} | {:8s} | {:8s} | {:8s} | {:8s} | {:8s} | {:8s} | {:8s} | {:32s}"
 
     # Go through each chassis object in the list
     for chassis in sensor_list:
@@ -593,11 +593,16 @@ def print_sensors(sensor_list):
                 elif item == "Reading":
                     if reading["Reading"] is None:
                         reading_pr["Reading"] = "Unknown"
-                    else:
+                    elif isinstance(reading["Reading"], int):
                         reading_pr["Reading"] = str(reading["Reading"])
                         if reading["Units"] is not None:
-                            reading_pr["Reading"] = reading_pr["Reading"] + reading["Units"]
-                    reading_pr["Reading"] = reading_pr["Reading"][:10]
+                            reading_pr["Reading"] = reading_pr["Reading"] + " " + reading["Units"]
+                    elif isinstance(reading["Reading"], float):
+                        reading_pr["Reading"] = "{:.2f}".format(reading["Reading"])
+                        if reading["Units"] is not None:
+                            reading_pr["Reading"] = reading_pr["Reading"] + " " + reading["Units"]
+                    else:
+                        reading_pr["Reading"] = str(reading["Reading"])
                 elif item == "Units":
                     if reading["Units"] is None:
                         reading_pr["Units"] = ""
