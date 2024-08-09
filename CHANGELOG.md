@@ -1,9 +1,5 @@
 # Change Log
 
-## [3.3.4] - 2024-08-09
-- Fixed file handling for certificate installation
-- Modified formatting of the sensor table from 'rf_sensor_list.py' to not truncate readings
-
 ## [3.3.3] - 2024-07-12
 - Fixed 'list' commands for 'rf_power_equipment.py' and 'rf_thermal_equipment.py' to handle cases where properties are not supported or null
 
