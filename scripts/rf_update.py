@@ -149,7 +149,7 @@ try:
             # TODO: Find a better way of getting your own IP address
             # socket.gethostbyname( socket.gethostname() ) returns 127.0.0.1 on many systems
             # This will open a socket with the target, and pulls the address of the socket
-            groups = re.search("^(https?)://([^:]+)(:(\d+))?$", args.rhost)
+            groups = re.search("^(https?)://([^:]+)(:(\\d+))?$", args.rhost)
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             remote_port = groups.group(4)
             if remote_port is None:
