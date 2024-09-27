@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.3.5] - 2024-09-27
+- Corrected the regex pattern when trying to discover the local system's address when directly hosting firmware images
+
 ## [3.3.4] - 2024-08-09
 - Fixed file handling for certificate installation
 - Modified formatting of the sensor table from 'rf_sensor_list.py' to not truncate readings
