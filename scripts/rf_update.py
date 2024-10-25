@@ -97,6 +97,7 @@ argget.add_argument(
     help="The apply time for the update",
     choices=redfish_utilities.operation_apply_times,
 )
+argget.add_argument("--timeout", "-timeout", type=int, help="The timeout, in seconds, to transfer the image; by default this is 2 seconds per MB")
 argget.add_argument("--debug", action="store_true", help="Creates debug file showing HTTP traces and exceptions")
 args = argget.parse_args()
 
@@ -135,7 +136,7 @@ try:
                 "Pushing the image to the service directly; depending on the size of the image, this can take a few minutes..."
             )
             response = redfish_utilities.multipart_push_update(
-                redfish_obj, args.image, targets=targets, apply_time=args.applytime
+                redfish_obj, args.image, targets=targets, timeout=args.timeout, apply_time=args.applytime
             )
         else:
             # Host a local web server and perform a SimpleUpdate for the local image

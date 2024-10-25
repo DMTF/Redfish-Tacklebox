@@ -12,7 +12,7 @@ A tool to perform an update with a Redfish service.
 usage: rf_update.py [-h] --user USER --password PASSWORD --rhost RHOST --image
                     IMAGE [--target TARGET]
                     [--applytime {Immediate,OnReset,AtMaintenanceWindowStart,InMaintenanceWindowOnReset,OnStartUpdateRequest}]
-                    [--debug]
+                    [--timeout TIMEOUT] [--debug]
 
 A tool to perform an update with a Redfish service
 
@@ -31,6 +31,9 @@ optional arguments:
                         The target resource to apply the image
   --applytime {Immediate,OnReset,AtMaintenanceWindowStart,InMaintenanceWindowOnReset,OnStartUpdateRequest}, -at {Immediate,OnReset,AtMaintenanceWindowStart,InMaintenanceWindowOnReset,OnStartUpdateRequest}
                         The apply time for the update
+  --timeout TIMEOUT, -timeout TIMEOUT
+                        The timeout, in seconds, to transfer the image; by
+                        default this is 2 seconds per MB
   --debug               Creates debug file showing HTTP traces and exceptions
 ```
 
