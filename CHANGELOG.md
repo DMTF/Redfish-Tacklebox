@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.3.6] - 2024-10-25
+- Added '--timeout' option to rf_update.py to manually specify a timeout for the file transfer
+
 ## [3.3.5] - 2024-09-27
 - Corrected the regex pattern when trying to discover the local system's address when directly hosting firmware images
 
