@@ -186,6 +186,7 @@ __all__ = [
     "get_system_bios",
     "set_system_bios",
     "print_system_bios",
+    "reset_system_bios",
     "poll_task_monitor",
     "thermal_equipment_types",
     "thermal_equipment_component_types",
