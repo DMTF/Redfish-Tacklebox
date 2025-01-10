@@ -59,6 +59,7 @@ class RedfishSystemBiosInvalidSettingsError(Exception):
 
     pass
 
+
 class RedfishSystemResetBiosNotFoundError(Exception):
     """
     Raised when the BIOS resource does not support the reset BIOS action
@@ -796,6 +797,7 @@ def print_system_bios(current_settings, future_settings):
 
     print("")
 
+
 def reset_system_bios(context, system_id=None):
     """
     Finds a system matching the given ID and resets the BIOS settings
@@ -818,9 +820,13 @@ def reset_system_bios(context, system_id=None):
 
     # Locate the ResetBios action and invoke it
     if "Actions" not in bios.dict:
-        raise RedfishSystemResetBiosNotFoundError("System '{}' does not support the reset BIOS action".format(system.dict["Id"]))
+        raise RedfishSystemResetBiosNotFoundError(
+            "System '{}' does not support the reset BIOS action".format(system.dict["Id"])
+        )
     if "#Bios.ResetBios" not in bios.dict["Actions"]:
-        raise RedfishSystemResetBiosNotFoundError("System '{}' does not support the reset BIOS action".format(system.dict["Id"]))
+        raise RedfishSystemResetBiosNotFoundError(
+            "System '{}' does not support the reset BIOS action".format(system.dict["Id"])
+        )
     response = context.post(bios.dict["Actions"]["#Bios.ResetBios"]["target"], body={})
     verify_response(response)
     return response

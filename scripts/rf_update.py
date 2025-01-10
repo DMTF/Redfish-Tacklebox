@@ -97,7 +97,12 @@ argget.add_argument(
     help="The apply time for the update",
     choices=redfish_utilities.operation_apply_times,
 )
-argget.add_argument("--timeout", "-timeout", type=int, help="The timeout, in seconds, to transfer the image; by default this is 2 seconds per MB")
+argget.add_argument(
+    "--timeout",
+    "-timeout",
+    type=int,
+    help="The timeout, in seconds, to transfer the image; by default this is 2 seconds per MB",
+)
 argget.add_argument("--debug", action="store_true", help="Creates debug file showing HTTP traces and exceptions")
 args = argget.parse_args()
 
