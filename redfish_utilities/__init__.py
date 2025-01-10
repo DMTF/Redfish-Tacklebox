@@ -83,6 +83,7 @@ from .systems import eject_virtual_media
 from .systems import get_system_bios
 from .systems import set_system_bios
 from .systems import print_system_bios
+from .systems import reset_system_bios
 from .tasks import poll_task_monitor
 from .thermal_equipment import thermal_equipment_types
 from .thermal_equipment import thermal_equipment_component_types

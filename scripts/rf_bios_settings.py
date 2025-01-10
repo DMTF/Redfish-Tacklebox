@@ -35,6 +35,7 @@ argget.add_argument(
     action="append",
     help="Sets a BIOS attribute to a new value; can be supplied multiple times to set multiple attributes",
 )
+argget.add_argument("--reset", "-reset", action="store_true", help="Resets BIOS to the default settings")
 argget.add_argument(
     "--workaround",
     "-workaround",
@@ -69,35 +70,40 @@ except Exception:
 
 exit_code = 0
 try:
-    # Get the BIOS settings
-    current_settings, future_settings = redfish_utilities.get_system_bios(redfish_obj, args.system)
-
-    if args.attribute is not None:
-        new_settings = {}
-        for attribute in args.attribute:
-            # Based on the current settings, determine the appropriate data type for the new setting
-            new_value = attribute[1]
-            if attribute[0] in current_settings:
-                if isinstance(current_settings[attribute[0]], bool):
-                    # Boolean; convert from a string
-                    if new_value.lower() == "true":
-                        new_value = True
-                    else:
-                        new_value = False
-                elif isinstance(current_settings[attribute[0]], (int, float)):
-                    # Integer or float; go by the user input to determine how to convert since the current value may be truncated
-                    try:
-                        new_value = int(new_value)
-                    except Exception:
-                        new_value = float(new_value)
-
-            # Set the specified attribute to the new value
-            new_settings[attribute[0]] = new_value
-            print("Setting {} to {}...".format(attribute[0], attribute[1]))
-        redfish_utilities.set_system_bios(redfish_obj, new_settings, args.system)
+    if args.reset:
+        # Reset BIOS to the default settings
+        print("Resetting the BIOS settings...")
+        redfish_utilities.reset_system_bios(redfish_obj, args.system)
     else:
-        # Print the BIOS settings
-        redfish_utilities.print_system_bios(current_settings, future_settings)
+        # Get the BIOS settings
+        current_settings, future_settings = redfish_utilities.get_system_bios(redfish_obj, args.system)
+
+        if args.attribute is not None:
+            new_settings = {}
+            for attribute in args.attribute:
+                # Based on the current settings, determine the appropriate data type for the new setting
+                new_value = attribute[1]
+                if attribute[0] in current_settings:
+                    if isinstance(current_settings[attribute[0]], bool):
+                        # Boolean; convert from a string
+                        if new_value.lower() == "true":
+                            new_value = True
+                        else:
+                            new_value = False
+                    elif isinstance(current_settings[attribute[0]], (int, float)):
+                        # Integer or float; go by the user input to determine how to convert since the current value may be truncated
+                        try:
+                            new_value = int(new_value)
+                        except Exception:
+                            new_value = float(new_value)
+
+                # Set the specified attribute to the new value
+                new_settings[attribute[0]] = new_value
+                print("Setting {} to {}...".format(attribute[0], attribute[1]))
+            redfish_utilities.set_system_bios(redfish_obj, new_settings, args.system)
+        else:
+            # Print the BIOS settings
+            redfish_utilities.print_system_bios(current_settings, future_settings)
 except Exception as e:
     if args.debug:
         logger.error("Caught exception:\n\n{}\n".format(traceback.format_exc()))
