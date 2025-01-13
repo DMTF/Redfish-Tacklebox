@@ -58,3 +58,34 @@ def get_collection_ids(context, collection_uri):
         verify_response(collection)
 
     return avail_members
+
+
+def get_collection_members(context, collection_uri):
+    """
+    Iterates over a collection and returns all members
+
+    Args:
+        context: The Redfish client object with an open session
+        collection_uri: The URI of the collection to process
+
+    Returns:
+        A list of the members of the collection
+    """
+
+    # Get the collection and iterate through its collection
+    members = []
+    collection = context.get(collection_uri)
+    if collection.status == 404:
+        raise RedfishCollectionNotFoundError("Service does not contain a collection at URI {}".format(collection_uri))
+    verify_response(collection)
+    while True:
+        for member in collection.dict["Members"]:
+            member_response = context.get(member["@odata.id"])
+            verify_response(member_response)
+            members.append(member_response.dict)
+        if "Members@odata.nextLink" not in collection.dict:
+            break
+        collection = context.get(collection.dict["Members@odata.nextLink"])
+        verify_response(collection)
+
+    return members
