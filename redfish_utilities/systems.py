@@ -60,6 +60,14 @@ class RedfishSystemBiosInvalidSettingsError(Exception):
     pass
 
 
+class RedfishSystemResetBiosNotFoundError(Exception):
+    """
+    Raised when the BIOS resource does not support the reset BIOS action
+    """
+
+    pass
+
+
 class RedfishVirtualMediaNotFoundError(Exception):
     """
     Raised when a system does not have any virtual media available
@@ -788,3 +796,37 @@ def print_system_bios(current_settings, future_settings):
             )
 
     print("")
+
+
+def reset_system_bios(context, system_id=None):
+    """
+    Finds a system matching the given ID and resets the BIOS settings
+
+    Args:
+        context: The Redfish client object with an open session
+        system_id: The system to locate; if None, perform on the only system
+
+    Returns:
+        The response of the reset operation
+    """
+
+    # Locate the system
+    system = get_system(context, system_id)
+
+    # Get the Bios resource
+    if "Bios" not in system.dict:
+        raise RedfishSystemBiosNotFoundError("System '{}' does not support representing BIOS".format(system.dict["Id"]))
+    bios = context.get(system.dict["Bios"]["@odata.id"])
+
+    # Locate the ResetBios action and invoke it
+    if "Actions" not in bios.dict:
+        raise RedfishSystemResetBiosNotFoundError(
+            "System '{}' does not support the reset BIOS action".format(system.dict["Id"])
+        )
+    if "#Bios.ResetBios" not in bios.dict["Actions"]:
+        raise RedfishSystemResetBiosNotFoundError(
+            "System '{}' does not support the reset BIOS action".format(system.dict["Id"])
+        )
+    response = context.post(bios.dict["Actions"]["#Bios.ResetBios"]["target"], body={})
+    verify_response(response)
+    return response

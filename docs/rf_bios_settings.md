@@ -11,7 +11,7 @@ A tool to manager BIOS settings for a system.
 ```
 usage: rf_bios_settings.py [-h] --user USER --password PASSWORD --rhost RHOST
                            [--system SYSTEM] [--attribute name value]
-                           [--workaround] [--debug]
+                           [--reset] [--workaround] [--debug]
 
 A tool to manager BIOS settings for a system
 
@@ -29,6 +29,7 @@ optional arguments:
   --attribute name value, -a name value
                         Sets a BIOS attribute to a new value; can be supplied
                         multiple times to set multiple attributes
+  --reset, -reset       Resets BIOS to the default settings
   --workaround, -workaround
                         Indicates if workarounds should be attempted for non-
                         conformant services
@@ -42,8 +43,9 @@ It then traverses the system collection for the service to find the matching sys
 
 The tool will then get the BIOS resource for the matching system.
 
+* If *reset* is specified, it will perform a request to set BIOS to the default settings.
 * If *attribute* is specified, it will update the BIOS resource with the new attribute value.
-* If *attribute* is not specified, it will display the BIOS settings.
+* Otherwise, it will display the BIOS settings.
 
 Example; display attributes:
 
@@ -70,4 +72,11 @@ Example; set an attribute:
 ```
 $ rf_bios_settings.py -u root -p root -r https://192.168.1.100 -a BiosMode Legacy
 Setting BiosMode to Legacy...
+```
+
+Example; reset BIOS to the default settings:
+
+```
+$ rf_bios_settings.py -u root -p root -r https://192.168.1.100 -reset
+Resetting the BIOS settings...
 ```
