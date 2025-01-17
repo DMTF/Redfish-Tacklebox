@@ -73,6 +73,7 @@ setup(
         "scripts/rf_diagnostic_data.py",
         "scripts/rf_discover.py",
         "scripts/rf_event_service.py",
+        "scripts/rf_firmware_inventory.py",
         "scripts/rf_licenses.py",
         "scripts/rf_logs.py",
         "scripts/rf_manager_config.py",

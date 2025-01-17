@@ -15,6 +15,7 @@ Brief : This file contains the definitions and functionalities for interacting
 import json
 import os
 import errno
+from .collections import get_collection_members
 from .messages import verify_response
 from enum import Enum
 
@@ -22,6 +23,14 @@ from enum import Enum
 class RedfishUpdateServiceNotFoundError(Exception):
     """
     Raised when the update service or an update action cannot be found
+    """
+
+    pass
+
+
+class RedfishFirmwareInventoryNotFoundError(Exception):
+    """
+    Raised when the update service does not contain firmware inventory
     """
 
     pass
@@ -214,6 +223,58 @@ def multipart_push_update(context, image_path, targets=None, timeout=None, apply
     )
     verify_response(response)
     return response
+
+
+def get_firmware_inventory(context):
+    """
+    Finds the firmware inventory and returns its contents
+
+    Args:
+        context: The Redfish client object with an open session
+
+    Returns:
+        An array of dictionaries of the firmware inventory members
+    """
+
+    # Get the update service
+    update_service = get_update_service(context)
+
+    # Check that there is a firmware inventory collection
+    if "FirmwareInventory" not in update_service.dict:
+        raise RedfishFirmwareInventoryNotFoundError("Service does not have a firmware inventory")
+
+    return get_collection_members(context, update_service.dict["FirmwareInventory"]["@odata.id"])
+
+
+def print_software_inventory(software_list, details=False, use_id=False):
+    """
+    Prints the software inventory list into a table
+
+    Args:
+        software_list: The certificate list to print
+        details: True to print all the detailed info
+        use_id: Indicates whether to print names from 'Id' property values
+    """
+
+    software_line_format = "  {:40s} | {}"
+    software_details_line_format = "  {:40s} | {}: {}"
+    details_properties = ["Manufacturer", "SoftwareId", "ReleaseDate"]
+
+    # Go through each software element
+    for software in software_list:
+        if use_id:
+            name = software["Id"]
+        else:
+            name = software["Name"]
+        version = software.get("Version", "No version found")
+        if details:
+            print(software_details_line_format.format(name, "Version", version))
+            for detail in details_properties:
+                if detail in software:
+                    print(software_details_line_format.format("", detail, software[detail]))
+        else:
+            print(software_line_format.format(name, version))
+    print("")
 
 
 def get_update_service(context):

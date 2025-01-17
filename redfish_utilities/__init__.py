@@ -101,6 +101,8 @@ from .update import get_update_service
 from .update import get_simple_update_info
 from .update import simple_update
 from .update import multipart_push_update
+from .update import get_firmware_inventory
+from .update import print_software_inventory
 from .misc import logout, print_password_change_required_and_logout
 
 from . import config
@@ -204,6 +206,8 @@ __all__ = [
     "get_simple_update_info",
     "simple_update",
     "multipart_push_update",
+    "get_firmware_inventory",
+    "print_software_inventory",
     "logout",
     "print_password_change_required_and_logout",
     "config",
