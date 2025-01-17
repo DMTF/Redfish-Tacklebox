@@ -1,5 +1,9 @@
 # Change Log
 
+## [3.3.7] - 2025-01-17
+- Added option to 'rf_bios_settings.py' to reset BIOS to the default settings
+- Added 'rf_firmware_inventory.py' script to collect and display firmware versions
+
 ## [3.3.6] - 2024-10-25
 - Added '--timeout' option to rf_update.py to manually specify a timeout for the file transfer
 

@@ -1,6 +1,6 @@
 # Event Service (rf_event_service.py)
 
-Copyright 2019-2024 DMTF.  All rights reserved.
+Copyright 2019-2025 DMTF.  All rights reserved.
 
 ## About
 

@@ -1,6 +1,6 @@
 BSD 3-Clause License
 
-Copyright (c) 2019-2024, Contributing Member(s) of Distributed Management Task
+Copyright (c) 2019-2025, Contributing Member(s) of Distributed Management Task
 Force, Inc.. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,

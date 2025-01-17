@@ -1,6 +1,6 @@
 # Diagnostic Data (rf_diagnostic_data.py)
 
-Copyright 2019-2024 DMTF.  All rights reserved.
+Copyright 2019-2025 DMTF.  All rights reserved.
 
 ## About
 

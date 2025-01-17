@@ -1,6 +1,6 @@
 # Accounts (rf_accounts.py)
 
-Copyright 2019-2024 DMTF.  All rights reserved.
+Copyright 2019-2025 DMTF.  All rights reserved.
 
 ## About
 
