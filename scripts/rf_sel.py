@@ -65,6 +65,8 @@ try:
             if log_service_resp.dict.get("LogEntryType") == "SEL":
                 match = True
                 break
+        if match:
+            break
     if match:
         # Either clear the logs or get/print the logs
         if args.clear:
