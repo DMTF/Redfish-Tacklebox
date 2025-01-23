@@ -140,6 +140,8 @@ __all__ = [
     "delete_license",
     "log_container",
     "diagnostic_data_types",
+    "get_log_service_ids",
+    "get_log_service",
     "get_log_entries",
     "print_log_entries",
     "clear_log_entries",

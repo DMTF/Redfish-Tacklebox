@@ -59,7 +59,9 @@ try:
     for manager in manager_ids:
         manager, log_service_ids = redfish_utilities.get_log_service_ids(redfish_obj, container_id=manager)
         for log_service in log_service_ids:
-            log_service_resp = redfish_utilities.get_log_service(redfish_obj, container_id=manager, log_service_id=log_service)
+            log_service_resp = redfish_utilities.get_log_service(
+                redfish_obj, container_id=manager, log_service_id=log_service
+            )
             if log_service_resp.dict.get("LogEntryType") == "SEL":
                 match = True
                 break
@@ -68,12 +70,16 @@ try:
         if args.clear:
             # Clear log was requested
             print("Clearing the log...")
-            response = redfish_utilities.clear_log_entries(redfish_obj, container_id=manager, log_service_id=log_service)
+            response = redfish_utilities.clear_log_entries(
+                redfish_obj, container_id=manager, log_service_id=log_service
+            )
             response = redfish_utilities.poll_task_monitor(redfish_obj, response)
             redfish_utilities.verify_response(response)
         else:
             # Print log was requested
-            log_entries = redfish_utilities.get_log_entries(redfish_obj, container_id=manager, log_service_id=log_service)
+            log_entries = redfish_utilities.get_log_entries(
+                redfish_obj, container_id=manager, log_service_id=log_service
+            )
             try:
                 from signal import signal, SIGPIPE, SIG_DFL
 

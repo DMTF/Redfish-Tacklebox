@@ -115,10 +115,13 @@ def get_log_service_ids(context, container_type=log_container.MANAGER, container
     # Get the container and check that it has log services
     container = context.get(service_root.dict[container_type.value]["@odata.id"] + "/" + container_id)
     if "LogServices" not in container.dict:
-        raise RedfishLogServiceNotFoundError("Container {} does not contain a log services collection".format(container_id))
+        raise RedfishLogServiceNotFoundError(
+            "Container {} does not contain a log services collection".format(container_id)
+        )
 
     # Get the log service collection and iterate through its collection
     return container_id, get_collection_ids(context, container.dict["LogServices"]["@odata.id"])
+
 
 def get_log_service(context, container_type=log_container.MANAGER, container_id=None, log_service_id=None):
     """
