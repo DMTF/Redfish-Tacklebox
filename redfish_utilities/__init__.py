@@ -33,6 +33,8 @@ from .licenses import install_license
 from .licenses import delete_license
 from .logs import log_container
 from .logs import diagnostic_data_types
+from .logs import get_log_service_ids
+from .logs import get_log_service
 from .logs import get_log_entries
 from .logs import print_log_entries
 from .logs import clear_log_entries
