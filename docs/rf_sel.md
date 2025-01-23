@@ -1,4 +1,4 @@
-# Logs (rf_logs.py)
+# SEL (rf_sel.py)
 
 Copyright 2019-2025 DMTF.  All rights reserved.
 
