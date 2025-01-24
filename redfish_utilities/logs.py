@@ -25,6 +25,14 @@ class RedfishLogServiceNotFoundError(Exception):
     pass
 
 
+class RedfishLogEntriesNotFoundError(Exception):
+    """
+    Raised when the log service does not provide entries
+    """
+
+    pass
+
+
 class RedfishClearLogNotFoundError(Exception):
     """
     Raised when a log service does not contain the clear log action
@@ -87,37 +95,50 @@ def get_log_service_ids(context, container_type=log_container.MANAGER, container
         A list of identifiers of the members of the log service collection
     """
 
+    container_collection_uri_pattern = "/redfish/v1/{}"
+    container_uri_pattern = "/redfish/v1/{}/{}"
+    avail_containers = None
+
     # Get the Service Root to find the resource collection
     service_root = context.get("/redfish/v1/")
     if container_type.value not in service_root.dict:
         # No resource collection
-        raise RedfishLogServiceNotFoundError("Service does not contain a {} collection".format(container_type.value))
+        raise RedfishLogServiceNotFoundError(
+            "Service does not contain a {} collection".format(container_type.value.lower())
+        )
 
-    # Get the resource collection and iterate through its collection to find the matching container instance
-    avail_containers = get_collection_ids(context, service_root.dict[container_type.value]["@odata.id"])
-    if container_id is None:
+    # If given an identifier, get the container directly
+    if container_id is not None:
+        container = context.get(container_uri_pattern.format(container_type.value, container_id))
+    # No identifier given; see if there's exactly one member
+    else:
+        avail_containers = get_collection_ids(context, container_collection_uri_pattern.format(container_type.value))
         if len(avail_containers) == 1:
             container_id = avail_containers[0]
+            container = context.get(container_uri_pattern.format(container_type.value, avail_containers[0]))
         else:
             raise RedfishLogServiceNotFoundError(
-                "Service does not contain exactly one resource in {}; a target container needs to be specified: {}".format(
-                    container_type.value, ", ".join(avail_containers)
-                )
-            )
-    else:
-        if container_id not in avail_containers:
-            raise RedfishLogServiceNotFoundError(
-                "Service does not contain a resource in {} called {}; valid resources: {}".format(
-                    container_type.value, container_id, ", ".join(avail_containers)
+                "Service does not contain exactly one member in the {} collection; a target container needs to be specified: {}".format(
+                    container_type.value.lower(), ", ".join(avail_containers)
                 )
             )
 
-    # Get the container and check that it has log services
-    container = context.get(service_root.dict[container_type.value]["@odata.id"] + "/" + container_id)
-    if "LogServices" not in container.dict:
+    # Check the response and return the container if the response is good
+    if container.status == 404:
+        if avail_containers is None:
+            avail_containers = get_collection_ids(
+                context, container_collection_uri_pattern.format(container_type.value)
+            )
         raise RedfishLogServiceNotFoundError(
-            "Container {} does not contain a log services collection".format(container_id)
+            "Service does not contain a member in the {} collection called '{}'; valid containers: {}".format(
+                container_type.value.lower(), container_id, ", ".join(avail_containers)
+            )
         )
+    verify_response(container)
+
+    # Check if the container has log services
+    if "LogServices" not in container.dict:
+        raise RedfishLogServiceNotFoundError("'{}' does not contain a log services collection".format(container_id))
 
     # Get the log service collection and iterate through its collection
     return container_id, get_collection_ids(context, container.dict["LogServices"]["@odata.id"])
@@ -137,30 +158,44 @@ def get_log_service(context, container_type=log_container.MANAGER, container_id=
         The log service resource
     """
 
-    # Get the log service collection and find a matching member
-    container_id, avail_logs = get_log_service_ids(context, container_type, container_id)
-    if log_service_id is None:
-        if len(avail_logs) == 1:
-            log_service_id = avail_logs[0]
+    log_service_uri_pattern = "/redfish/v1/{}/{}/LogServices/{}"
+    avail_logs = None
+
+    # If given an identifier, get the log service directly
+    if container_id is not None and log_service_id is not None:
+        log_service = context.get(log_service_uri_pattern.format(container_type.value, container_id, log_service_id))
+    # One or both identifiers not given; see if there's exactly one member
+    else:
+        container_id, avail_logs = get_log_service_ids(context, container_type, container_id)
+        if len(avail_logs) == 1 or log_service_id is not None:
+            if log_service_id is None:
+                log_service_id = avail_logs[0]
+            log_service = context.get(
+                log_service_uri_pattern.format(container_type.value, container_id, log_service_id)
+            )
         else:
             raise RedfishLogServiceNotFoundError(
-                "{} does not contain exactly one log service; a target log service needs to be specified: {}".format(
+                "'{}' does not contain exactly one log service; a target log service needs to be specified: {}".format(
                     container_id, ", ".join(avail_logs)
                 )
             )
-    else:
-        if log_service_id not in avail_logs:
-            raise RedfishLogServiceNotFoundError(
-                "{} does not contain a log service called {}; valid log services: {}".format(
-                    container_id, log_service_id, ", ".join(avail_logs)
-                )
+
+    # Check the response and return the log service if the response is good
+    if log_service.status == 404:
+        if avail_logs is None:
+            container_id, avail_logs = get_log_service_ids(context, container_type, container_id)
+        raise RedfishLogServiceNotFoundError(
+            "'{}' does not contain a log service called '{}'; valid log services: {}".format(
+                container_id, log_service_id, ", ".join(avail_logs)
             )
+        )
+    verify_response(log_service)
+    return log_service
 
-    # Get the log service
-    return context.get("/redfish/v1/" + container_type.value + "/" + container_id + "/LogServices/" + log_service_id)
 
-
-def get_log_entries(context, container_type=log_container.MANAGER, container_id=None, log_service_id=None):
+def get_log_entries(
+    context, container_type=log_container.MANAGER, container_id=None, log_service_id=None, log_service=None
+):
     """
     Finds the log entries of a log service matching the given ID
 
@@ -169,12 +204,16 @@ def get_log_entries(context, container_type=log_container.MANAGER, container_id=
         container_type: The type of resource containing the log service (manager, system, or chassis)
         container_id: The container instance with the log service; if None, perform on the only container
         log_service_id: The log service with the logs; if None, perform on the only log service
+        log_service: Existing log service resource from which to get log entries
 
     Returns:
         An array of log entries
     """
 
-    log_service = get_log_service(context, container_type, container_id, log_service_id)
+    if log_service is None:
+        log_service = get_log_service(context, container_type, container_id, log_service_id)
+    if "Entries" not in log_service.dict:
+        raise RedfishLogEntriesNotFoundError("Log service '{}' does not provide entries".format(log_service.dict["Id"]))
 
     # Read in the log entries
     log_entries = []
@@ -228,7 +267,7 @@ def print_log_entries(log_entries, details=False):
             entry_line_format.format(
                 entry["Id"],
                 entry.get(timestamp_property, "Unknown"),
-                entry["Message"].replace("\n", "; "),
+                entry.get("Message", entry["MessageId"]).replace("\n", "; "),
             )
         )
         if details:
@@ -237,7 +276,9 @@ def print_log_entries(log_entries, details=False):
                     print(detail_line_format.format("", detail, entry[detail]))
 
 
-def clear_log_entries(context, container_type=log_container.MANAGER, container_id=None, log_service_id=None):
+def clear_log_entries(
+    context, container_type=log_container.MANAGER, container_id=None, log_service_id=None, log_service=None
+):
     """
     Clears the log entries of a log service matching the given ID
 
@@ -246,18 +287,24 @@ def clear_log_entries(context, container_type=log_container.MANAGER, container_i
         container_type: The type of resource containing the log service (manager, system, or chassis)
         container_id: The container instance with the log service; if None, perform on the only container
         log_service_id: The log service with the logs; if None, perform on the only log service
+        log_service: Existing log service resource to clear
 
     Returns:
         The response of the action
     """
 
-    log_service = get_log_service(context, container_type, container_id, log_service_id)
+    if log_service is None:
+        log_service = get_log_service(context, container_type, container_id, log_service_id)
 
     # Find the ClearLog action
     if "Actions" not in log_service.dict:
-        raise RedfishClearLogNotFoundError("Log service does not support ClearLog")
+        raise RedfishClearLogNotFoundError(
+            "Log service '{}' does not support log clearing".format(log_service.dict["Id"])
+        )
     if "#LogService.ClearLog" not in log_service.dict["Actions"]:
-        raise RedfishClearLogNotFoundError("Log service does not support ClearLog")
+        raise RedfishClearLogNotFoundError(
+            "Log service '{}' does not support log clearing".format(log_service.dict["Id"])
+        )
     clear_uri = log_service.dict["Actions"]["#LogService.ClearLog"]["target"]
 
     # Clear the log
@@ -273,6 +320,7 @@ def collect_diagnostic_data(
     log_service_id=None,
     diagnostic_data_type=None,
     oem_data_type=None,
+    log_service=None,
 ):
     """
     Performs diagnostic data collection of a log service matching the given ID
@@ -284,18 +332,24 @@ def collect_diagnostic_data(
         log_service_id: The log service with the logs; if None, perform on the only log service
         diagnostic_data_type: The type of diagnostic data to collect (manager, pre OS, OS, OEM)
         oem_data_type: The type of OEM data to collect
+        log_service: Existing log service resource from which to collect diagnostic data
 
     Returns:
         The response of the action
     """
 
-    log_service = get_log_service(context, container_type, container_id, log_service_id)
+    if log_service is None:
+        log_service = get_log_service(context, container_type, container_id, log_service_id)
 
     # Find the ClearLog action
     if "Actions" not in log_service.dict:
-        raise RedfishCollectDiagnosticDataNotFoundError("Log service does not support CollectDiagnosticData")
+        raise RedfishCollectDiagnosticDataNotFoundError(
+            "Log service '{}' does not support collecting diagnostic data".format(log_service.dict["Id"])
+        )
     if "#LogService.CollectDiagnosticData" not in log_service.dict["Actions"]:
-        raise RedfishCollectDiagnosticDataNotFoundError("Log service does not support CollectDiagnosticData")
+        raise RedfishCollectDiagnosticDataNotFoundError(
+            "Log service '{}' does not support collecting diagnostic data".format(log_service.dict["Id"])
+        )
     collect_uri = log_service.dict["Actions"]["#LogService.CollectDiagnosticData"]["target"]
 
     # Collect diagnostic data

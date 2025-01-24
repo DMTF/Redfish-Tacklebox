@@ -31,7 +31,7 @@ optional arguments:
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then attempt to locate the SEL via the following logic:
 
-* It will iterate through each log service found in each manager.
+* It will iterate through each log service found in each manager and each system.
 * The first log service found where `LogEntryType` contains `SEL` is considered the SEL for the service.
 
 Once the SEL is found, the tool will either perform the `ClearLog` action if *clear* is provided, or read and display the log entries.

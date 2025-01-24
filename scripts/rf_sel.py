@@ -55,15 +55,29 @@ exit_code = 0
 try:
     # Find the SEL
     match = False
-    manager_ids = redfish_utilities.get_manager_ids(redfish_obj)
-    for manager in manager_ids:
-        manager, log_service_ids = redfish_utilities.get_log_service_ids(redfish_obj, container_id=manager)
-        for log_service in log_service_ids:
-            log_service_resp = redfish_utilities.get_log_service(
-                redfish_obj, container_id=manager, log_service_id=log_service
-            )
-            if log_service_resp.dict.get("LogEntryType") == "SEL":
-                match = True
+    for container_type in [redfish_utilities.log_container.MANAGER, redfish_utilities.log_container.SYSTEM]:
+        if container_type == redfish_utilities.log_container.MANAGER:
+            container_ids = redfish_utilities.get_manager_ids(redfish_obj)
+        else:
+            container_ids = redfish_utilities.get_system_ids(redfish_obj)
+        for container in container_ids:
+            try:
+                container, log_service_ids = redfish_utilities.get_log_service_ids(
+                    redfish_obj, container_type=container_type, container_id=container
+                )
+                for log_service in log_service_ids:
+                    log_service_resp = redfish_utilities.get_log_service(
+                        redfish_obj, container_type=container_type, container_id=container, log_service_id=log_service
+                    )
+                    if (
+                        log_service_resp.dict.get("LogEntryType") == "SEL"
+                        or log_service_resp.dict["Id"].upper() == "SEL"
+                    ):
+                        match = True
+                        break
+            except:
+                pass
+            if match:
                 break
         if match:
             break
@@ -71,17 +85,13 @@ try:
         # Either clear the logs or get/print the logs
         if args.clear:
             # Clear log was requested
-            print("Clearing the log...")
-            response = redfish_utilities.clear_log_entries(
-                redfish_obj, container_id=manager, log_service_id=log_service
-            )
+            print("Clearing the SEL...")
+            response = redfish_utilities.clear_log_entries(redfish_obj, log_service=log_service_resp)
             response = redfish_utilities.poll_task_monitor(redfish_obj, response)
             redfish_utilities.verify_response(response)
         else:
             # Print log was requested
-            log_entries = redfish_utilities.get_log_entries(
-                redfish_obj, container_id=manager, log_service_id=log_service
-            )
+            log_entries = redfish_utilities.get_log_entries(redfish_obj, log_service=log_service_resp)
             try:
                 from signal import signal, SIGPIPE, SIG_DFL
 
