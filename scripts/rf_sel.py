@@ -75,7 +75,7 @@ try:
                     ):
                         match = True
                         break
-            except:
+            except Exception:
                 pass
             if match:
                 break
