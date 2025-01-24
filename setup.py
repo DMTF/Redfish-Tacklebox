@@ -80,6 +80,7 @@ setup(
         "scripts/rf_power_equipment.py",
         "scripts/rf_power_reset.py",
         "scripts/rf_raw_request.py",
+        "scripts/rf_sel.py",
         "scripts/rf_sensor_list.py",
         "scripts/rf_sys_inventory.py",
         "scripts/rf_test_event_listener.py",
