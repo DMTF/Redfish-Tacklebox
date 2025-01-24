@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.3.8] - 2025-01-24
+- Added 'rf_sel.py' script to simplify the ability for a user to find the SEL on a service
+
 ## [3.3.7] - 2025-01-17
 - Added option to 'rf_bios_settings.py' to reset BIOS to the default settings
 - Added 'rf_firmware_inventory.py' script to collect and display firmware versions
