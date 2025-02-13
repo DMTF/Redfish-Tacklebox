@@ -18,14 +18,18 @@ The utilities can be used as part of larger management applications, or be used 
 
 ## Installation
 
-`pip install redfish_utilities`
+Only one installation method is required to use Redfish Tacklebox.
+
+### From PyPI
+
+    pip install redfish_utilities
 
 ### Building from Source
 
-```
-python setup.py sdist
-pip install dist/redfish_utilities-x.x.x.tar.gz
-```
+    git clone https://github.com/DMTF/Redfish-Tacklebox.git
+    cd Redfish-Tacklebox
+    python setup.py sdist
+    pip install dist/redfish_utilities-x.x.x.tar.gz
 
 ### Building Docker
 
