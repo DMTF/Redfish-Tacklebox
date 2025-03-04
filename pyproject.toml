@@ -1,0 +1,6 @@
+[tool.black]
+line-length = 120
+
+# uv package manager
+[tool.uv]
+native-tls = true
