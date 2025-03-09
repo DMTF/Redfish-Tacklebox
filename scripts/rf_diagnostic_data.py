@@ -25,8 +25,14 @@ from redfish.messages import RedfishPasswordChangeRequiredError
 argget = argparse.ArgumentParser(
     description="A tool to collect diagnostic data from a log service on a Redfish service"
 )
-argget.add_argument("--user", "-u", type=str, required=True, help="The user name for authentication")
-argget.add_argument("--password", "-p", type=str, required=True, help="The password for authentication")
+
+# Add username and password arguments
+argget.add_argument("--user", "-u", type=str, help="The user name for authentication")
+argget.add_argument("--password", "-p", type=str, help="The password for authentication")
+
+# Add session token argument
+argget.add_argument("--session-token", "-t", type=str, help="The session token for authentication")
+
 argget.add_argument("--rhost", "-r", type=str, required=True, help="The address of the Redfish service (with scheme)")
 argget.add_argument(
     "--manager", "-m", type=str, nargs="?", default=False, help="The ID of the manager containing the log service"
@@ -62,6 +68,14 @@ argget.add_argument(
 argget.add_argument("--debug", action="store_true", help="Creates debug file showing HTTP traces and exceptions")
 args = argget.parse_args()
 
+# Validate either username + password OR session_token
+if (args.user and args.password and not args.session_token) or (
+    args.session_token and not (args.user or args.password)
+):
+    pass  # Valid input
+else:
+    argget.error("You must specify either both --user and --password, or --session-token")
+
 # Determine the target log service based on the inputs
 # Effectively if the user gives multiple targets, some will be ignored
 container_type = redfish_utilities.log_container.MANAGER
@@ -85,10 +99,15 @@ if args.debug:
 # Set up the Redfish object
 redfish_obj = None
 try:
-    redfish_obj = redfish.redfish_client(
-        base_url=args.rhost, username=args.user, password=args.password, timeout=15, max_retry=3
-    )
-    redfish_obj.login(auth="session")
+    if args.session_token:
+        sessionkey = str.encode(args.session_token)
+        redfish_obj = redfish.redfish_client(base_url=args.rhost, sessionkey=sessionkey, timeout=15, max_retry=3)
+    else:
+        redfish_obj = redfish.redfish_client(
+            base_url=args.rhost, username=args.user, password=args.password, timeout=15, max_retry=3
+        )
+        # Don't need to login if we're using a session key
+        redfish_obj.login(auth="session")
 except RedfishPasswordChangeRequiredError:
     redfish_utilities.print_password_change_required_and_logout(redfish_obj, args)
     sys.exit(1)
@@ -127,5 +146,6 @@ except Exception as e:
     print(e)
 finally:
     # Log out
-    redfish_utilities.logout(redfish_obj)
+    if not args.session_token:
+        redfish_utilities.logout(redfish_obj)
 sys.exit(exit_code)
