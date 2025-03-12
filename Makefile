@@ -58,3 +58,4 @@ install-uv: ##@ Install with uv
 
 lint: ##@ Run linting
 	black .
+	ruff check .
