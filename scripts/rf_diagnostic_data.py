@@ -12,7 +12,6 @@ Brief : This script uses the redfish_utilities module to collect diagnostic data
 """
 
 import argparse
-import datetime
 
 # import logging
 import os

@@ -16,7 +16,7 @@ def get_debug_level(level):
     elif level == "CRITICAL":
         return logging.CRITICAL
     else:
-        raise ValueError(f"Invalid debug level: {args.debug_level}")
+        raise ValueError(f"Invalid debug level: {level}")
 
 
 def setup_logger(
