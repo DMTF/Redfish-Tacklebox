@@ -51,6 +51,12 @@ jobs:
         if [[ -n "${{github.event.inputs.changes_8}}" ]]; then echo "- ${{github.event.inputs.changes_8}}" >> $GITHUB_ENV; fi
         echo "" >> $GITHUB_ENV
         echo 'EOF' >> $GITHUB_ENV
+    - name: Convert all files to Unix format
+      run: |
+        sudo apt-get install dos2unix
+        find . -type f -name "*.py" -print0 | xargs -0 dos2unix
+        find . -type f -name "*.md" -print0 | xargs -0 dos2unix
+        find . -type f -name "*.txt" -print0 | xargs -0 dos2unix
     - name: Update version numbers
       run: |
         sed -i -E 's/    version=.+,/    version="'${{github.event.inputs.version}}'",/' setup.py
