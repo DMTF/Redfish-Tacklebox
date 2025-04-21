@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.3.9] - 2025-04-21
+- Fixed files to always be Unix format
+
 ## [3.3.8] - 2025-01-24
 - Added 'rf_sel.py' script to simplify the ability for a user to find the SEL on a service
 
