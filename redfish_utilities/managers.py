@@ -145,7 +145,7 @@ def set_manager(context, manager_id=None, date_time=None, date_time_offset=None)
     if date_time is not None:
         payload["DateTime"] = date_time
     if date_time_offset is not None:
-        payload["DateTimeOffset"] = date_time_offset
+        payload["DateTimeLocalOffset"] = date_time_offset
 
     # Update the manager
     headers = None
