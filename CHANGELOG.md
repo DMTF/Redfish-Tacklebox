@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.4.0] - 2025-05-02
+- Corrected the usage of the 'DateTimeLocalOffset' property when setting a manager's time
+
 ## [3.3.9] - 2025-04-21
 - Fixed files to always be Unix format
 
