@@ -12,7 +12,7 @@ Brief : This script uses the redfish_utilities module to collect diagnostic data
 """
 
 import argparse
-
+import datetime
 import logging
 import os
 import redfish
@@ -22,7 +22,6 @@ import sys
 from redfish.messages import RedfishPasswordChangeRequiredError
 from redfish_utilities.arguments import create_parent_parser, validate_args
 from redfish_utilities.logger import setup_logger
-import datetime
 
 # Get the input arguments
 description = "A tool to collect diagnostic data from a log service on a Redfish service"
@@ -109,6 +108,7 @@ except Exception:
 
 exit_code = 0
 try:
+    print("Collecting diagnostic data...")
     logger.info("Collecting diagnostic data...")
     response = redfish_utilities.collect_diagnostic_data(
         redfish_obj, container_type, container_id, args.log, args.type, args.oemtype
@@ -131,11 +131,13 @@ try:
         path = os.path.join(args.directory, filename)
     with open(path, "wb") as file:
         file.write(data)
+    print("Saved diagnostic data to '{}'".format(path))
     logger.info("Saved diagnostic data to '{}'".format(path))
 except Exception as e:
-    logger.debug("Caught exception:\n\n{}\n".format(traceback.format_exc()))
+    if args.debug:
+        logger.error("Caught exception:\n\n{}\n".format(traceback.format_exc()))
     exit_code = 1
-    logger.info(e)
+    print(e)
 finally:
     # Log out
     if not args.session_token:
