@@ -82,6 +82,12 @@ elif args.chassis is not False:
     container_type = redfish_utilities.log_container.CHASSIS
     container_id = args.chassis
 
+if args.debug:
+    log_file = "rf_diagnostic_data-{}.log".format(datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S"))
+    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logger = redfish.redfish_logger(log_file, log_format, logging.DEBUG)
+    logger.info("rf_diagnostic_data Trace")
+
 # Set up the Redfish object
 redfish_obj = None
 try:
