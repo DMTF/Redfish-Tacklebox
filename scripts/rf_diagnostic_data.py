@@ -109,7 +109,6 @@ except Exception:
 exit_code = 0
 try:
     print("Collecting diagnostic data...")
-    logger.info("Collecting diagnostic data...")
     response = redfish_utilities.collect_diagnostic_data(
         redfish_obj, container_type, container_id, args.log, args.type, args.oemtype
     )
@@ -132,7 +131,6 @@ try:
     with open(path, "wb") as file:
         file.write(data)
     print("Saved diagnostic data to '{}'".format(path))
-    logger.info("Saved diagnostic data to '{}'".format(path))
 except Exception as e:
     if args.debug:
         logger.error("Caught exception:\n\n{}\n".format(traceback.format_exc()))
