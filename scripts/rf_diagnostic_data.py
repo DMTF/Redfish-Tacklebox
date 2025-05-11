@@ -13,7 +13,7 @@ Brief : This script uses the redfish_utilities module to collect diagnostic data
 
 import argparse
 
-# import logging
+import logging
 import os
 import redfish
 import redfish_utilities
@@ -22,6 +22,7 @@ import sys
 from redfish.messages import RedfishPasswordChangeRequiredError
 from redfish_utilities.arguments import create_parent_parser, validate_args
 from redfish_utilities.logger import setup_logger
+import datetime
 
 # Get the input arguments
 description = "A tool to collect diagnostic data from a log service on a Redfish service"
