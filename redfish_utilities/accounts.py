@@ -12,6 +12,7 @@ Brief : This file contains the definitions and functionalities for managing
         accounts on a Redfish Service
 """
 
+from .tasks import poll_task_monitor
 from .messages import verify_response
 
 
@@ -128,6 +129,9 @@ def add_user(context, user_name, password, role):
                     user_name
                 )
             )
+    elif response.status == 202:
+        response = poll_task_monitor(context, response)
+
     verify_response(response)
     return response
 
