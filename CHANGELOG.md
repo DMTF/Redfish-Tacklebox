@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.4.1] - 2025-05-30
+- Added new global config to automatically internalize task monitoring for select operations
+
 ## [3.4.0] - 2025-05-02
 - Corrected the usage of the 'DateTimeLocalOffset' property when setting a manager's time
 
