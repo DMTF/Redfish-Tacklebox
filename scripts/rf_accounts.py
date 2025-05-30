@@ -54,6 +54,9 @@ argget.add_argument("--unlock", "-unlock", type=str, help="Unlocks a user accoun
 argget.add_argument("--debug", action="store_true", help="Creates debug file showing HTTP traces and exceptions")
 args = argget.parse_args()
 
+# Always let the calls for account management block until the underlying task is complete
+redfish_utilities.config.__auto_task_handling__ = True
+
 if args.debug:
     log_file = "rf_accounts-{}.log".format(datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S"))
     log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

@@ -9,15 +9,17 @@ Accounts Module
 File : accounts.py
 
 Brief : This file contains the definitions and functionalities for managing
-        accounts on a Redfish Service
+        accounts on a Redfish service
 """
 
 from .messages import verify_response
+from .tasks import poll_task_monitor
+from . import config
 
 
 class RedfishAccountCollectionNotFoundError(Exception):
     """
-    Raised when the Account Service or Account Collection cannot be found
+    Raised when the account service or account collection cannot be found
     """
 
     pass
@@ -25,7 +27,7 @@ class RedfishAccountCollectionNotFoundError(Exception):
 
 class RedfishAccountNotFoundError(Exception):
     """
-    Raised when the Account Service or Account Collection cannot be found
+    Raised when the account service or account collection cannot be found
     """
 
     pass
@@ -52,7 +54,7 @@ def get_users(context):
 
     user_list = []
 
-    # Go through each Account in the Account Collection
+    # Go through each account in the account collection
     account_col = context.get(get_account_collection(context), None)
     for account_member in account_col.dict["Members"]:
         account = context.get(account_member["@odata.id"], None)
@@ -128,6 +130,8 @@ def add_user(context, user_name, password, role):
                     user_name
                 )
             )
+    if config.__auto_task_handling__:
+        response = poll_task_monitor(context, response, silent=True)
     verify_response(response)
     return response
 
@@ -154,6 +158,8 @@ def delete_user(context, user_name):
         # Some also do not allow for both Enabled and UserName to be modified simultaneously
         modify_user(context, user_name, new_enabled=False)
         return modify_user(context, user_name, new_name="")
+    if config.__auto_task_handling__:
+        response = poll_task_monitor(context, response, silent=True)
     verify_response(response)
     return response
 
@@ -203,6 +209,8 @@ def modify_user(
 
     # Update the user
     response = context.patch(user_uri, body=new_info, headers={"If-Match": user_info.getheader("ETag")})
+    if config.__auto_task_handling__:
+        response = poll_task_monitor(context, response, silent=True)
     verify_response(response)
     return response
 
@@ -218,17 +226,17 @@ def get_account_collection(context):
         The URI for the account collection
     """
 
-    # Get the Service Root to find the Account Service
+    # Get the service root to find the account service
     service_root = context.get("/redfish/v1")
     if "AccountService" not in service_root.dict:
-        # No Account Service
-        raise RedfishAccountCollectionNotFoundError("Service does not contain an Account Service")
+        # No account service
+        raise RedfishAccountCollectionNotFoundError("Service does not contain an account service")
 
-    # Get the Account Service to find the Account Collection
+    # Get the account service to find the account collection
     account_service = context.get(service_root.dict["AccountService"]["@odata.id"])
     if "Accounts" not in account_service.dict:
         # No Account Collection
-        raise RedfishAccountCollectionNotFoundError("Service does not contain an Account Collection")
+        raise RedfishAccountCollectionNotFoundError("Service does not contain an account collection")
 
     return account_service.dict["Accounts"]["@odata.id"]
 
