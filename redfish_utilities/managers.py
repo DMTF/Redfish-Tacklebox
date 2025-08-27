@@ -123,7 +123,7 @@ def get_manager(context, manager_id=None):
     return manager
 
 
-def set_manager(context, manager_id=None, date_time=None, date_time_offset=None):
+def set_manager(context, manager_id=None, date_time=None, date_time_offset=None, service_id=None):
     """
     Finds a manager matching the given identifier and sets one or more properties
 
@@ -132,6 +132,7 @@ def set_manager(context, manager_id=None, date_time=None, date_time_offset=None)
         manager_id: The manager to locate; if None, perform on the only manager
         date_time: The date-time value to set
         date_time_offset: The date-time offset value to set
+        service_id: The service identification value to set
 
     Returns:
         The response of the PATCH
@@ -146,6 +147,8 @@ def set_manager(context, manager_id=None, date_time=None, date_time_offset=None)
         payload["DateTime"] = date_time
     if date_time_offset is not None:
         payload["DateTimeLocalOffset"] = date_time_offset
+    if service_id is not None:
+        payload["ServiceIdentification"] = service_id
 
     # Update the manager
     headers = None
@@ -181,6 +184,7 @@ def print_manager(manager):
         "PartNumber",
         "SparePartNumber",
         "SerialNumber",
+        "ServiceIdentification",
     ]
     print("Manager {} Info".format(manager.dict["Id"]))
     for property in manager_properties:

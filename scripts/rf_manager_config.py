@@ -88,6 +88,8 @@ setprotocol_argget.add_argument("--protocol", "-prot", type=str, required=True, 
 setprotocol_argget.add_argument("--enable", "-en", action="store_true", help="Enable the selected protocol")
 setprotocol_argget.add_argument("--disable", "-dis", action="store_true", help="Disable the selected protocol")
 setprotocol_argget.add_argument("--port", "-port", type=int, help="The port number to assign the protocol")
+setserviceid_argget = subparsers.add_parser("setserviceid", help="Sets the service identification for a manager")
+setserviceid_argget.add_argument("--id", "-i", type=str, required=True, help="The service identification to set")
 args = argget.parse_args()
 
 if args.debug:
@@ -215,6 +217,9 @@ try:
             network_protocol_setting[args.protocol]["Port"] = args.port
         print("Configuring {}...".format(args.protocol))
         redfish_utilities.set_manager_network_protocol(redfish_obj, args.manager, network_protocol_setting)
+    elif args.command == "setserviceid":
+        print("Setting the identification to '{}'...".format(args.id))
+        redfish_utilities.set_manager(redfish_obj, args.manager, service_id=args.id)
     else:
         manager = redfish_utilities.get_manager(redfish_obj, args.manager)
         redfish_utilities.print_manager(manager)
