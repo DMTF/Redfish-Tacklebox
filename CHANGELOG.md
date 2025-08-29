@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.4.2] - 2025-08-29
+- Added 'setserviceid' option to rf_manager_config.py
+
 ## [3.4.1] - 2025-05-30
 - Added new global config to automatically internalize task monitoring for select operations
 
