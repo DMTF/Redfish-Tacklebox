@@ -11,13 +11,13 @@ A tool to manage managers in a service.
 ```
 usage: rf_manager_config.py [-h] --user USER --password PASSWORD --rhost RHOST
                             [--manager MANAGER] [--debug]
-                            {info,reset,getnet,setnet,resettodefaults,settime,getprotocol,setprotocol}
+                            {info,reset,getnet,setnet,resettodefaults,settime,getprotocol,setprotocol,setserviceid}
                             ...
 
 A tool to manage managers in a service
 
 positional arguments:
-  {info,reset,getnet,setnet,resettodefaults,settime,getprotocol,setprotocol}
+  {info,reset,getnet,setnet,resettodefaults,settime,getprotocol,setprotocol,setserviceid}
     info                Displays information about a manager
     reset               Resets a manager
     getnet              Displays information about an Ethernet interface
@@ -26,6 +26,7 @@ positional arguments:
     settime             Sets the date-time on a manager
     getprotocol         Displays network protocol information about a manager
     setprotocol         Configures network protocol settings on a manager
+    setserviceid        Sets the service identification for a manager
 
 required arguments:
   --user USER, -u USER  The user name for authentication
@@ -341,4 +342,28 @@ Example:
 ```
 $ rf_manager_config.py -u root -p root -r https://192.168.1.100 setprotocol -prot IPMI -dis
 Configuring IPMI...
+```
+
+### Set Service Identification
+
+Sets the service identification for a manager
+
+```
+usage: rf_manager_config.py setserviceid [-h] --id ID
+
+options:
+  -h, --help      show this help message and exit
+  --id ID, -i ID  The service identification to set
+```
+
+The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
+It will then locate the manager specified by the *manager* argument, and applies the *id* value to the manager instance.
+
+* If *manager* is not specified, and if the service has exactly one manager, it will perform the operation on the one manager.
+
+Example:
+
+```
+$ rf_manager_config.py -u root -p root -r https://192.168.1.100 setserviceid -i 'New Identifier'
+Setting the identification to 'New Identifier'...
 ```
