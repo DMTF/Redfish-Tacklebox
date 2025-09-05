@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.4.3] - 2025-09-05
+- Added option to 'modify_user' to set PasswordChangeRequired
+
 ## [3.4.2] - 2025-08-29
 - Added 'setserviceid' option to rf_manager_config.py
 
