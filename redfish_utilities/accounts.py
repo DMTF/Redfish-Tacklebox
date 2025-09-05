@@ -63,6 +63,7 @@ def get_users(context):
             "RoleId": account.dict["RoleId"],
             "Locked": account.dict.get("Locked", False),
             "Enabled": account.dict.get("Enabled", True),
+            "PasswordChangeRequired": account.dict.get("PasswordChangeRequired", False),
         }
 
         # Some implementations always expose "slots" for users; ignore empty slots
@@ -172,6 +173,7 @@ def modify_user(
     new_role=None,
     new_locked=None,
     new_enabled=None,
+    new_pass_chng_req=None,
     user_uri=None,
 ):
     """
@@ -185,6 +187,7 @@ def modify_user(
         new_role: The new role of the user
         new_locked: The new locked flag of the user
         new_enabled: The new enabled flag of the user
+        new_pass_chng_req: The new password change required flag of the user
         user_uri: The URI of the user to modify
 
     Returns:
@@ -206,6 +209,8 @@ def modify_user(
         new_info["Locked"] = new_locked
     if new_enabled is not None:
         new_info["Enabled"] = new_enabled
+    if new_pass_chng_req is not None:
+        new_info["PasswordChangeRequired"] = new_pass_chng_req
 
     # Update the user
     response = context.patch(user_uri, body=new_info, headers={"If-Match": user_info.getheader("ETag")})
