@@ -46,6 +46,10 @@ endif
 build: ##@ Build the python package
 	python setup.py sdist
 
+clean: ##@ Clean up build
+	rm -rf dist/*
+	rm -rf redfish_utilities.egg-info
+
 install: ##@ Install with pip
 	pip install dist/redfish_utilities-${VERSION}.tar.gz
 
@@ -54,3 +58,4 @@ install-uv: ##@ Install with uv
 
 lint: ##@ Run linting
 	black .
+	ruff check .
