@@ -9,10 +9,12 @@ A tool to manage logs on a Redfish service.
 ## Usage
 
 ```
-usage: rf_logs.py [-h] --user USER --password PASSWORD --rhost RHOST
-                  [--manager [MANAGER]] [--system [SYSTEM]]
-                  [--chassis [CHASSIS]] [--log LOG] [--details] [--clear]
-                  [--debug]
+usage: rf_logs.py [-h] --user USER --password PASSWORD --rhost
+                  RHOST [--manager [MANAGER]]
+                  [--system [SYSTEM]] [--chassis [CHASSIS]]
+                  [--log LOG] [--first FIRST] [--max MAX]
+                  [--starttime STARTTIME] [--endtime ENDTIME]
+                  [--details] [--clear] [--debug]
 
 A tool to manage logs on a Redfish service
 
@@ -32,6 +34,17 @@ optional arguments:
   --chassis [CHASSIS], -c [CHASSIS]
                         The ID of the chassis containing the log service
   --log LOG, -l LOG     The ID of the resource containing the log service
+  --first FIRST, -first FIRST
+                        The index of the first log entry to
+                        collect
+  --max MAX, -max MAX   The maximum number of log entries to
+                        collect
+  --starttime STARTTIME, -start STARTTIME
+                        The timestamp of the oldest log entry
+                        to collect in ISO8601 date-time format
+  --endtime ENDTIME, -end ENDTIME
+                        The timestamp of the newest log entry
+                        to collect in ISO8601 date-time format
   --details, -details   Indicates details to be shown for each log entry
   --clear, -clear       Indicates if the log should be cleared
   --debug               Creates debug file showing HTTP traces and exceptions
@@ -49,6 +62,7 @@ It will then attempt to locate the appropriate log service via the following log
     * If *log* is not specified, and there is exactly one log service in the member, then the tool will use that one log service.
 
 Once the desired log service is found, the tool will either perform the `ClearLog` action if *clear* is provided, or read and display the log entries.
+If displaying the log entries, it will apply the filters and restrictions specified by the *first*, *max*, *starttime*, and *endtime* arguments.
 
 Example:
 
