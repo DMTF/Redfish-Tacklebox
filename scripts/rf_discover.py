@@ -38,7 +38,13 @@ for service in services:
         groups = re.search(r"^(.+)\/redfish\/v1\/?$", services[service])
         url = groups.group(1)
         redfish_obj = redfish.redfish_client(base_url=url, timeout=15, max_retry=3)
-        print("{}: {} ({})".format(service, services[service], redfish_obj.root["Product"]))
+        product = "N/A"
+        if "Product" in redfish_obj.root:
+            product = redfish_obj.root["Product"]
+        identification = "N/A"
+        if "ServiceIdentification" in redfish_obj.root:
+            identification = redfish_obj.root["ServiceIdentification"]
+        print("{}: {} ({}, {})".format(service, services[service], product, identification))
     except Exception:
         print("{}: {}".format(service, services[service]))
 
