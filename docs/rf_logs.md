@@ -64,10 +64,18 @@ It will then attempt to locate the appropriate log service via the following log
 Once the desired log service is found, the tool will either perform the `ClearLog` action if *clear* is provided, or read and display the log entries.
 If displaying the log entries, it will apply the filters and restrictions specified by the *first*, *max*, *starttime*, and *endtime* arguments.
 
-Example:
+Example; read an entire log:
 
 ```
 $ rf_logs.py -u root -p root -r https://192.168.1.100 -m BMC
+  Id    | Timestamp                 | Message
+  1     | 2012-03-07T14:44:00Z      | System May be Melting
+```
+
+Example; read a log with a specified date-time range:
+
+```
+$ rf_logs.py -u root -p root -r https://192.168.1.100 -m BMC -start 2012-03-01T00:00:00Z -end 2012-03-10T00:00:00Z
   Id    | Timestamp                 | Message
   1     | 2012-03-07T14:44:00Z      | System May be Melting
 ```
