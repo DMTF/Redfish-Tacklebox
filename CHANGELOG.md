@@ -1,5 +1,10 @@
 # Change Log
 
+## [3.4.4] - 2025-10-31
+- Added new arguments to 'rf_logs.py' to control how many log entries to collect
+- Added 'FullPowerCycle' to 'rf_power_reset.py'
+- Added support for showing ServiceIdentification in the output of 'rf_discover.py'
+
 ## [3.4.3] - 2025-09-05
 - Added option to 'modify_user' to set PasswordChangeRequired
 
