@@ -25,6 +25,7 @@ reset_types = [
     "Suspend",
     "Pause",
     "Resume",
+    "FullPowerCycle",
 ]
 
 reset_to_defaults_types = ["ResetAll", "PreserveNetworkAndUsers", "PreserveNetwork"]
