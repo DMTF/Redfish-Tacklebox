@@ -194,7 +194,15 @@ def get_log_service(context, container_type=log_container.MANAGER, container_id=
 
 
 def get_log_entries(
-    context, container_type=log_container.MANAGER, container_id=None, log_service_id=None, log_service=None
+    context,
+    container_type=log_container.MANAGER,
+    container_id=None,
+    log_service_id=None,
+    log_service=None,
+    first=None,
+    max_entries=None,
+    start_time=None,
+    end_time=None,
 ):
     """
     Finds the log entries of a log service matching the given ID
@@ -205,6 +213,10 @@ def get_log_entries(
         container_id: The container instance with the log service; if None, perform on the only container
         log_service_id: The log service with the logs; if None, perform on the only log service
         log_service: Existing log service resource from which to get log entries
+        first: The index of the first log entry to collect
+        max_entries: The maximum number of entries to collect
+        start_time: The timestamp of the oldest log entry to collect in ISO8601 date-time format
+        end_time: The timestamp of the latest log entry to collect in ISO8601 date-time format
 
     Returns:
         An array of log entries
@@ -217,13 +229,29 @@ def get_log_entries(
 
     # Read in the log entries
     log_entries = []
-    log_entry_col = context.get(log_service.dict["Entries"]["@odata.id"])
+    query = {}
+    if first is not None:
+        query["$skip"] = str(first)
+    if start_time is not None and end_time is not None:
+        query["$filter"] = "Created ge '{}' and Created le '{}'".format(start_time, end_time)
+    elif start_time is not None:
+        query["$filter"] = "Created ge '{}'".format(start_time)
+    elif end_time is not None:
+        query["$filter"] = "Created le '{}'".format(end_time)
+    if not query:
+        query = None
+    log_entry_col = context.get(log_service.dict["Entries"]["@odata.id"], args=query)
     log_entries.extend(log_entry_col.dict["Members"])
 
     # If a next link is provided, iterate over it and add to the log entry list
     while "Members@odata.nextLink" in log_entry_col.dict:
+        if max_entries is not None and len(log_entries) >= max_entries:
+            break
         log_entry_col = context.get(log_entry_col.dict["Members@odata.nextLink"])
         log_entries.extend(log_entry_col.dict["Members"])
+
+    if max_entries is not None:
+        del log_entries[max_entries:]
 
     return log_entries
 

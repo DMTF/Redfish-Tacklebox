@@ -35,6 +35,17 @@ argget.add_argument(
     "--chassis", "-c", type=str, nargs="?", default=False, help="The ID of the chassis containing the log service"
 )
 argget.add_argument("--log", "-l", type=str, help="The ID of the resource containing the log service")
+argget.add_argument("--first", "-first", type=int, help="The index of the first log entry to collect")
+argget.add_argument("--max", "-max", type=int, help="The maximum number of log entries to collect")
+argget.add_argument(
+    "--starttime",
+    "-start",
+    type=str,
+    help="The timestamp of the oldest log entry to collect in ISO8601 date-time format",
+)
+argget.add_argument(
+    "--endtime", "-end", type=str, help="The timestamp of the newest log entry to collect in ISO8601 date-time format"
+)
 argget.add_argument(
     "--details", "-details", action="store_true", help="Indicates details to be shown for each log entry"
 )
@@ -86,7 +97,16 @@ try:
         redfish_utilities.verify_response(response)
     else:
         # Print log was requested
-        log_entries = redfish_utilities.get_log_entries(redfish_obj, container_type, container_id, args.log)
+        log_entries = redfish_utilities.get_log_entries(
+            redfish_obj,
+            container_type=container_type,
+            container_id=container_id,
+            log_service_id=args.log,
+            first=args.first,
+            max_entries=args.max,
+            start_time=args.starttime,
+            end_time=args.endtime,
+        )
         try:
             from signal import signal, SIGPIPE, SIG_DFL
 
