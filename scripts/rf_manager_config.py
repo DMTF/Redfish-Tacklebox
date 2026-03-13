@@ -68,6 +68,9 @@ setnet_argget.add_argument(
 )
 setnet_argget.add_argument("--vlanid", "-vlanid", type=int, help="The VLAN ID to set")
 setnet_argget.add_argument("--vlanpriority", "-vlanpriority", type=int, help="The VLAN priority to set")
+setnet_argget.add_argument("--hostname", "-hostname", type=str, help="The hostname to set")
+setnet_argget.add_argument("--fqdn", "-fqdn", type=str, help="The fully qualified domain name to set")
+setnet_argget.add_argument("--nameservers", "-nameservers", type=str, help="The static name servers to set", nargs="*")
 reset_to_defaults_argget = subparsers.add_parser("resettodefaults", help="Resets a manager to default settings")
 reset_to_defaults_argget.add_argument(
     "--type",
@@ -202,7 +205,7 @@ try:
         if args.dhcpv6 is not None:
             dhcpv6 = {"OperatingMode": args.dhcpv6}
         redfish_utilities.set_manager_ethernet_interface(
-            redfish_obj, args.manager, args.id, vlan, ipv4_addresses, dhcpv4, ipv6_addresses, ipv6_gateways, dhcpv6
+            redfish_obj, args.manager, args.id, vlan, ipv4_addresses, dhcpv4, ipv6_addresses, ipv6_gateways, dhcpv6, args.hostname, args.fqdn, args.nameservers
         )
     elif args.command == "getprotocol":
         network_protocol = redfish_utilities.get_manager_network_protocol(redfish_obj, args.manager)

@@ -614,6 +614,9 @@ def set_manager_ethernet_interface(
     ipv6_addresses=None,
     ipv6_gateways=None,
     dhcpv6=None,
+    hostname=None,
+    fqdn=None,
+    static_name_servers=None,
 ):
     """
     Finds an Ethernet interface matching the given ID and updates specified properties
@@ -628,6 +631,9 @@ def set_manager_ethernet_interface(
         ipv6_addresses: An array of objects containing new IPv6 static addresses for the interface
         ipv6_gateways: New IPv6 static gateways for the interface
         dhcpv6: An object containing new DHCPv6 settings for the interface
+        hostname: The new hostname for the interface
+        fqdn: The new fqdn for the interface
+        static_name_servers: Any array containing the static name servers for the interface
 
     Returns:
         The response of the PATCH
@@ -654,6 +660,12 @@ def set_manager_ethernet_interface(
         payload["IPv6StaticDefaultGateways"] = ipv6_gateways
     if dhcpv6 is not None:
         payload["DHCPv6"] = dhcpv6
+    if hostname is not None:
+        payload["HostName"] = hostname
+    if fqdn is not None:
+        payload["FQDN"] = fqdn
+    if static_name_servers is not None:
+        payload["StaticNameServers"] = static_name_servers
     headers = None
     etag = interface.getheader("ETag")
     if etag is not None:
