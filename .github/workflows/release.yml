@@ -37,6 +37,14 @@ jobs:
     - uses: actions/checkout@v2
       with:
         token: ${{secrets.GITHUB_TOKEN}}
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel twine black
     - name: Build the changelog text
       run: |
         echo 'CHANGES<<EOF' >> $GITHUB_ENV
@@ -72,6 +80,9 @@ jobs:
       run: |
         find . -type f -exec sed -i -E 's/Copyright [0-9\-]+ DMTF/Copyright 2019-'$(date +'%Y')' DMTF/' {} \;
         find . -type f -exec sed -i -E 's/Copyright \(c\) [0-9\-]+,/Copyright (c) 2019-'$(date +'%Y')',/' {} \;
+    - name: Run Black
+      run: |
+        black . -l 120
     - name: Commit and push the updates
       run: |
         git config user.name "GitHub Release Workflow"
@@ -79,14 +90,6 @@ jobs:
         git add *
         git commit -s -m "${{github.event.inputs.version}} versioning"
         git push origin main
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine
     - name: Build the distribution
       run: |
         python setup.py sdist bdist_wheel bdist_rpm

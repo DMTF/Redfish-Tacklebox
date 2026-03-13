@@ -200,6 +200,12 @@ optional arguments:
                         The VLAN ID to set
   --vlanpriority VLANPRIORITY, -vlanpriority VLANPRIORITY
                         The VLAN priority to set
+  --hostname HOSTNAME, -hostname HOSTNAME
+                        The hostname to set
+  --fqdn FQDN, -fqdn FQDN
+                        The fully qualified domain name to set
+  --nameservers [NAMESERVERS ...], -nameservers [NAMESERVERS ...]
+                        The static name servers to set
 ```
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
