@@ -1,6 +1,6 @@
 #! /usr/bin/python
 # Copyright Notice:
-# Copyright 2019-2025 DMTF. All rights reserved.
+# Copyright 2019-2026 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/main/LICENSE.md
 
 """
@@ -205,7 +205,18 @@ try:
         if args.dhcpv6 is not None:
             dhcpv6 = {"OperatingMode": args.dhcpv6}
         redfish_utilities.set_manager_ethernet_interface(
-            redfish_obj, args.manager, args.id, vlan, ipv4_addresses, dhcpv4, ipv6_addresses, ipv6_gateways, dhcpv6, args.hostname, args.fqdn, args.nameservers
+            redfish_obj,
+            args.manager,
+            args.id,
+            vlan,
+            ipv4_addresses,
+            dhcpv4,
+            ipv6_addresses,
+            ipv6_gateways,
+            dhcpv6,
+            args.hostname,
+            args.fqdn,
+            args.nameservers,
         )
     elif args.command == "getprotocol":
         network_protocol = redfish_utilities.get_manager_network_protocol(redfish_obj, args.manager)

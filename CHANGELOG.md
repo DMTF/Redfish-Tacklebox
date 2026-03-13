@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.4.5] - 2026-03-13
+- Added options in 'rf_manager_config.py' to set the hostname, FQDN, and name servers
+
 ## [3.4.4] - 2025-10-31
 - Added new arguments to 'rf_logs.py' to control how many log entries to collect
 - Added 'FullPowerCycle' to 'rf_power_reset.py'

@@ -1,6 +1,6 @@
 # Firmware Inventory (rf_firmware_inventory.py)
 
-Copyright 2019-2025 DMTF.  All rights reserved.
+Copyright 2019-2026 DMTF.  All rights reserved.
 
 ## About
 
