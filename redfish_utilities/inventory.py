@@ -123,6 +123,10 @@ def catalog_collection(context, resource, name, inventory, chassis_id):
     """
 
     if name in resource:
+        # some Chassis (such as a secondary Enclosure on HPE Apollo) may have empty PCIe devices collections
+        if not resource[name]:
+            return
+
         collection = context.get(resource[name]["@odata.id"])
         try:
             verify_response(collection)
