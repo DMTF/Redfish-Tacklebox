@@ -295,8 +295,9 @@ def catalog_resource(context, resource, inventory, chassis_id):
                 elif prop == "DeviceType":
                     prop_val = prop_val + " PCIe Device"
                 elif prop == "PCIeInterface":
-                    if "MaxPCIeType" in prop_val:
-                        prop_val = "@" + " " + prop_val["MaxPCIeType"]
+                    max_pcie_type = prop_val.get("MaxPCIeType")
+                    if max_pcie_type is not None:
+                        prop_val = "@" + " " + max_pcie_type
                     else:
                         continue
                 description_str = description_str + " " + prop_val
