@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.4.6] - 2026-03-27
+- Fixed crash during 'rf_sys_inventory.py' if MaxPCIeType contains 'null'
+
 ## [3.4.5] - 2026-03-13
 - Added options in 'rf_manager_config.py' to set the hostname, FQDN, and name servers
 
