@@ -193,9 +193,9 @@ def multipart_push_update(context, image_path, targets=None, timeout=None, apply
         if file_size >= 16:
             timeout = math.ceil( ( 5 / 16 ) * file_size )
         """
-        timeout = 30
+        timeout = 120
         file_size = get_size(image_path, "mb")
-        if file_size >= 15:
+        if file_size >= 60:
             timeout = 2 * file_size
 
     # Get the update service
