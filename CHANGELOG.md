@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.4.8] - 2026-05-01
+- Added '--httpheaders' argument to 'rf_event_service.py'
+
 ## [3.4.7] - 2026-04-10
 - Added '--timeout' option to override default HTTP timeout value
 - Added workaround to check for presence of '@odata.id' when building inventory when incorrectly omitted

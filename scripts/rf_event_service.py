@@ -98,8 +98,8 @@ try:
         if args.httpheaders:
             http_headers = []
             for header_str in args.httpheaders:
-                if ':' in header_str:
-                    header_name, header_value = header_str.split(':', 1)
+                if ":" in header_str:
+                    header_name, header_value = header_str.split(":", 1)
                     header_name = header_name.strip()
                     header_value = header_value.strip()
 
@@ -107,7 +107,7 @@ try:
                     if header_name == "Authorization" and header_value.startswith("Basic "):
                         credentials = header_value[6:]
                         # Only encode if not already Base64 encoded
-                        if ':' in credentials:
+                        if ":" in credentials:
                             credentials_b64 = base64.b64encode(credentials.encode()).decode()
                             header_value = f"Basic {credentials_b64}"
 
