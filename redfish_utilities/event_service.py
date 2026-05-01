@@ -164,6 +164,12 @@ def print_event_subscriptions(subscriptions):
             print(subscription_line_format.format("", "Registries", ", ".join(subscription["RegistryPrefixes"])))
         if "ResourceTypes" in subscription:
             print(subscription_line_format.format("", "Resource Types", ", ".join(subscription["ResourceTypes"])))
+        if "HttpHeaders" in subscription:
+            header_list = []
+            for header in subscription["HttpHeaders"]:
+                header_names = list(header.keys())
+                header_list.extend(header_names)
+            print(subscription_line_format.format("", "HTTP Headers", ", ".join(header_list)))
 
 
 def create_event_subscription(
@@ -178,6 +184,7 @@ def create_event_subscription(
     origins=None,
     subordinate_resources=None,
     event_types=None,
+    http_headers=None,
 ):
     """
     Creates an event subscription
@@ -194,6 +201,7 @@ def create_event_subscription(
         origins: The origins for the subscription
         subordinate_resources: Indicates if subordinate resources to those referenced by 'origins' will also be monitored
         event_types: The event types for the subscription; this method for subscriptions has been deprecated for other controls
+        http_headers: The HTTP headers to include in event messages sent to the destination
 
     Returns:
         The response of the POST
@@ -225,6 +233,8 @@ def create_event_subscription(
         payload["SubordinateResources"] = subordinate_resources
     if event_types is not None:
         payload["EventTypes"] = event_types
+    if http_headers is not None:
+        payload["HttpHeaders"] = http_headers
 
     # Create the subscription
     response = context.post(event_service["Subscriptions"]["@odata.id"], body=payload)
