@@ -96,6 +96,7 @@ usage: rf_event_service.py subscribe [-h] --destination DESTINATION
                                      [--resourcetypes RESOURCETYPES [RESOURCETYPES ...]]
                                      [--registries REGISTRIES [REGISTRIES ...]]
                                      [--eventtypes EVENTTYPES [EVENTTYPES ...]]
+                                     [--httpheaders HTTPHEADERS [HTTPHEADERS ...]]
 
 required arguments:
   --destination DESTINATION, -dest DESTINATION
@@ -118,6 +119,12 @@ optional arguments:
                         A list of event types for the subscription; this
                         option has been deprecated in favor of other methods
                         such as 'resource types' and 'registries'
+  --httpheaders HTTPHEADERS [HTTPHEADERS ...], -hh HTTPHEADERS [HTTPHEADERS ...]
+                        A list of HTTP headers to include in event deliveries
+                        in the format 'HeaderName:HeaderValue' (e.g.,
+                        'Authorization:Basic user:password'). For Basic
+                        Authentication, credentials will be automatically
+                        Base64 encoded.
 ```
 
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.

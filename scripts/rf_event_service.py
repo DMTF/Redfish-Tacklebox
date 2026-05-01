@@ -12,6 +12,7 @@ Brief : This script uses the redfish_utilities module to manage the event servic
 """
 
 import argparse
+import base64
 import datetime
 import logging
 import redfish
@@ -57,6 +58,13 @@ sub_argget.add_argument(
     nargs="+",
     help="A list of event types for the subscription; this option has been deprecated in favor of other methods such as 'resource types' and 'registries'",
 )
+sub_argget.add_argument(
+    "--httpheaders",
+    "-hh",
+    type=str,
+    nargs="+",
+    help="A list of HTTP headers to include in event deliveries in the format 'HeaderName:HeaderValue'",
+)
 unsub_argget = subparsers.add_parser("unsubscribe", help="Deletes an event subscription")
 unsub_argget.add_argument(
     "--id", "-i", type=str, required=True, help="The identifier of the event subscription to be deleted"
@@ -85,6 +93,28 @@ except Exception:
 exit_code = 0
 try:
     if args.command == "subscribe":
+        # Parse HTTP headers from 'HeaderName:HeaderValue'
+        http_headers = None
+        if args.httpheaders:
+            http_headers = []
+            for header_str in args.httpheaders:
+                if ':' in header_str:
+                    header_name, header_value = header_str.split(':', 1)
+                    header_name = header_name.strip()
+                    header_value = header_value.strip()
+
+                    # Special handling for Basic Authentication - Base64 encode credentials
+                    if header_name == "Authorization" and header_value.startswith("Basic "):
+                        credentials = header_value[6:]
+                        # Only encode if not already Base64 encoded
+                        if ':' in credentials:
+                            credentials_b64 = base64.b64encode(credentials.encode()).decode()
+                            header_value = f"Basic {credentials_b64}"
+
+                    http_headers.append({header_name: header_value})
+                else:
+                    print("Warning: Invalid header format '{}', expected 'HeaderName:HeaderValue'".format(header_str))
+
         response = redfish_utilities.create_event_subscription(
             redfish_obj,
             args.destination,
@@ -94,6 +124,7 @@ try:
             resource_types=args.resourcetypes,
             registries=args.registries,
             event_types=args.eventtypes,
+            http_headers=http_headers,
         )
         print("Created subscription '{}'".format(response.getheader("Location")))
     elif args.command == "unsubscribe":
