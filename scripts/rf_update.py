@@ -65,24 +65,6 @@ def local_web_server(filepath):
     return
 
 
-def print_error_payload(response):
-    """
-    Prints an error payload, which can also be used for action responses
-
-    Args:
-        response: The response to print
-    """
-
-    try:
-        print(redfish_utilities.get_error_messages(response))
-    except Exception:
-        # No response body
-        if response.status >= 400:
-            print("Failed")
-        else:
-            print("Success")
-
-
 # Get the input arguments
 argget = argparse.ArgumentParser(description="A tool to perform an update with a Redfish service")
 argget.add_argument("--user", "-u", type=str, required=True, help="The user name for authentication")
@@ -180,7 +162,7 @@ try:
 
     # Display the results
     print("")
-    print_error_payload(response)
+    redfish_utilities.print_error_payload(response)
 except Exception as e:
     if args.debug:
         logger.error("Caught exception:\n\n{}\n".format(traceback.format_exc()))
