@@ -52,11 +52,12 @@ def print_error_payload(response):
         response: The response to print
     """
 
-    try:
-        print(get_error_messages(response))
-    except Exception:
+    out = get_error_messages(response)
+    if len(out) == 0:
         # No response body
         if response.status >= 400:
             print("Failed")
         else:
             print("Success")
+    else:
+        print(out)
