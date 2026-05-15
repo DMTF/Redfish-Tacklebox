@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.4.9] - 2026-05-15
+- Corrected usage of message printing in 'rf_update.py' to properly show results
+
 ## [3.4.8] - 2026-05-01
 - Added '--httpheaders' argument to 'rf_event_service.py'
 
