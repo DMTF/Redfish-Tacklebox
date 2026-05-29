@@ -134,8 +134,24 @@ def print_component_integrity_summary(component_integrity_summary):
     print(summary_line_title_format.format("Id", "Details"))
     for component_integrity in component_integrity_summary:
         print(summary_line_title_format.format(component_integrity["Id"], component_integrity["Name"]))
-        print(summary_line_target_format.format("", component_integrity["TargetComponentURI"] if component_integrity["TargetComponentURI"] else "Unknown"))
-        print(summary_line_detail_format.format("", component_integrity["ComponentIntegrityType"] if component_integrity["ComponentIntegrityType"] else "Unknown", component_integrity["State"] if component_integrity["State"] else "Unknown", component_integrity["Health"] if component_integrity["Health"] else "Unknown"))
+        print(
+            summary_line_target_format.format(
+                "",
+                component_integrity["TargetComponentURI"] if component_integrity["TargetComponentURI"] else "Unknown",
+            )
+        )
+        print(
+            summary_line_detail_format.format(
+                "",
+                (
+                    component_integrity["ComponentIntegrityType"]
+                    if component_integrity["ComponentIntegrityType"]
+                    else "Unknown"
+                ),
+                component_integrity["State"] if component_integrity["State"] else "Unknown",
+                component_integrity["Health"] if component_integrity["Health"] else "Unknown",
+            )
+        )
     print("")
 
 
@@ -190,16 +206,20 @@ def get_signed_measurements(context, component_integrity_id, nonce=None, certifi
 
     # Locate the signed measurements action
     if "Actions" not in component_integrity:
-        raise RedfishComponentIntegrityGetSignedMeasurementsNotFoundError("Component integrity '{}' does not support getting signed measurements".format(component_integrity_id))
+        raise RedfishComponentIntegrityGetSignedMeasurementsNotFoundError(
+            "Component integrity '{}' does not support getting signed measurements".format(component_integrity_id)
+        )
     if component_integrity["ComponentIntegrityType"] == "SPDM":
         # SPDM path
         if "#ComponentIntegrity.SPDMGetSignedMeasurements" not in component_integrity["Actions"]:
-            raise RedfishComponentIntegrityGetSignedMeasurementsNotFoundError("Component integrity '{}' does not support getting signed measurements".format(component_integrity_id))
+            raise RedfishComponentIntegrityGetSignedMeasurementsNotFoundError(
+                "Component integrity '{}' does not support getting signed measurements".format(component_integrity_id)
+            )
         target_uri = component_integrity["Actions"]["#ComponentIntegrity.SPDMGetSignedMeasurements"]["target"]
         if nonce is None:
             # We always want to provide a nonce
             nonce = os.urandom(32).hex()
-        body = { "Nonce": nonce }
+        body = {"Nonce": nonce}
         if certificate_uri is not None:
             # If a certificate was specified, get its slot ID
             certificate = context.get(certificate_uri)
@@ -208,7 +228,9 @@ def get_signed_measurements(context, component_integrity_id, nonce=None, certifi
             certificate = certificate.dict
     else:
         # Others (no support yet)
-        raise NotImplementedError("Signed measurements for '{}' are not supported".format(component_integrity["ComponentIntegrityType"]))
+        raise NotImplementedError(
+            "Signed measurements for '{}' are not supported".format(component_integrity["ComponentIntegrityType"])
+        )
 
     # Perform the action request
     response = context.post(target_uri, body=body)
@@ -243,10 +265,22 @@ def parse_signed_measurements(response, action_context):
     if action_context["ComponentIntegrity"]["ComponentIntegrityType"] == "SPDM":
         # SPDM path
         measurements["Type"] = "SPDM"
-        measurements["VCA"], measurements["Measurements"], measurements["MeasurementLog"], measurements["Signature"], measurements["RequestNonce"] = _parse_spdm_signed_measurements(measurements["Version"], measurements["SigningAlgorithm"], measurements["SignedMeasurements"])
+        (
+            measurements["VCA"],
+            measurements["Measurements"],
+            measurements["MeasurementLog"],
+            measurements["Signature"],
+            measurements["RequestNonce"],
+        ) = _parse_spdm_signed_measurements(
+            measurements["Version"], measurements["SigningAlgorithm"], measurements["SignedMeasurements"]
+        )
     else:
         # Others (no support yet)
-        raise NotImplementedError("Signed measurements for '{}' are not supported".format(action_context["ComponentIntegrity"]["ComponentIntegrityType"]))
+        raise NotImplementedError(
+            "Signed measurements for '{}' are not supported".format(
+                action_context["ComponentIntegrity"]["ComponentIntegrityType"]
+            )
+        )
 
     return measurements
 
@@ -268,12 +302,26 @@ def print_signed_measurements(parsed_measurements):
         print("")
         if parsed_measurements["VCA"] is not None:
             print("  Supported Versions: {}".format(", ".join(parsed_measurements["VCA"]["SupportedVersions"])))
-            print("  Requester Size Limits: Max Transfer Size: {}, Max Message Size: {}".format(parsed_measurements["VCA"]["RequesterMaxMessageSize"], parsed_measurements["VCA"]["RequesterMaxMessageSize"]))
-            print("  Responder Size Limits: Max Transfer Size: {}, Max Message Size: {}".format(parsed_measurements["VCA"]["ResponderMaxMessageSize"], parsed_measurements["VCA"]["ResponderMaxMessageSize"]))
+            print(
+                "  Requester Size Limits: Max Transfer Size: {}, Max Message Size: {}".format(
+                    parsed_measurements["VCA"]["RequesterMaxMessageSize"],
+                    parsed_measurements["VCA"]["RequesterMaxMessageSize"],
+                )
+            )
+            print(
+                "  Responder Size Limits: Max Transfer Size: {}, Max Message Size: {}".format(
+                    parsed_measurements["VCA"]["ResponderMaxMessageSize"],
+                    parsed_measurements["VCA"]["ResponderMaxMessageSize"],
+                )
+            )
             print("")
         print("  Measurements:")
         for i, measurement in enumerate(parsed_measurements["Measurements"]):
-            print("    Index: {}, Specification: {:02x}".format(measurement["Index"], measurement["MeasurementSpecification"]))
+            print(
+                "    Index: {}, Specification: {:02x}".format(
+                    measurement["Index"], measurement["MeasurementSpecification"]
+                )
+            )
             print("    Data: {}".format(measurement["Measurement"].hex()))
         print("")
     else:
@@ -297,7 +345,9 @@ def verify_signed_measurements(context, parsed_measurements):
             if parsed_measurements["RequestNonce"] is None:
                 raise RedfishInvalidSignedMeasurements("The request nonce is missing from the measurement log")
             if parsed_measurements["RequestNonce"].hex().lower() != parsed_measurements["RequestBody"]["Nonce"].lower():
-                raise RedfishInvalidSignedMeasurements("The request nonce does not match the nonce found in the measurement log")
+                raise RedfishInvalidSignedMeasurements(
+                    "The request nonce does not match the nonce found in the measurement log"
+                )
 
         # Check that the certificate chain is valid
         # Preference order:
@@ -316,7 +366,9 @@ def verify_signed_measurements(context, parsed_measurements):
         else:
             # Case 3: Follow the link from SPDM/IdentityAuthentication/ResponderAuthentication/ComponentCertificate
             try:
-                cert_uri = parsed_measurements["ComponentIntegrity"]["SPDM"]["IdentityAuthentication"]["ResponderAuthentication"]["ComponentCertificate"]["@odata.id"]
+                cert_uri = parsed_measurements["ComponentIntegrity"]["SPDM"]["IdentityAuthentication"][
+                    "ResponderAuthentication"
+                ]["ComponentCertificate"]["@odata.id"]
             except Exception:
                 raise RedfishInvalidSignedMeasurements("No device certificate found")
             resp = context.get(cert_uri)
@@ -326,7 +378,9 @@ def verify_signed_measurements(context, parsed_measurements):
         if "CertificateString" not in certificate:
             raise RedfishInvalidSignedMeasurements("No certificate string found to verify measurements")
         cert_delim = "-----END CERTIFICATE-----"
-        cert_chain_raw = [cert + cert_delim for cert in certificate["CertificateString"].strip().split(cert_delim) if cert]
+        cert_chain_raw = [
+            cert + cert_delim for cert in certificate["CertificateString"].strip().split(cert_delim) if cert
+        ]
 
         # Go through the chain, starting with the root certificate, and verify each certificate
         cert_store = crypto.X509Store()
@@ -341,7 +395,7 @@ def verify_signed_measurements(context, parsed_measurements):
 
         # Get the public key from the certificate
         try:
-            public_key = x509.load_pem_x509_certificate(cert_chain_raw[0].encode('utf-8')).public_key()
+            public_key = x509.load_pem_x509_certificate(cert_chain_raw[0].encode("utf-8")).public_key()
         except Exception:
             raise RedfishInvalidSignedMeasurements("Failed to load the public key from the certificate")
 
@@ -349,7 +403,9 @@ def verify_signed_measurements(context, parsed_measurements):
         try:
             hash_algorithm = _spdm_hash_algorithms[parsed_measurements["HashingAlgorithm"]]
         except Exception:
-            raise RedfishInvalidSignedMeasurements("Unknown hash algorithm: {}".format(parsed_measurements["HashingAlgorithm"]))
+            raise RedfishInvalidSignedMeasurements(
+                "Unknown hash algorithm: {}".format(parsed_measurements["HashingAlgorithm"])
+            )
         try:
             # Verification is dependent on the key type
             if isinstance(public_key, ec.EllipticCurvePublicKey):
@@ -358,10 +414,17 @@ def verify_signed_measurements(context, parsed_measurements):
                 sig_half = int(len(parsed_measurements["Signature"]) / 2)
                 r = int.from_bytes(parsed_measurements["Signature"][:sig_half], byteorder="big")
                 s = int.from_bytes(parsed_measurements["Signature"][sig_half:], byteorder="big")
-                public_key.verify(utils.encode_dss_signature(r, s), parsed_measurements["MeasurementLog"], ec.ECDSA(hash_algorithm))
+                public_key.verify(
+                    utils.encode_dss_signature(r, s), parsed_measurements["MeasurementLog"], ec.ECDSA(hash_algorithm)
+                )
             elif isinstance(public_key, rsa.RSAPublicKey):
                 # RSA signatures require the padding and hash algorithm to be provided
-                public_key.verify(parsed_measurements["Signature"], parsed_measurements["MeasurementLog"], padding.PKCS1v15(), hash_algorithm)
+                public_key.verify(
+                    parsed_measurements["Signature"],
+                    parsed_measurements["MeasurementLog"],
+                    padding.PKCS1v15(),
+                    hash_algorithm,
+                )
             else:
                 # Other key types don't require additional info
                 # The cryptography module uses this for the following key types: Ed448, Ed25519, and ML-DSA
@@ -419,7 +482,9 @@ def _parse_spdm_signed_measurements(version, signing_algorithm, raw_measurements
         signature = data[-signature_len:]
         measurement_log = data[:-signature_len]
     except Exception:
-        raise RedfishInvalidSignedMeasurements("Could not separate signature from measurement data: {}".format(raw_measurements))
+        raise RedfishInvalidSignedMeasurements(
+            "Could not separate signature from measurement data: {}".format(raw_measurements)
+        )
 
     try:
         if version_num >= 102:
@@ -434,7 +499,9 @@ def _parse_spdm_signed_measurements(version, signing_algorithm, raw_measurements
             # Only the last measurement should have a signature
             if signature_found:
                 raise RedfishInvalidSignedMeasurements("Signature found in non-final measurement")
-            offset, signature_found, request_nonce = _spdm_parse_measurement_req_resp(data, offset, version_num, signature_len, measurements)
+            offset, signature_found, request_nonce = _spdm_parse_measurement_req_resp(
+                data, offset, version_num, signature_len, measurements
+            )
     except RedfishInvalidSignedMeasurements:
         # Should already have a reasonable error message
         raise
@@ -476,7 +543,7 @@ def _spdm_parse_version_req_resp(data, offset, vca):
         raise RedfishInvalidSignedMeasurements("Invalid VERSION response code: 0x{:02X}".format(data[offset + 1]))
     response_length = 6
     num_versions = data[offset + 5]
-    response_length += (2 * num_versions)
+    response_length += 2 * num_versions
     # Extract the supported SPDM versions; ignore the "Alpha" version
     for i in range(num_versions):
         version = "{}.{}.{}".format(
@@ -512,15 +579,17 @@ def _spdm_parse_capabilities_req_resp(data, offset, version_num, vca):
     # GET_CAPABILITIES request
     # Check the request code is correct
     if data[offset + 1] != 0xE1:  # GET_CAPABILITIES
-        raise RedfishInvalidSignedMeasurements("Invalid GET_CAPABILITIES request code: 0x{:02X}".format(data[offset + 1]))
+        raise RedfishInvalidSignedMeasurements(
+            "Invalid GET_CAPABILITIES request code: 0x{:02X}".format(data[offset + 1])
+        )
     if version_num == 100:
         offset += 4
     elif version_num == 101:
         offset += 12
     else:
         # SPDM 1.2+ has a transfer size fields
-        vca["RequesterMaxTransferSize"] = int.from_bytes(data[offset + 12:offset + 16], byteorder="little")
-        vca["RequesterMaxSPDMMessageSize"] = int.from_bytes(data[offset + 16:offset + 20], byteorder="little")
+        vca["RequesterMaxTransferSize"] = int.from_bytes(data[offset + 12 : offset + 16], byteorder="little")
+        vca["RequesterMaxSPDMMessageSize"] = int.from_bytes(data[offset + 16 : offset + 20], byteorder="little")
         offset += 20
 
     # CAPABILITIES response
@@ -531,13 +600,13 @@ def _spdm_parse_capabilities_req_resp(data, offset, version_num, vca):
         offset += 12
     else:
         # SPDM 1.2+ has a transfer size fields
-        vca["ResponderMaxTransferSize"] = int.from_bytes(data[offset + 12:offset + 16], byteorder="little")
-        vca["ResponderMaxSPDMMessageSize"] = int.from_bytes(data[offset + 16:offset + 20], byteorder="little")
+        vca["ResponderMaxTransferSize"] = int.from_bytes(data[offset + 12 : offset + 16], byteorder="little")
+        vca["ResponderMaxSPDMMessageSize"] = int.from_bytes(data[offset + 16 : offset + 20], byteorder="little")
         alg_length = 0
         if version_num >= 103:
             # SPDM 1.3+ has an optional "supported algorithms" field
             if data[offset + 2] & 0x01:
-                alg_length = int.from_bytes(data[offset + 22:offset + 24], byteorder="little")
+                alg_length = int.from_bytes(data[offset + 22 : offset + 24], byteorder="little")
         offset += 20 + alg_length
 
     return offset
@@ -559,15 +628,17 @@ def _spdm_parse_algorithms_req_resp(data, offset, vca):
     # NEGOTIATE_ALGORITHMS request
     # Check the request code is correct
     if data[offset + 1] != 0xE3:  # NEGOTIATE_ALGORITHMS
-        raise RedfishInvalidSignedMeasurements("Invalid NEGOTIATE_ALGORITHMS request code: 0x{:02X}".format(data[offset + 1]))
-    alg_length = int.from_bytes(data[offset + 4:offset + 6], byteorder="little")
+        raise RedfishInvalidSignedMeasurements(
+            "Invalid NEGOTIATE_ALGORITHMS request code: 0x{:02X}".format(data[offset + 1])
+        )
+    alg_length = int.from_bytes(data[offset + 4 : offset + 6], byteorder="little")
     offset += alg_length
 
     # ALGORITHMS response
     # Check the response code is correct
     if data[offset + 1] != 0x63:  # ALGORITHMS
         raise RedfishInvalidSignedMeasurements("Invalid ALGORITHMS response code: 0x{:02X}".format(data[offset + 1]))
-    alg_length = int.from_bytes(data[offset + 4:offset + 6], byteorder="little")
+    alg_length = int.from_bytes(data[offset + 4 : offset + 6], byteorder="little")
     offset += alg_length
 
     return offset
@@ -593,7 +664,9 @@ def _spdm_parse_measurement_req_resp(data, offset, version_num, signature_len, m
     # GET_MEASUREMENTS request
     # Check the request code is correct
     if data[offset + 1] != 0xE0:  # GET_MEASUREMENTS
-        raise RedfishInvalidSignedMeasurements("Invalid GET_MEASUREMENTS request code: 0x{:02X}".format(data[offset + 1]))
+        raise RedfishInvalidSignedMeasurements(
+            "Invalid GET_MEASUREMENTS request code: 0x{:02X}".format(data[offset + 1])
+        )
     request_len = 4
     signature_found = bool(data[offset + 2] & 0x01)
     request_nonce = None
@@ -603,7 +676,7 @@ def _spdm_parse_measurement_req_resp(data, offset, version_num, signature_len, m
     if signature_found:
         # Signature requested; contains a nonce
         request_len += 32
-        request_nonce = data[offset + 4:offset + 36]
+        request_nonce = data[offset + 4 : offset + 36]
         if version_num >= 101:
             # SPDM 1.1+ has a "slot ID param" field if a signature is requested
             request_len += 1
@@ -618,14 +691,18 @@ def _spdm_parse_measurement_req_resp(data, offset, version_num, signature_len, m
         # SPDM 1.3+ has a "context" field before the signature
         response_length += 8
     # Add in the record length and opaque data length
-    record_length = int.from_bytes(data[offset + 5:offset + 8], byteorder="little")
-    opaque_len = int.from_bytes(data[offset + record_length + 40:offset + record_length + 42], byteorder="little")
+    record_length = int.from_bytes(data[offset + 5 : offset + 8], byteorder="little")
+    opaque_len = int.from_bytes(data[offset + record_length + 40 : offset + record_length + 42], byteorder="little")
     response_length += record_length + opaque_len
     # Pull out the different measurement blocks
     measurement_block_off = offset + 8
     for i in range(0, data[offset + 4]):
-        block_length = int.from_bytes(data[measurement_block_off + 2:measurement_block_off + 4], byteorder="little")
-        block_data = { "Index": data[measurement_block_off], "MeasurementSpecification": data[measurement_block_off + 1], "Measurement": data[measurement_block_off + 4:measurement_block_off + 4 + block_length] }
+        block_length = int.from_bytes(data[measurement_block_off + 2 : measurement_block_off + 4], byteorder="little")
+        block_data = {
+            "Index": data[measurement_block_off],
+            "MeasurementSpecification": data[measurement_block_off + 1],
+            "Measurement": data[measurement_block_off + 4 : measurement_block_off + 4 + block_length],
+        }
         measurements.append(block_data)
         measurement_block_off += 4 + block_length
     offset += response_length

@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.5.0] - 2026-05-29
+- Added 'rf_component_integrity.py' to collect and verify signed measurements
+
 ## [3.4.9] - 2026-05-15
 - Corrected usage of message printing in 'rf_update.py' to properly show results
 
