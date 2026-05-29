@@ -18,6 +18,14 @@ from .certificates import get_generate_csr_info
 from .certificates import generate_csr
 from .certificates import install_certificate
 from .certificates import delete_certificate
+from .component_integrity import get_component_integrity_summary
+from .component_integrity import print_component_integrity_summary
+from .component_integrity import get_component_integrity_ids
+from .component_integrity import get_component_integrity
+from .component_integrity import get_signed_measurements
+from .component_integrity import parse_signed_measurements
+from .component_integrity import print_signed_measurements
+from .component_integrity import verify_signed_measurements
 from .event_service import get_event_service
 from .event_service import print_event_service
 from .event_service import get_event_subscriptions
@@ -125,6 +133,14 @@ __all__ = [
     "generate_csr",
     "install_certificate",
     "delete_certificate",
+    "get_component_integrity_summary",
+    "print_component_integrity_summary",
+    "get_component_integrity_ids",
+    "get_component_integrity",
+    "get_signed_measurements",
+    "parse_signed_measurements",
+    "print_signed_measurements",
+    "verify_signed_measurements",
     "get_event_service",
     "print_event_service",
     "get_event_subscriptions",
