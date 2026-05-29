@@ -91,7 +91,12 @@ optional arguments:
 The tool will log into the service specified by the *rhost* argument using the credentials provided by the *user* and *password* arguments.
 It will then call the `SPDMGetSignedMeasurements` action for the specified component integrity instance, poll the task monitor for completion, parse the response payload, and print the parsed signed measurements.
 
-* If *verify* is specified, it will also verify the signed measurements before printing them.
+* If *verify* is specified, it will also verify the signed measurements before printing them by performing the following:
+    * Checks the nonce found in the signed measurement log matches the nonce sent in the request
+    * Finds the certificate chain used to sign the measurements
+    * Verifies the certificate chain is signed properly
+    * Locates the public key of the device from the certificate chain
+    * Verifies the signature over the measurements with the found public key
 
 Example:
 
