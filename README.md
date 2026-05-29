@@ -81,6 +81,7 @@ You may install the external modules by running:
 * [Assembly (rf_assembly.py)](https://github.com/DMTF/Redfish-Tacklebox/blob/main/docs/rf_assembly.md)
 * [Power Equipment (rf_power_equipment.py)](https://github.com/DMTF/Redfish-Tacklebox/blob/main/docs/rf_power_equipment.md)
 * [Thermal Equipment (rf_thermal_equipment.py)](https://github.com/DMTF/Redfish-Tacklebox/blob/main/docs/rf_thermal_equipment.md)
+* [Component Integrity (rf_component_integrity.py)](https://github.com/DMTF/Redfish-Tacklebox/blob/main/docs/rf_component_integrity.md)
 * [Raw Request (rf_raw_request.py)](https://github.com/DMTF/Redfish-Tacklebox/blob/main/docs/rf_raw_request.md)
 * [Test Event Listener (rf_test_event_listener.py)](https://github.com/DMTF/Redfish-Tacklebox/blob/main/docs/rf_test_event_listener.md)
 

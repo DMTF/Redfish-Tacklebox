@@ -60,6 +60,27 @@ def get_collection_ids(context, collection_uri):
     return avail_members
 
 
+def get_collection_member(context, collection_uri, member_id):
+    """
+    Gets a specific member from a collection
+    
+    Args:
+        context: The Redfish client object with an open session
+        collection_uri: The URI of the collection to process
+        member_id: The identifier of the member to get
+    
+    Returns:
+        The member with the specified identifier
+    """
+    member_uri = collection_uri + "/" + member_id
+    member = context.get(member_uri)
+    if member.status == 404:
+        avail_ids = get_collection_ids(context, collection_uri)
+        raise RedfishCollectionMemberNotFoundError("Service does not contain a member with identifier {}; valid identifiers: {}".format(member_id, ", ".join(avail_ids)))
+    verify_response(member)
+    return member.dict
+
+
 def get_collection_members(context, collection_uri):
     """
     Iterates over a collection and returns all members
