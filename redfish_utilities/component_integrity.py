@@ -317,7 +317,7 @@ def verify_signed_measurements(context, parsed_measurements):
             # Case 3: Follow the link from SPDM/IdentityAuthentication/ResponderAuthentication/ComponentCertificate
             try:
                 cert_uri = parsed_measurements["ComponentIntegrity"]["SPDM"]["IdentityAuthentication"]["ResponderAuthentication"]["ComponentCertificate"]["@odata.id"]
-            except:
+            except Exception:
                 raise RedfishInvalidSignedMeasurements("No device certificate found")
             resp = context.get(cert_uri)
             verify_response(resp)
@@ -342,13 +342,13 @@ def verify_signed_measurements(context, parsed_measurements):
         # Get the public key from the certificate
         try:
             public_key = x509.load_pem_x509_certificate(cert_chain_raw[0].encode('utf-8')).public_key()
-        except:
+        except Exception:
             raise RedfishInvalidSignedMeasurements("Failed to load the public key from the certificate")
 
         # Verify the signature
         try:
             hash_algorithm = _spdm_hash_algorithms[parsed_measurements["HashingAlgorithm"]]
-        except:
+        except Exception:
             raise RedfishInvalidSignedMeasurements("Unknown hash algorithm: {}".format(parsed_measurements["HashingAlgorithm"]))
         try:
             # Verification is dependent on the key type
@@ -367,7 +367,7 @@ def verify_signed_measurements(context, parsed_measurements):
                 # The cryptography module uses this for the following key types: Ed448, Ed25519, and ML-DSA
                 # SLH-DSA is currently not supported, but anticipating the same pattern will be used when it's added
                 public_key.verify(parsed_measurements["Signature"], parsed_measurements["MeasurementLog"])
-        except:
+        except Exception:
             raise RedfishInvalidSignedMeasurements("Failed to verify the signature with the public key")
     else:
         # Others (no support yet)
@@ -394,14 +394,14 @@ def _parse_spdm_signed_measurements(version, signing_algorithm, raw_measurements
     # Decode the measurement data into raw bytes
     try:
         data = base64.b64decode(raw_measurements)
-    except:
+    except Exception:
         raise RedfishInvalidSignedMeasurements("Invalid Base64 data: {}".format(raw_measurements))
 
     # Parse the SPDM version
     try:
         # Wanted to keep the version parsing/comparison simple without bringing in packaging or other dependencies
         version_num = int(version.split(".")[0]) * 100 + int(version.split(".")[1])
-    except:
+    except Exception:
         raise RedfishInvalidSignedMeasurements("Invalid SPDM version: {}".format(version))
 
     offset = 0
@@ -413,12 +413,12 @@ def _parse_spdm_signed_measurements(version, signing_algorithm, raw_measurements
     # Separate the signature from the measurement data
     try:
         signature_len = _spdm_signature_sizes_bytes[signing_algorithm]
-    except:
+    except Exception:
         raise RedfishInvalidSignedMeasurements("Unknown signing algorithm: {}".format(signing_algorithm))
     try:
         signature = data[-signature_len:]
         measurement_log = data[:-signature_len]
-    except:
+    except Exception:
         raise RedfishInvalidSignedMeasurements("Could not separate signature from measurement data: {}".format(raw_measurements))
 
     try:
