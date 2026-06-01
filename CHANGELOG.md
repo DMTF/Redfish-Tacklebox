@@ -1,5 +1,8 @@
 # Change Log
 
+## [3.5.1] - 2026-06-01
+- Added missing requirements for crypto modules
+
 ## [3.5.0] - 2026-05-29
 - Added 'rf_component_integrity.py' to collect and verify signed measurements
 
