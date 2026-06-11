@@ -126,6 +126,9 @@ required arguments:
   --certificatecollection CERTIFICATECOLLECTION, -col CERTIFICATECOLLECTION
                         The URI of the certificate collection where the signed
                         certificate will be installed
+
+optional arguments:
+  -h, --help            show this help message and exit
   --commonname COMMONNAME, -cn COMMONNAME
                         The common name of the component to secure
   --organization ORGANIZATION, -o ORGANIZATION
@@ -142,9 +145,6 @@ required arguments:
   --country COUNTRY, -c COUNTRY
                         The two-letter country code of the organization making
                         the request
-
-optional arguments:
-  -h, --help            show this help message and exit
   --email EMAIL, -email EMAIL
                         The email address of the contact within the
                         organization making the request

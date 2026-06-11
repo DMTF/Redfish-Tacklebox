@@ -162,13 +162,13 @@ def get_generate_csr_info(context):
 
 def generate_csr(
     context,
-    common_name,
-    organization,
-    organizational_unit,
-    city,
-    state,
-    country,
     cert_col,
+    common_name=None,
+    organization=None,
+    organizational_unit=None,
+    city=None,
+    state=None,
+    country=None,
     email=None,
     key_pair_alg=None,
     key_bit_len=None,
@@ -179,13 +179,13 @@ def generate_csr(
 
     Args:
         context: The Redfish client object with an open session
+        cert_col: The URI of the certificate collection where the signed certificate will be installed
         common_name: The common name of the component to secure
         organization: The name of the organization making the request
         organizational_unit: The name of the unit in the organization making the request
         city: The city or locality of the organization making the request
         state: The state, province, or region of the organization making the request
         country: The two-letter country code of the organization making the request
-        cert_col: The URI of the certificate collection where the signed certificate will be installed
         email: The email address of the contact within the organization making the request
         key_pair_alg: The type of key-pair for use with signing algorithms
         key_bit_len: The length of the key, in bits, if the key pair algorithm supports key size
@@ -201,13 +201,19 @@ def generate_csr(
     # Build the payload
     payload = {
         "CertificateCollection": {"@odata.id": cert_col},
-        "CommonName": common_name,
-        "Organization": organization,
-        "OrganizationalUnit": organizational_unit,
-        "City": city,
-        "State": state,
-        "Country": country,
     }
+    if common_name is not None:
+        payload["CommonName"] = common_name
+    if organization is not None:
+        payload["Organization"] = organization
+    if organizational_unit is not None:
+        payload["OrganizationalUnit"] = organizational_unit
+    if city is not None:
+        payload["City"] = city
+    if state is not None:
+        payload["State"] = state
+    if country is not None:
+        payload["Country"] = country
     if email is not None:
         payload["Email"] = email
     if key_pair_alg is not None:
