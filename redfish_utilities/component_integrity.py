@@ -268,6 +268,7 @@ def parse_signed_measurements(response, action_context):
         (
             measurements["VCA"],
             measurements["Measurements"],
+            measurements["SPDMPrefix"],
             measurements["MeasurementLog"],
             measurements["Signature"],
             measurements["RequestNonce"],
@@ -304,13 +305,13 @@ def print_signed_measurements(parsed_measurements):
             print("  Supported Versions: {}".format(", ".join(parsed_measurements["VCA"]["SupportedVersions"])))
             print(
                 "  Requester Size Limits: Max Transfer Size: {}, Max Message Size: {}".format(
-                    parsed_measurements["VCA"]["RequesterMaxMessageSize"],
+                    parsed_measurements["VCA"]["RequesterMaxTransferSize"],
                     parsed_measurements["VCA"]["RequesterMaxMessageSize"],
                 )
             )
             print(
                 "  Responder Size Limits: Max Transfer Size: {}, Max Message Size: {}".format(
-                    parsed_measurements["VCA"]["ResponderMaxMessageSize"],
+                    parsed_measurements["VCA"]["ResponderMaxTransferSize"],
                     parsed_measurements["VCA"]["ResponderMaxMessageSize"],
                 )
             )
@@ -408,6 +409,14 @@ def verify_signed_measurements(context, parsed_measurements):
             )
         try:
             # Verification is dependent on the key type
+            if parsed_measurements["SPDMPrefix"]:
+                # Newer versions hash the measurement data and attach a prefix
+                measurement_log_hash = hashes.Hash(hash_algorithm)
+                measurement_log_hash.update(parsed_measurements["MeasurementLog"])
+                full_measurement_log = parsed_measurements["SPDMPrefix"] + measurement_log_hash.finalize()
+            else:
+                # Older versions of SPDM don't have a prefix
+                full_measurement_log = parsed_measurements["MeasurementLog"]
             if isinstance(public_key, ec.EllipticCurvePublicKey):
                 # ECDSA signatures require breaking down the signature in to a DER-encoded format
                 # It also requires the hash algorithm to be provided
@@ -415,13 +424,13 @@ def verify_signed_measurements(context, parsed_measurements):
                 r = int.from_bytes(parsed_measurements["Signature"][:sig_half], byteorder="big")
                 s = int.from_bytes(parsed_measurements["Signature"][sig_half:], byteorder="big")
                 public_key.verify(
-                    utils.encode_dss_signature(r, s), parsed_measurements["MeasurementLog"], ec.ECDSA(hash_algorithm)
+                    utils.encode_dss_signature(r, s), full_measurement_log, ec.ECDSA(hash_algorithm)
                 )
             elif isinstance(public_key, rsa.RSAPublicKey):
                 # RSA signatures require the padding and hash algorithm to be provided
                 public_key.verify(
                     parsed_measurements["Signature"],
-                    parsed_measurements["MeasurementLog"],
+                    full_measurement_log,
                     padding.PKCS1v15(),
                     hash_algorithm,
                 )
@@ -429,7 +438,7 @@ def verify_signed_measurements(context, parsed_measurements):
                 # Other key types don't require additional info
                 # The cryptography module uses this for the following key types: Ed448, Ed25519, and ML-DSA
                 # SLH-DSA is currently not supported, but anticipating the same pattern will be used when it's added
-                public_key.verify(parsed_measurements["Signature"], parsed_measurements["MeasurementLog"])
+                public_key.verify(parsed_measurements["Signature"], full_measurement_log)
         except Exception:
             raise RedfishInvalidSignedMeasurements("Failed to verify the signature with the public key")
     else:
@@ -449,6 +458,7 @@ def _parse_spdm_signed_measurements(version, signing_algorithm, raw_measurements
     Returns:
         A dictionary of the VCA transcript; None if the SPDM version is less than 1.2
         A list of dictionaries containing the measurements
+        A byte array containing the SPDM prefix
         A byte array containing the measurement log data
         A byte array containing the signature of the measurement log data
         A byte array containing the request nonce
@@ -463,7 +473,9 @@ def _parse_spdm_signed_measurements(version, signing_algorithm, raw_measurements
     # Parse the SPDM version
     try:
         # Wanted to keep the version parsing/comparison simple without bringing in packaging or other dependencies
-        version_num = int(version.split(".")[0]) * 100 + int(version.split(".")[1])
+        major = int(version.split(".")[0])
+        minor = int(version.split(".")[1])
+        version_num = major * 100 + minor
     except Exception:
         raise RedfishInvalidSignedMeasurements("Invalid SPDM version: {}".format(version))
 
@@ -472,6 +484,7 @@ def _parse_spdm_signed_measurements(version, signing_algorithm, raw_measurements
     measurements = []
     request_nonce = None
     signature_found = False
+    spdm_prefix = None
 
     # Separate the signature from the measurement data
     try:
@@ -513,7 +526,16 @@ def _parse_spdm_signed_measurements(version, signing_algorithm, raw_measurements
     if not signature_found:
         raise RedfishInvalidSignedMeasurements("No signature found in SPDM messages")
 
-    return vca, measurements, measurement_log, signature, request_nonce
+    # SPDM 1.2+ includes an "SPDM prefix" that needs to be included in the signature verification
+    if version_num >= 102:
+        spdm_prefix_version = "dmtf-spdm-v{}.{}.*".format(major, minor).encode("utf-8")
+        spdm_prefix_context = "responder-measurements signing".encode("utf-8")
+        spdm_prefix = spdm_prefix_version + spdm_prefix_version + spdm_prefix_version + spdm_prefix_version
+        while len(spdm_prefix) < (100 - len(spdm_prefix_context)):
+            spdm_prefix += b"\x00"
+        spdm_prefix = spdm_prefix + spdm_prefix_context
+
+    return vca, measurements, spdm_prefix, measurement_log, signature, request_nonce
 
 
 def _spdm_parse_version_req_resp(data, offset, vca):
@@ -547,9 +569,9 @@ def _spdm_parse_version_req_resp(data, offset, vca):
     # Extract the supported SPDM versions; ignore the "Alpha" version
     for i in range(num_versions):
         version = "{}.{}.{}".format(
-            (data[offset + 6 + 2 * i] >> 4) & 0xF,
-            data[offset + 6 + 2 * i] & 0xF,
             (data[offset + 7 + 2 * i] >> 4) & 0xF,
+            data[offset + 7 + 2 * i] & 0xF,
+            (data[offset + 6 + 2 * i] >> 4) & 0xF,
         )
         vca["SupportedVersions"].append(version)
     offset += response_length
@@ -572,9 +594,9 @@ def _spdm_parse_capabilities_req_resp(data, offset, version_num, vca):
     """
 
     vca["RequesterMaxTransferSize"] = None
-    vca["RequesterMaxSPDMMessageSize"] = None
+    vca["RequesterMaxMessageSize"] = None
     vca["ResponderMaxTransferSize"] = None
-    vca["ResponderMaxSPDMMessageSize"] = None
+    vca["ResponderMaxMessageSize"] = None
 
     # GET_CAPABILITIES request
     # Check the request code is correct
@@ -589,7 +611,7 @@ def _spdm_parse_capabilities_req_resp(data, offset, version_num, vca):
     else:
         # SPDM 1.2+ has a transfer size fields
         vca["RequesterMaxTransferSize"] = int.from_bytes(data[offset + 12 : offset + 16], byteorder="little")
-        vca["RequesterMaxSPDMMessageSize"] = int.from_bytes(data[offset + 16 : offset + 20], byteorder="little")
+        vca["RequesterMaxMessageSize"] = int.from_bytes(data[offset + 16 : offset + 20], byteorder="little")
         offset += 20
 
     # CAPABILITIES response
@@ -601,7 +623,7 @@ def _spdm_parse_capabilities_req_resp(data, offset, version_num, vca):
     else:
         # SPDM 1.2+ has a transfer size fields
         vca["ResponderMaxTransferSize"] = int.from_bytes(data[offset + 12 : offset + 16], byteorder="little")
-        vca["ResponderMaxSPDMMessageSize"] = int.from_bytes(data[offset + 16 : offset + 20], byteorder="little")
+        vca["ResponderMaxMessageSize"] = int.from_bytes(data[offset + 16 : offset + 20], byteorder="little")
         alg_length = 0
         if version_num >= 103:
             # SPDM 1.3+ has an optional "supported algorithms" field
