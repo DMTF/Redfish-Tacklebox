@@ -423,9 +423,7 @@ def verify_signed_measurements(context, parsed_measurements):
                 sig_half = int(len(parsed_measurements["Signature"]) / 2)
                 r = int.from_bytes(parsed_measurements["Signature"][:sig_half], byteorder="big")
                 s = int.from_bytes(parsed_measurements["Signature"][sig_half:], byteorder="big")
-                public_key.verify(
-                    utils.encode_dss_signature(r, s), full_measurement_log, ec.ECDSA(hash_algorithm)
-                )
+                public_key.verify(utils.encode_dss_signature(r, s), full_measurement_log, ec.ECDSA(hash_algorithm))
             elif isinstance(public_key, rsa.RSAPublicKey):
                 # RSA signatures require the padding and hash algorithm to be provided
                 public_key.verify(

@@ -1,5 +1,9 @@
 # Change Log
 
+## [3.5.2] - 2026-06-12
+- Corrected SPDM signed measurement verification for newer versions that include a context prefix
+- Updated 'rf_certificates.py' to reduce the required argument list when generating a CSR
+
 ## [3.5.1] - 2026-06-01
 - Added missing requirements for crypto modules
 
