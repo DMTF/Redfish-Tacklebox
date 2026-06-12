@@ -45,35 +45,19 @@ csr_argget.add_argument(
     required=True,
     help="The URI of the certificate collection where the signed certificate will be installed",
 )
+csr_argget.add_argument("--commonname", "-cn", type=str, help="The common name of the component to secure")
 csr_argget.add_argument(
-    "--commonname", "-cn", type=str, required=True, help="The common name of the component to secure"
+    "--organization", "-o", type=str, help="The name of the unit in the organization making the request"
 )
 csr_argget.add_argument(
-    "--organization", "-o", type=str, required=True, help="The name of the unit in the organization making the request"
+    "--organizationalunit", "-ou", type=str, help="The name of the unit in the organization making the request"
+)
+csr_argget.add_argument("--city", "-l", type=str, help="The city or locality of the organization making the request")
+csr_argget.add_argument(
+    "--state", "-st", type=str, help="The state, province, or region of the organization making the request"
 )
 csr_argget.add_argument(
-    "--organizationalunit",
-    "-ou",
-    type=str,
-    required=True,
-    help="The name of the unit in the organization making the request",
-)
-csr_argget.add_argument(
-    "--city", "-l", type=str, required=True, help="The city or locality of the organization making the request"
-)
-csr_argget.add_argument(
-    "--state",
-    "-st",
-    type=str,
-    required=True,
-    help="The state, province, or region of the organization making the request",
-)
-csr_argget.add_argument(
-    "--country",
-    "-c",
-    type=str,
-    required=True,
-    help="The two-letter country code of the organization making the request",
+    "--country", "-c", type=str, help="The two-letter country code of the organization making the request"
 )
 csr_argget.add_argument(
     "--email", "-email", type=str, help="The email address of the contact within the organization making the request"
@@ -151,13 +135,13 @@ try:
         print("Generating cerficiate signing request...")
         response = redfish_utilities.generate_csr(
             redfish_obj,
+            args.certificatecollection,
             args.commonname,
             args.organization,
             args.organizationalunit,
             args.city,
             args.state,
             args.country,
-            args.certificatecollection,
             args.email,
             args.keyalg,
             args.keylen,
